@@ -12,8 +12,6 @@ function example_transport(; verbose = true)
    model = Model(GAMS.Optimizer)
    set_optimizer_attribute(model, MOI.Silent(), !verbose)
 
-   set_optimizer_attribute(model, GAMS.solver(), "gurobi")
-
    a = [350, 600]
    b = [325, 300, 275]
    d = [2.5 1.7 1.8; 2.5 1.8 1.4]

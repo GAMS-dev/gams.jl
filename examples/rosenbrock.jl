@@ -20,8 +20,6 @@ function example_rosenbrock(; verbose = true)
       print(model)
    end
 
-   set_optimizer_attribute(model, "type", "LP")
-
    JuMP.optimize!(model)
 
    obj_opt = JuMP.objective_value(model)
