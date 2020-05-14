@@ -68,9 +68,6 @@ function MOI.optimize!(
       translate_solve(io, model, "moi")
    end
 
-   # @info model.gamswork.working_dir
-   # @info open(f->read(f, String), filename)
-
    # run GAMS
    job = GAMSJob(model.gamswork, filename, "moi")
    model.sol, stats = run(job, options=model.gams_options, solver_options=model.solver_options)
@@ -86,12 +83,6 @@ function MOI.optimize!(
    if haskey(stats, "objEst")
       model.obj_est = stats["objEst"]
    end
-
-   # @info open(f->read(f, String), replace(filename, r"(.gms)" => ".lst"))
-   # @info stats["numVar"], stats["numEqu"], stats["numNZ"], stats["numNLIns"], stats["numNLNZ"]
-   # @info :etSolve, stats["etSolve"]
-   # @info :etSolver, stats["etSolver"]
-   # @info model.sol
 
    # model.solve_time = time() - start_time
    if haskey(stats, "resUsd")

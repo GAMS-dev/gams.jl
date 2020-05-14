@@ -204,29 +204,6 @@ function gdx_data_read_str(
    return
 end
 
-# function gdx_um_uel_get(
-#    gdx_ptr::Ptr{Cvoid},
-#    uel_nr::Cint,
-#    str::Cstring
-# )
-#    i = Ref{Cint}(-1)
-#    return ccall((:cgdxumuelget, LIBGDX), Cint,
-#       (Ptr{Cvoid}, Cint, Cstring, Ref{Cint}),
-#       gdx_ptr, uel_nr, str, i)
-# end
-
-# function gdx_um_uel_get(
-#    gdx::GDXHandle,
-#    uel_nr::Int
-# )
-#    gdx.cbuf[1][1] = '\0'
-#    rc = gdx_um_uel_get(gdx.cptr[], Cint(uel_nr), gdx.cbuf[1])
-#    if rc != 1
-#       throw(GDXException("Can't get UEL for number '$uel_nr'", 0))
-#    end
-#    return unsafe_string(gdx.cbuf[1])
-# end
-
 function gdx_data_read_done(
    gdx_ptr::Ptr{Cvoid},
 )

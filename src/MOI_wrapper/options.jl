@@ -33,14 +33,14 @@ end
 
 function MOI.get(
    model::Optimizer,
-   opt::type
+   ::type
 )
    return label(model.type)
 end
 
 function MOI.set(
    model::Optimizer,
-   opt::type,
+   ::type,
    value::String
 )
    value = uppercase(value)
@@ -141,7 +141,7 @@ function MOI.set(
       MOI.set(model, type(), value)
       return
    end
-   
+
    if name in GAMS.MOI_SUPPORTED_CLOPTIONS
       model.gams_options[name] = lowercase(value)
    else

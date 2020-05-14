@@ -1,7 +1,5 @@
 module GAMS
 
-# TODO: search for GAMS (during installation? would allow to load solver info etc. Not flexible afterwards)
-
 using Libdl
 
 export GAMSModelStatus, GAMSSolveStatus, GAMSModelType, GAMSVarType

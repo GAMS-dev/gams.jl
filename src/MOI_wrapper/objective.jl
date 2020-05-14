@@ -27,14 +27,14 @@ end
 
 function MOI.get(
    model::Optimizer,
-   attr::MOI.ObjectiveValue
+   ::MOI.ObjectiveValue
 )
    return model.obj
 end
 
 function MOI.get(
    model::Optimizer,
-   attr::MOI.ObjectiveBound
+   ::MOI.ObjectiveBound
 )
    return model.obj_est
 end
