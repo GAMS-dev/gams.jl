@@ -19,6 +19,46 @@ const OPTIMIZER_SPLITINTERVAL = MOIB.Constraint.SplitInterval{Float64}(
     MOIU.CachingOptimizer(MOIU.UniversalFallback(MOIU.Model{Float64}()), OPTIMIZER))
 const BRIDGED = MOI.instantiate(OPTIMIZER_CONSTRUCTOR, with_bridge_type = Float64)
 
+const TEST_SOLVERS = (
+   "alphaecp",
+   "antigone",
+   "baron",
+   "bdmlp",
+   "bonmin",
+   "bonminh",
+   "cbc",
+   "conopt",
+   "conopt3",
+   "conopt4",
+   "couenne",
+   "cplex",
+   "dicopt",
+   "glomiqo",
+   "gurobi",
+   "ipopt",
+   "ipopth",
+   "knitro",
+   "lgo",
+   "lindo",
+   "lindoglobal",
+   "localsolver",
+   "localsolver70",
+   "minos",
+   "mosek",
+   "msnlp",
+   "path",
+   "pathc",
+   "pathnlp",
+   "quadminos",
+   "sbb",
+   "shot",
+   "scip",
+   "snopt",
+   "soplex",
+   "xa",
+   "xpress"
+)
+
 atol = 1e-5
 rtol = 1e-5
 const CONFIG = MOIT.TestConfig(atol=atol, rtol=rtol)
@@ -67,7 +107,7 @@ end
 println()
 
 println("Continuous Linear" * "_"^12)
-for solver in GAMS.MOI_SUPPORTED_SOLVERS
+for solver in TEST_SOLVERS
     if ! GAMS.check_solver(OPTIMIZER.gamswork, solver, GAMS.MODEL_TYPE_LP)
         continue
     end
@@ -125,7 +165,7 @@ MOI.empty!(OPTIMIZER)
 
 println("Integer Linear" * "_"^15)
 MOI.set(OPTIMIZER, GAMS.type(), "MIP")
-for solver in GAMS.MOI_SUPPORTED_SOLVERS
+for solver in TEST_SOLVERS
     if ! GAMS.check_solver(OPTIMIZER.gamswork, solver, GAMS.MODEL_TYPE_MIP)
         continue
     end
@@ -199,7 +239,7 @@ MOI.empty!(OPTIMIZER)
 
 println("Continuous Quadratic" * "_"^9)
 MOI.set(OPTIMIZER, GAMS.type(), "QCP")
-for solver in GAMS.MOI_SUPPORTED_SOLVERS
+for solver in TEST_SOLVERS
     if ! GAMS.check_solver(OPTIMIZER.gamswork, solver, GAMS.MODEL_TYPE_QCP)
         continue
     end
@@ -300,7 +340,7 @@ MOI.empty!(OPTIMIZER)
 
 println("Continuous Nonlinear" * "_"^9)
 MOI.set(OPTIMIZER, GAMS.type(), "NLP")
-for solver in GAMS.MOI_SUPPORTED_SOLVERS
+for solver in TEST_SOLVERS
     if ! GAMS.check_solver(OPTIMIZER.gamswork, solver, GAMS.MODEL_TYPE_NLP)
         continue
     end

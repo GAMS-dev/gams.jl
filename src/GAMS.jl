@@ -5,7 +5,7 @@ using Libdl
 export GAMSModelStatus, GAMSSolveStatus, GAMSModelType, GAMSVarType
 export label
 export GAMSWorkspace, GAMSJob
-export get_version, check_solver, get_solvers
+export get_version, check_solver, get_solvers, set_system_dir
 
 # GAMS model status
 @enum(GAMSModelStatus,
@@ -194,16 +194,7 @@ mutable struct GAMSWorkspace
       working_dir::String,
       system_dir::String
    )
-      if Sys.iswindows()
-         if ! Sys.isexecutable(joinpath(system_dir, "gams.exe"))
-            error("GAMS executable 'gams.exe' not found in: $system_dir")
-         end
-      else
-         if ! Sys.isexecutable(joinpath(system_dir, "gams"))
-            error("GAMS executable 'gams' not found in: $system_dir")
-         end
-      end
-      push!(Libdl.DL_LOAD_PATH, system_dir)
+      check_system_dir(system_dir)
       new((0, 0, 0), working_dir, system_dir, Dict{String, Dict{GAMSModelType, Bool}}())
    end
 end
@@ -221,6 +212,33 @@ function GAMSWorkspace()
       error("GAMS executable not found!")
    end
    GAMSWorkspace(splitdir(path)[1])
+end
+
+function check_system_dir(
+   system_dir::String
+)
+   if Sys.iswindows()
+      if ! Sys.isexecutable(joinpath(system_dir, "gams.exe"))
+         error("GAMS executable 'gams.exe' not found in: $system_dir")
+      end
+   else
+      if ! Sys.isexecutable(joinpath(system_dir, "gams"))
+         error("GAMS executable 'gams' not found in: $system_dir")
+      end
+   end
+   push!(Libdl.DL_LOAD_PATH, system_dir)
+   return true
+end
+
+function set_system_dir(
+   workspace::GAMSWorkspace,
+   system_dir::String
+)
+   if check_system_dir(system_dir)
+      workspace.system_dir = system_dir
+      workspace.version = (0,0,0)
+      workspace.supported_solver_type = Dict{String, Dict{GAMSModelType, Bool}}()
+   end
 end
 
 function get_version(

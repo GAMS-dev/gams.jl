@@ -14,7 +14,7 @@ function MOI.get(
 end
 
 function MOI.get(
-   model::Optimizer, 
+   model::Optimizer,
    ::MOI.NumberOfConstraints{MOI.SingleVariable, MOI.LessThan{Float64}}
 )
    n = 0
@@ -27,7 +27,7 @@ function MOI.get(
 end
 
 function MOI.get(
-   model::Optimizer, 
+   model::Optimizer,
    ::MOI.NumberOfConstraints{MOI.SingleVariable, MOI.GreaterThan{Float64}}
 )
    n = 0
@@ -40,7 +40,7 @@ function MOI.get(
 end
 
 function MOI.get(
-   model::Optimizer, 
+   model::Optimizer,
    ::MOI.NumberOfConstraints{MOI.SingleVariable, MOI.EqualTo{Float64}}
 )
    n = 0
@@ -173,8 +173,8 @@ function MOI.add_constraint(
 end
 
 function MOI.add_constraint(
-   model::Optimizer, 
-   v::MOI.SingleVariable, 
+   model::Optimizer,
+   v::MOI.SingleVariable,
    ::MOI.ZeroOne
 )
    vi = v.variable
@@ -186,8 +186,8 @@ function MOI.add_constraint(
 end
 
 function MOI.add_constraint(
-   model::Optimizer, 
-   v::MOI.SingleVariable, 
+   model::Optimizer,
+   v::MOI.SingleVariable,
    ::MOI.Integer
 )
    vi = v.variable
@@ -197,8 +197,8 @@ function MOI.add_constraint(
 end
 
 function MOI.add_constraint(
-   model::Optimizer, 
-   v::MOI.SingleVariable, 
+   model::Optimizer,
+   v::MOI.SingleVariable,
    sc::MOI.Semicontinuous{Float64}
 )
    vi = v.variable
@@ -210,8 +210,8 @@ function MOI.add_constraint(
 end
 
 function MOI.add_constraint(
-   model::Optimizer, 
-   v::MOI.SingleVariable, 
+   model::Optimizer,
+   v::MOI.SingleVariable,
    si::MOI.Semiinteger{Float64}
 )
    vi = v.variable
@@ -223,8 +223,8 @@ function MOI.add_constraint(
 end
 
 function MOI.add_constraint(
-   model::Optimizer, 
-   v::MOI.VectorOfVariables, 
+   model::Optimizer,
+   v::MOI.VectorOfVariables,
    sos::MOI.SOS1{Float64}
 )
    check_inbounds(model, v)
@@ -234,8 +234,8 @@ function MOI.add_constraint(
 end
 
 function MOI.add_constraint(
-   model::Optimizer, 
-   v::MOI.VectorOfVariables, 
+   model::Optimizer,
+   v::MOI.VectorOfVariables,
    sos::MOI.SOS2{Float64}
 )
    perm = sortperm(sos.weights)
@@ -403,7 +403,7 @@ function MOI.get(
 end
 
 function MOI.get(
-   model::Optimizer, 
+   model::Optimizer,
    attr::MOI.ConstraintDual,
    ci::MOI.ConstraintIndex{MOI.SingleVariable, MOI.LessThan{Float64}}
 )
@@ -421,7 +421,7 @@ function MOI.get(
 end
 
 function MOI.get(
-   model::Optimizer, 
+   model::Optimizer,
    attr::MOI.ConstraintDual,
    ci::MOI.ConstraintIndex{MOI.SingleVariable, MOI.GreaterThan{Float64}}
 )
@@ -441,7 +441,7 @@ function MOI.get(
 end
 
 function MOI.get(
-   model::Optimizer, 
+   model::Optimizer,
    attr::MOI.ConstraintDual,
    ci::MOI.ConstraintIndex{MOI.SingleVariable, MOI.EqualTo{Float64}}
 )

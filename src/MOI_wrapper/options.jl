@@ -9,10 +9,11 @@ struct optcr <: MOI.AbstractOptimizerAttribute end
 struct solver <: MOI.AbstractOptimizerAttribute end
 struct threads <: MOI.AbstractOptimizerAttribute end
 struct logoption <: MOI.AbstractOptimizerAttribute end
+struct sysdir <: MOI.AbstractOptimizerAttribute end
 
 function MOI.get(
    model::Optimizer,
-   opt::Union{reslim, iterlim, holdfixed, nodlim, optca, optcr, solver, threads}
+   opt::Union{reslim, iterlim, holdfixed, nodlim, optca, optcr, solver, threads, logoption, sysdir}
 )
    name = replace(string(typeof(opt)), r"(GAMS.)" => "")
    if haskey(model.gams_options, name)
@@ -23,7 +24,7 @@ end
 
 function MOI.set(
    model::Optimizer,
-   opt::Union{reslim, iterlim, holdfixed, nodlim, optca, optcr, solver, threads},
+   opt::Union{reslim, iterlim, holdfixed, nodlim, optca, optcr, solver, threads, logoption, sysdir},
    value
 )
    name = replace(string(typeof(opt)), r"(GAMS.)" => "")
@@ -89,7 +90,7 @@ end
 
 function MOI.set(
    model::Optimizer,
-   attr::MOI.TimeLimitSec,
+   ::MOI.TimeLimitSec,
    ::Nothing
 )
    delete!(model.gams_options, "reslim")

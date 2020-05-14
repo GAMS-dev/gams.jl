@@ -6,8 +6,7 @@ GAMS.jl provides a
 solve [JuMP](https://github.com/JuliaOpt/JuMP.jl) models using
 [GAMS](https://www.gams.com/).
 
-GAMS integrates many state-of-the-art solvers. Supported GAMS solvers by GAMS.jl
-are:
+GAMS comes with dozens of supported solvers. Among them are:
 [ALPHAECP](https://www.gams.com/latest/docs/S_ALPHAECP.html),
 [ANTIGONE](https://www.gams.com/latest/docs/S_ANTIGONE.html),
 [BARON](https://www.gams.com/latest/docs/S_BARON.html),
@@ -32,11 +31,13 @@ are:
 [PATH](https://www.gams.com/latest/docs/S_PATH.html),
 [QUADMINOS](https://www.gams.com/latest/docs/S_MINOS.html),
 [SBB](https://www.gams.com/latest/docs/S_SBB.html),
+[SHOT](https://www.gams.com/latest/docs/S_SHOT.html),
 [SCIP](https://www.gams.com/latest/docs/S_SCIP.html),
 [SNOPT](https://www.gams.com/latest/docs/S_SNOPT.html),
 [SOPLEX](https://www.gams.com/latest/docs/S_SOPLEX.html),
 [XA](https://www.gams.com/latest/docs/S_XA.html),
 [XPRESS](https://www.gams.com/latest/docs/S_XPRESS.html).
+Find a complete list [here](https://www.gams.com/latest/docs/S_MAIN.html).
 
 GAMS.jl supports the following JuMP features:
 - linear, quadratic and nonlinear (convex and non-convex) objective and constraints
@@ -46,10 +47,12 @@ GAMS.jl supports the following JuMP features:
 
 ## Installation
 
-First, you need to [download GAMS](https://www.gams.com/download/) and obtain a
-GAMS license. Add the GAMS system directory to the `PATH` variable.
-
-GAMS.jl can be installed by:
+1. [Download GAMS](https://www.gams.com/download/) and obtain a
+GAMS license. Please note that GAMS also offers a [free community
+license](https://www.gams.com/latest/docs/UG_License.html#GAMS_Community_Licenses).
+2. (optional) Add the GAMS system directory to the `PATH` variable in order to
+find GAMS automatically.
+3. Install GAMS.jl using the Julia package manager:
 ```
 using Pkg
 Pkg.add("GAMS")
@@ -64,6 +67,8 @@ model = Model(GAMS.Optimizer)
 ```
 
 ### GAMS Options
+
+#### Solver
 
 Choosing a GAMS solver (one of the following):
 ```
@@ -84,6 +89,8 @@ supports the command line options
 Note that `GAMS.reslim()` is equivalent to `MOI.TimeLimitSec()` and
 `GAMS.threads()` to `MOI.NumberOfThreads()`.
 
+#### Model Type
+
 GAMS.jl will automatically choose a [GAMS model
 type](https://www.gams.com/latest/docs/UG_ModelSolve.html#UG_ModelSolve_ModelClassificationOfModels)
 for you. Choosing a different model type:
@@ -93,6 +100,16 @@ set_optimizer_attribute(model, GAMS.type(), "<model_type>")
 Supported [GAMS model
 types](https://www.gams.com/latest/docs/UG_ModelSolve.html#UG_ModelSolve_ModelClassificationOfModels)
 are LP, MIP, RMIP, NLP, MINLP, RMINLP, QCP, MIQCP and RMIQCP.
+
+#### GAMS System
+
+If the GAMS system directory has been added to the `PATH` variable, GAMS.jl will find
+it automatically. Otherwise, or if you like to switch between systems, the
+system directory can be specified by (one of the following):
+```
+set_optimizer_attribute(model, "sysdir", "<gams_system_dir>")
+set_optimizer_attribute(model, GAMS.sysdir(), "<gams_system_dir>")
+```
 
 ### GAMS Solver Options
 

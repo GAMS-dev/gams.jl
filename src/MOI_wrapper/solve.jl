@@ -42,11 +42,6 @@ function MOI.optimize!(
       @info "Updated GAMS model type: " * label(model.type) * " -> " * label(type)
    end
    model.type = type
-   if haskey(model.gams_options, "solver")
-      if ! (model.gams_options["solver"] in MOI_SUPPORTED_SOLVERS)
-         error("GAMS solver '" * model.gams_options["solver"] * "' not supported.")
-      end
-   end
 
    # use additional objective variable?
    model.objvar = true
@@ -66,6 +61,12 @@ function MOI.optimize!(
       translate_equations(io, model)
       translate_vardata(io, model)
       translate_solve(io, model, "moi")
+   end
+
+   # system dir
+   if haskey(model.gams_options, "sysdir")
+      set_system_dir(model.gamswork, model.gams_options["sysdir"])
+      delete!(model.gams_options, "sysdir")
    end
 
    # run GAMS

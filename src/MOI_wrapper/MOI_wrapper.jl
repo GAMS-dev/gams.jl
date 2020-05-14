@@ -5,46 +5,6 @@ import MathOptInterface
 const MOI = MathOptInterface
 const MOIU = MathOptInterface.Utilities
 
-# supported solvers
-const MOI_SUPPORTED_SOLVERS = (
-   "alphaecp",
-   "antigone",
-   "baron",
-   "bdmlp",
-   "bonmin",
-   "bonminh",
-   "cbc",
-   "conopt",
-   "conopt3",
-   "conopt4",
-   "couenne",
-   "cplex",
-   "dicopt",
-   "glomiqo",
-   "gurobi",
-   "ipopt",
-   "ipopth",
-   "knitro",
-   "lgo",
-   "lindo",
-   "lindoglobal",
-   "localsolver",
-   "localsolver70",
-   "minos",
-   "mosek",
-   "msnlp",
-   "path",
-   "pathc",
-   "pathnlp",
-   "quadminos",
-   "sbb",
-   "scip",
-   "snopt",
-   "soplex",
-   "xa",
-   "xpress"
-)
-
 # supported GAMS command line options
 const MOI_SUPPORTED_CLOPTIONS = (
    "reslim",
