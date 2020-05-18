@@ -52,10 +52,9 @@ GAMS license. Please note that GAMS also offers a [free community
 license](https://www.gams.com/latest/docs/UG_License.html#GAMS_Community_Licenses).
 2. (optional) Add the GAMS system directory to the `PATH` variable in order to
 find GAMS automatically.
-3. Install GAMS.jl using the Julia package manager:
+3. Registration in the Julia package manager is still pending. In the meantime, do:
 ```
-using Pkg
-Pkg.add("GAMS")
+pkg> add https://github.com/GAMS-dev/gams.jl
 ```
 
 ## Usage
