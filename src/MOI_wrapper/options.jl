@@ -1,5 +1,5 @@
 
-struct type <: MOI.AbstractOptimizerAttribute end
+struct mtype <: MOI.AbstractOptimizerAttribute end
 struct reslim <: MOI.AbstractOptimizerAttribute end
 struct iterlim <: MOI.AbstractOptimizerAttribute end
 struct holdfixed <: MOI.AbstractOptimizerAttribute end
@@ -10,10 +10,11 @@ struct solver <: MOI.AbstractOptimizerAttribute end
 struct threads <: MOI.AbstractOptimizerAttribute end
 struct logoption <: MOI.AbstractOptimizerAttribute end
 struct sysdir <: MOI.AbstractOptimizerAttribute end
+struct workdir <: MOI.AbstractOptimizerAttribute end
 
 function MOI.get(
    model::Optimizer,
-   opt::Union{reslim, iterlim, holdfixed, nodlim, optca, optcr, solver, threads, logoption, sysdir}
+   opt::Union{reslim, iterlim, holdfixed, nodlim, optca, optcr, solver, threads, logoption}
 )
    name = replace(string(typeof(opt)), r"(GAMS.)" => "")
    if haskey(model.gams_options, name)
@@ -24,7 +25,7 @@ end
 
 function MOI.set(
    model::Optimizer,
-   opt::Union{reslim, iterlim, holdfixed, nodlim, optca, optcr, solver, threads, logoption, sysdir},
+   opt::Union{reslim, iterlim, holdfixed, nodlim, optca, optcr, solver, threads, logoption},
    value
 )
    name = replace(string(typeof(opt)), r"(GAMS.)" => "")
@@ -34,14 +35,14 @@ end
 
 function MOI.get(
    model::Optimizer,
-   ::type
+   ::mtype
 )
    return label(model.type)
 end
 
 function MOI.set(
    model::Optimizer,
-   ::type,
+   ::mtype,
    value::String
 )
    value = uppercase(value)
@@ -49,6 +50,38 @@ function MOI.set(
    if model.type == MODEL_TYPE_UNDEFINED
       error("Unsupported model type '$value'.")
    end
+   return
+end
+
+function MOI.get(
+   model::Optimizer,
+   ::sysdir
+)
+   return model.gamswork.system_dir
+end
+
+function MOI.set(
+   model::Optimizer,
+   ::sysdir,
+   value::String
+)
+   set_system_dir(model.gamswork, value)
+   return
+end
+
+function MOI.get(
+   model::Optimizer,
+   ::workdir
+)
+   return model.gamswork.working_dir
+end
+
+function MOI.set(
+   model::Optimizer,
+   ::workdir,
+   value::String
+)
+   set_working_dir(model.gamswork, value)
    return
 end
 
@@ -139,7 +172,13 @@ function MOI.set(
    name = lowercase(option.name)
 
    if name == "type"
-      MOI.set(model, type(), value)
+      MOI.set(model, mtype(), value)
+      return
+   elseif name == "sysdir"
+      MOI.set(model, sysdir(), value)
+      return
+   elseif name == "workdir"
+      MOI.set(model, workdir(), value)
       return
    end
 

@@ -241,6 +241,17 @@ function set_system_dir(
    end
 end
 
+function set_working_dir(
+   workspace::GAMSWorkspace,
+   working_dir::String
+)
+   rm(workspace.working_dir, force=true, recursive=true)
+   if ! ispath(working_dir)
+      mkpath(working_dir)
+   end
+   workspace.working_dir = working_dir
+end
+
 function get_version(
    workspace::GAMSWorkspace
 )

@@ -63,12 +63,6 @@ function MOI.optimize!(
       translate_solve(io, model, "moi")
    end
 
-   # system dir
-   if haskey(model.gams_options, "sysdir")
-      set_system_dir(model.gamswork, model.gams_options["sysdir"])
-      delete!(model.gams_options, "sysdir")
-   end
-
    # run GAMS
    job = GAMSJob(model.gamswork, filename, "moi")
    model.sol, stats = run(job, options=model.gams_options, solver_options=model.solver_options)

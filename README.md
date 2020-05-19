@@ -94,7 +94,7 @@ GAMS.jl will automatically choose a [GAMS model
 type](https://www.gams.com/latest/docs/UG_ModelSolve.html#UG_ModelSolve_ModelClassificationOfModels)
 for you. Choosing a different model type:
 ```
-set_optimizer_attribute(model, GAMS.type(), "<model_type>")
+set_optimizer_attribute(model, GAMS.mtype(), "<model_type>")
 ```
 Supported [GAMS model
 types](https://www.gams.com/latest/docs/UG_ModelSolve.html#UG_ModelSolve_ModelClassificationOfModels)
