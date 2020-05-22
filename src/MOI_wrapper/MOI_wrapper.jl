@@ -57,7 +57,7 @@ mutable struct Optimizer <: MOI.AbstractOptimizer
    gamswork::GAMSWorkspace
 
    # problem attributes
-   type::GAMSModelType
+   mtype::GAMSModelType
    n_binary::Int
    n_integer::Int
    n_semicont::Int

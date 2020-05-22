@@ -719,7 +719,7 @@ function translate_solve(
 )
    writeln(io, "Model $name / all /;")
    write(io, "Solve $name using ")
-   write(io, label(model.type))
+   write(io, label(model.mtype))
    if model.sense == MOI.MAX_SENSE
       write(io, " maximizing ")
    else

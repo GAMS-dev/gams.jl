@@ -37,7 +37,7 @@ function MOI.get(
    model::Optimizer,
    ::mtype
 )
-   return label(model.type)
+   return label(model.mtype)
 end
 
 function MOI.set(
@@ -46,8 +46,8 @@ function MOI.set(
    value::String
 )
    value = uppercase(value)
-   model.type = model_type_from_label(value)
-   if model.type == MODEL_TYPE_UNDEFINED
+   model.mtype = model_type_from_label(value)
+   if model.mtype == MODEL_TYPE_UNDEFINED
       error("Unsupported model type '$value'.")
    end
    return
@@ -171,7 +171,7 @@ function MOI.set(
 )
    name = lowercase(option.name)
 
-   if name == "type"
+   if name == "mtype"
       MOI.set(model, mtype(), value)
       return
    elseif name == "sysdir"

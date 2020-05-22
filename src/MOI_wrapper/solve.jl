@@ -37,11 +37,11 @@ function MOI.optimize!(
 
    # choose model type
    is_discrete = model.n_binary + model.n_integer + model.n_semicont + model.n_semiint > 0
-   type = auto_model_type(model.type, model.m_quad > 0, model.m_nonlin > 0, is_discrete)
-   if type != model.type && ! MOI.get(model, MOI.Silent())
-      @info "Updated GAMS model type: " * label(model.type) * " -> " * label(type)
+   mtype = auto_model_type(model.mtype, model.m_quad > 0, model.m_nonlin > 0, is_discrete)
+   if mtype != model.mtype && ! MOI.get(model, MOI.Silent())
+      @info "Updated GAMS model type: " * label(model.mtype) * " -> " * label(mtype)
    end
-   model.type = type
+   model.mtype = mtype
 
    # use additional objective variable?
    model.objvar = true

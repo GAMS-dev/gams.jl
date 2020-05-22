@@ -132,43 +132,43 @@ const GAMS_MODEL_ATTRIBUTES_REQUIRED = (
 )
 
 function label(
-   type::GAMSModelType
+   mtype::GAMSModelType
 )
-   return replace(string(type), r"(MODEL_TYPE_)" => "")
+   return replace(string(mtype), r"(MODEL_TYPE_)" => "")
 end
 
 function model_type_from_label(
-   type::String
+   mtype::String
 )
-   if type == "LP"
+   if mtype == "LP"
       return MODEL_TYPE_LP
-   elseif type == "MIP"
+   elseif mtype == "MIP"
       return MODEL_TYPE_MIP
-   elseif type == "RMIP"
+   elseif mtype == "RMIP"
       return MODEL_TYPE_RMIP
-   elseif type == "NLP"
+   elseif mtype == "NLP"
       return MODEL_TYPE_NLP
-   elseif type == "MCP"
+   elseif mtype == "MCP"
       return MODEL_TYPE_MCP
-   elseif type == "MPEC"
+   elseif mtype == "MPEC"
       return MODEL_TYPE_MPEC
-   elseif type == "RMPEC"
+   elseif mtype == "RMPEC"
       return MODEL_TYPE_RMPEC
-   elseif type == "CNS"
+   elseif mtype == "CNS"
       return MODEL_TYPE_CNS
-   elseif type == "DNLP"
+   elseif mtype == "DNLP"
       return MODEL_TYPE_DNLP
-   elseif type == "MINLP"
+   elseif mtype == "MINLP"
       return MODEL_TYPE_MINLP
-   elseif type == "RMINLP"
+   elseif mtype == "RMINLP"
       return MODEL_TYPE_RMINLP
-   elseif type == "QCP"
+   elseif mtype == "QCP"
       return MODEL_TYPE_QCP
-   elseif type == "MIQCP"
+   elseif mtype == "MIQCP"
       return MODEL_TYPE_MIQCP
-   elseif type == "RMIQCP"
+   elseif mtype == "RMIQCP"
       return MODEL_TYPE_RMIQCP
-   elseif type == "EMP"
+   elseif mtype == "EMP"
       return MODEL_TYPE_EMP
    else
       return MODEL_TYPE_UNDEFINED
@@ -295,9 +295,9 @@ function load_solver_info(
       if ! haskey(workspace.supported_solver_type, name)
          workspace.supported_solver_type[name] = Dict{String, Bool}()
       end
-      type = model_type_from_label(uppercase(uels[2]))
-      if ! haskey(workspace.supported_solver_type[name], type)
-         workspace.supported_solver_type[name][type] = true
+      mtype = model_type_from_label(uppercase(uels[2]))
+      if ! haskey(workspace.supported_solver_type[name], mtype)
+         workspace.supported_solver_type[name][mtype] = true
       end
    end
    gdx_data_read_done(gdx)
@@ -501,61 +501,61 @@ function run(
 end
 
 function auto_model_type(
-   type::GAMSModelType,
+   mtype::GAMSModelType,
    is_quadratic::Bool,
    is_nonlinear::Bool,
    is_discrete::Bool
 )
-   if type == GAMS.MODEL_TYPE_UNDEFINED
+   if mtype == GAMS.MODEL_TYPE_UNDEFINED
       if is_nonlinear && is_discrete
-         type = GAMS.MODEL_TYPE_MINLP
+         mtype = GAMS.MODEL_TYPE_MINLP
       elseif is_nonlinear
-         type = GAMS.MODEL_TYPE_NLP
+         mtype = GAMS.MODEL_TYPE_NLP
       elseif is_quadratic && is_discrete
-         type = GAMS.MODEL_TYPE_MIQCP
+         mtype = GAMS.MODEL_TYPE_MIQCP
       elseif is_quadratic
-         type = GAMS.MODEL_TYPE_QCP
+         mtype = GAMS.MODEL_TYPE_QCP
       elseif is_discrete
-         type = GAMS.MODEL_TYPE_MIP
+         mtype = GAMS.MODEL_TYPE_MIP
       else
-         type = GAMS.MODEL_TYPE_LP
+         mtype = GAMS.MODEL_TYPE_LP
       end
    else
-      if type == GAMS.MODEL_TYPE_LP
+      if mtype == GAMS.MODEL_TYPE_LP
          if is_quadratic
-            type = GAMS.MODEL_TYPE_QCP
+            mtype = GAMS.MODEL_TYPE_QCP
          elseif is_nonlinear
-            type = GAMS.MODEL_TYPE_NLP
+            mtype = GAMS.MODEL_TYPE_NLP
          elseif is_discrete
-            type = GAMS.MODEL_TYPE_MIP
+            mtype = GAMS.MODEL_TYPE_MIP
          end
       end
-      if type == GAMS.MODEL_TYPE_MIP
+      if mtype == GAMS.MODEL_TYPE_MIP
          if is_quadratic
-            type = GAMS.MODEL_TYPE_MIQCP
+            mtype = GAMS.MODEL_TYPE_MIQCP
          elseif is_nonlinear
-            type = GAMS.MODEL_TYPE_MINLP
+            mtype = GAMS.MODEL_TYPE_MINLP
          end
       end
-      if type == GAMS.MODEL_TYPE_QCP
+      if mtype == GAMS.MODEL_TYPE_QCP
          if is_nonlinear
-            type = GAMS.MODEL_TYPE_NLP
+            mtype = GAMS.MODEL_TYPE_NLP
          elseif is_discrete
-            type = GAMS.MODEL_TYPE_MIQCP
+            mtype = GAMS.MODEL_TYPE_MIQCP
          end
       end
-      if type == GAMS.MODEL_TYPE_MIQCP
+      if mtype == GAMS.MODEL_TYPE_MIQCP
          if is_nonlinear
-            type = GAMS.MODEL_TYPE_MINLP
+            mtype = GAMS.MODEL_TYPE_MINLP
          end
       end
-      if type == GAMS.MODEL_TYPE_NLP
+      if mtype == GAMS.MODEL_TYPE_NLP
          if is_discrete
-            type = GAMS.MODEL_TYPE_MINLP
+            mtype = GAMS.MODEL_TYPE_MINLP
          end
       end
    end
-   return type
+   return mtype
 end
 
 function parse_gdx_value(

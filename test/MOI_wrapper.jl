@@ -164,7 +164,7 @@ println()
 MOI.empty!(OPTIMIZER)
 
 println("Integer Linear" * "_"^15)
-MOI.set(OPTIMIZER, GAMS.type(), "MIP")
+MOI.set(OPTIMIZER, GAMS.mtype(), "MIP")
 for solver in TEST_SOLVERS
     if ! GAMS.check_solver(OPTIMIZER.gamswork, solver, GAMS.MODEL_TYPE_MIP)
         continue
@@ -238,7 +238,7 @@ println()
 MOI.empty!(OPTIMIZER)
 
 println("Continuous Quadratic" * "_"^9)
-MOI.set(OPTIMIZER, GAMS.type(), "QCP")
+MOI.set(OPTIMIZER, GAMS.mtype(), "QCP")
 for solver in TEST_SOLVERS
     if ! GAMS.check_solver(OPTIMIZER.gamswork, solver, GAMS.MODEL_TYPE_QCP)
         continue
@@ -339,7 +339,7 @@ println()
 MOI.empty!(OPTIMIZER)
 
 println("Continuous Nonlinear" * "_"^9)
-MOI.set(OPTIMIZER, GAMS.type(), "NLP")
+MOI.set(OPTIMIZER, GAMS.mtype(), "NLP")
 for solver in TEST_SOLVERS
     if ! GAMS.check_solver(OPTIMIZER.gamswork, solver, GAMS.MODEL_TYPE_NLP)
         continue
