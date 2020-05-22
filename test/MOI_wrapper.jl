@@ -1,4 +1,3 @@
-# TODO: test with different solvers
 
 using Test
 using Printf
