@@ -15,7 +15,20 @@ const MOI_SUPPORTED_CLOPTIONS = (
    "optcr",
    "solver",
    "threads",
-   "logoption"
+   "trace",
+   "traceopt",
+   "logoption",
+   "lp",
+   "mip",
+   "rmip",
+   "nlp",
+   "dnlp",
+   "cns",
+   "minlp",
+   "rminlp",
+   "qcp",
+   "miqcp",
+   "rmiqcp"
 )
 
 # supported model types
