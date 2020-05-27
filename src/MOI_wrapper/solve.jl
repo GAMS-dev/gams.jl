@@ -32,12 +32,14 @@ function MOI.optimize!(
       length(model.linear_ge_constraints) + length(model.linear_eq_constraints)
    model.m_quad = length(model.quadratic_le_constraints) +
       length(model.quadratic_ge_constraints) + length(model.quadratic_eq_constraints)
-   model.m_nonlin = ! isnothing(model.nlp_data) ? length(model.nlp_data.constraint_bounds) : 0
+   model.m_nonlin = !isnothing(model.nlp_data) ? length(model.nlp_data.constraint_bounds) : 0
    model.m = offset_nonlin(model) + model.m_nonlin
 
    # choose model type
    is_discrete = model.n_binary + model.n_integer + model.n_semicont + model.n_semiint > 0
-   mtype = auto_model_type(model.mtype, model.m_quad > 0, model.m_nonlin > 0, is_discrete)
+   is_nonlinear = model.m_nonlin > 0 || (!isnothing(model.nlp_data) && model.nlp_data.has_objective)
+   is_quadratic = model.m_quad > 0 || isa(model.objective, MOI.ScalarQuadraticFunction{Float64})
+   mtype = auto_model_type(model.mtype, is_quadratic, is_nonlinear, is_discrete)
    if mtype != model.mtype && ! MOI.get(model, MOI.Silent())
       @info "Updated GAMS model type: " * label(model.mtype) * " -> " * label(mtype)
    end

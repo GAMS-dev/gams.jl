@@ -53,7 +53,7 @@ license](https://www.gams.com/latest/docs/UG_License.html#GAMS_Community_License
 2. (optional) Add the GAMS system directory to the `PATH` variable in order to
 find GAMS automatically.
 3. Install GAMS.jl using the Julia package manager:
-```
+```julia
 using Pkg
 Pkg.add("GAMS")
 ```
@@ -61,7 +61,7 @@ Pkg.add("GAMS")
 ## Usage
 
 Using GAMS as optimizer for your JuMP model:
-```
+```julia
 using GAMS, JuMP
 model = Model(GAMS.Optimizer)
 ```
@@ -71,31 +71,44 @@ model = Model(GAMS.Optimizer)
 #### Solver
 
 Choosing a GAMS solver (one of the following):
-```
-set_optimizer_attribute(model, "solver", "<solver_name>")
-set_optimizer_attribute(model, GAMS.solver(), "<solver_name>")
+```julia
+set_optimizer_attribute(model, "Solver", "<solver_name>")
+set_optimizer_attribute(model, GAMS.Solver(), "<solver_name>")
 ```
 Other [GAMS command line options](https://www.gams.com/latest/docs/UG_GamsCall.html#UG_GamsCall_ListOfCommandLineParameters) can be specified the same way. GAMS.jl
 supports the command line options
-[reslim](https://www.gams.com/latest/docs/UG_GamsCall.html#GAMSAOreslim),
-[iterlim](https://www.gams.com/latest/docs/UG_GamsCall.html#GAMSAOiterlim),
-[holdfixed](https://www.gams.com/latest/docs/UG_GamsCall.html#GAMSAOholdfixed),
-[nodlim](https://www.gams.com/latest/docs/UG_GamsCall.html#GAMSAOnodlim),
-[optca](https://www.gams.com/latest/docs/UG_GamsCall.html#GAMSAOoptca),
-[optcr](https://www.gams.com/latest/docs/UG_GamsCall.html#GAMSAOoptcr),
-[solver](https://www.gams.com/latest/docs/UG_GamsCall.html#GAMSAOsolver),
-[threads](https://www.gams.com/latest/docs/UG_GamsCall.html#GAMSAOthreads) and
-[logoption](https://www.gams.com/latest/docs/UG_GamsCall.html#GAMSAOlogoption).
-Note that `GAMS.reslim()` is equivalent to `MOI.TimeLimitSec()` and
-`GAMS.threads()` to `MOI.NumberOfThreads()`.
+[HoldFixed](https://www.gams.com/latest/docs/UG_GamsCall.html#GAMSAOholdfixed),
+[IterLim](https://www.gams.com/latest/docs/UG_GamsCall.html#GAMSAOiterlim),
+[LogOption](https://www.gams.com/latest/docs/UG_GamsCall.html#GAMSAOlogoption),
+[NodLim](https://www.gams.com/latest/docs/UG_GamsCall.html#GAMSAOnodlim),
+[OptCA](https://www.gams.com/latest/docs/UG_GamsCall.html#GAMSAOoptca),
+[OptCR](https://www.gams.com/latest/docs/UG_GamsCall.html#GAMSAOoptcr),
+[ResLim](https://www.gams.com/latest/docs/UG_GamsCall.html#GAMSAOreslim),
+[Solver](https://www.gams.com/latest/docs/UG_GamsCall.html#GAMSAOsolver),
+[Threads](https://www.gams.com/latest/docs/UG_GamsCall.html#GAMSAOthreads),
+[Trace](https://www.gams.com/latest/docs/UG_GamsCall.html#GAMSAOtrace),
+[TraceOpt](https://www.gams.com/latest/docs/UG_GamsCall.html#GAMSAOtraceopt) as well as
+[LP](https://www.gams.com/latest/docs/UG_GamsCall.html#GAMSAOlp),
+[MIP](https://www.gams.com/latest/docs/UG_GamsCall.html#GAMSAOmip),
+[RMIP](https://www.gams.com/latest/docs/UG_GamsCall.html#GAMSAOrmip),
+[NLP](https://www.gams.com/latest/docs/UG_GamsCall.html#GAMSAOnlp),
+[DNLP](https://www.gams.com/latest/docs/UG_GamsCall.html#GAMSAOdnlp),
+[CNS](https://www.gams.com/latest/docs/UG_GamsCall.html#GAMSAOcns),
+[MINLP](https://www.gams.com/latest/docs/UG_GamsCall.html#GAMSAOminlp),
+[RMINLP](https://www.gams.com/latest/docs/UG_GamsCall.html#GAMSAOrminlp),
+[QCP](https://www.gams.com/latest/docs/UG_GamsCall.html#GAMSAOqcp),
+[MIQCP](https://www.gams.com/latest/docs/UG_GamsCall.html#GAMSAOmiqcp) and
+[RMIQCP](https://www.gams.com/latest/docs/UG_GamsCall.html#GAMSAOrmiqcp).
+Note that `GAMS.ResLim()` is equivalent to `MOI.TimeLimitSec()` and
+`GAMS.Threads()` to `MOI.NumberOfThreads()`.
 
 #### Model Type
 
 GAMS.jl will automatically choose a [GAMS model
 type](https://www.gams.com/latest/docs/UG_ModelSolve.html#UG_ModelSolve_ModelClassificationOfModels)
 for you. Choosing a different model type:
-```
-set_optimizer_attribute(model, GAMS.mtype(), "<model_type>")
+```julia
+set_optimizer_attribute(model, GAMS.ModelType(), "<model_type>")
 ```
 Supported [GAMS model
 types](https://www.gams.com/latest/docs/UG_ModelSolve.html#UG_ModelSolve_ModelClassificationOfModels)
@@ -106,15 +119,15 @@ are LP, MIP, RMIP, NLP, MINLP, RMINLP, QCP, MIQCP and RMIQCP.
 If the GAMS system directory has been added to the `PATH` variable, GAMS.jl will find
 it automatically. Otherwise, or if you like to switch between systems, the
 system directory can be specified by (one of the following):
-```
-set_optimizer_attribute(model, "sysdir", "<gams_system_dir>")
-set_optimizer_attribute(model, GAMS.sysdir(), "<gams_system_dir>")
+```julia
+set_optimizer_attribute(model, "SysDir", "<gams_system_dir>")
+set_optimizer_attribute(model, GAMS.SysDir(), "<gams_system_dir>")
 ```
 
 ### GAMS Solver Options
 
 Specifying GAMS solver options:
-```
+```julia
 set_optimizer_attribute(model, "<solver_option_name>", <option_value>)
 ```
 Note that passing a solver option is only valid when exlicitly choosing a GAMS
@@ -126,7 +139,7 @@ In order to check, if a GAMS solver is licensed (and supports a given [GAMS
 model
 type](https://www.gams.com/latest/docs/UG_ModelSolve.html#UG_ModelSolve_ModelClassificationOfModels)),
 do
-```
+```julia
 GAMS.check_solver(GAMS.GAMSWorkspace(), "<solver_name>")
 GAMS.check_solver(GAMS.GAMSWorkspace(), "<solver_name>", "<model_type>")
 ```

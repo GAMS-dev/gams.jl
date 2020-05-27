@@ -111,7 +111,7 @@ for solver in TEST_SOLVERS
         continue
     end
     testname = @sprintf("%-15s", "$solver")
-    MOI.set(OPTIMIZER_SPLITINTERVAL, GAMS.solver(), solver)
+    MOI.set(OPTIMIZER_SPLITINTERVAL, GAMS.Solver(), solver)
     exclude = [
         "linear7",  # VectorAffineFunction not supported
         "linear15", # VectorAffineFunction not supported
@@ -163,13 +163,13 @@ println()
 MOI.empty!(OPTIMIZER)
 
 println("Integer Linear" * "_"^15)
-MOI.set(OPTIMIZER, GAMS.mtype(), "MIP")
+MOI.set(OPTIMIZER, GAMS.ModelType(), "MIP")
 for solver in TEST_SOLVERS
     if ! GAMS.check_solver(OPTIMIZER.gamswork, solver, GAMS.MODEL_TYPE_MIP)
         continue
     end
     testname = @sprintf("%-15s", "$solver")
-    MOI.set(OPTIMIZER, GAMS.solver(), solver)
+    MOI.set(OPTIMIZER, GAMS.Solver(), solver)
     exclude = [
         "indicator1",   # indicator constraints not supported
         "indicator2",   # indicator constraints not supported
@@ -237,13 +237,13 @@ println()
 MOI.empty!(OPTIMIZER)
 
 println("Continuous Quadratic" * "_"^9)
-MOI.set(OPTIMIZER, GAMS.mtype(), "QCP")
+MOI.set(OPTIMIZER, GAMS.ModelType(), "QCP")
 for solver in TEST_SOLVERS
     if ! GAMS.check_solver(OPTIMIZER.gamswork, solver, GAMS.MODEL_TYPE_QCP)
         continue
     end
     testname = @sprintf("%-15s", "$solver")
-    MOI.set(OPTIMIZER, GAMS.solver(), solver)
+    MOI.set(OPTIMIZER, GAMS.Solver(), solver)
     exclude = [
         "qcp1",   # VectorAffineFunction not supported
     ]
@@ -338,13 +338,13 @@ println()
 MOI.empty!(OPTIMIZER)
 
 println("Continuous Nonlinear" * "_"^9)
-MOI.set(OPTIMIZER, GAMS.mtype(), "NLP")
+MOI.set(OPTIMIZER, GAMS.ModelType(), "NLP")
 for solver in TEST_SOLVERS
     if ! GAMS.check_solver(OPTIMIZER.gamswork, solver, GAMS.MODEL_TYPE_NLP)
         continue
     end
     testname = @sprintf("%-15s", "$solver")
-    MOI.set(OPTIMIZER, GAMS.solver(), solver)
+    MOI.set(OPTIMIZER, GAMS.Solver(), solver)
     @testset "$testname" begin
         if solver in ("antigone", "baron", "couenne")
             exclude = [

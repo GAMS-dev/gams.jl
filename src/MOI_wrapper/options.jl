@@ -1,20 +1,36 @@
 
-struct mtype <: MOI.AbstractOptimizerAttribute end
-struct reslim <: MOI.AbstractOptimizerAttribute end
-struct iterlim <: MOI.AbstractOptimizerAttribute end
-struct holdfixed <: MOI.AbstractOptimizerAttribute end
-struct nodlim <: MOI.AbstractOptimizerAttribute end
-struct optca <: MOI.AbstractOptimizerAttribute end
-struct optcr <: MOI.AbstractOptimizerAttribute end
-struct solver <: MOI.AbstractOptimizerAttribute end
-struct threads <: MOI.AbstractOptimizerAttribute end
-struct logoption <: MOI.AbstractOptimizerAttribute end
-struct sysdir <: MOI.AbstractOptimizerAttribute end
-struct workdir <: MOI.AbstractOptimizerAttribute end
+struct ModelType <: MOI.AbstractOptimizerAttribute end
+struct ResLim <: MOI.AbstractOptimizerAttribute end
+struct IterLim <: MOI.AbstractOptimizerAttribute end
+struct HoldFixed <: MOI.AbstractOptimizerAttribute end
+struct NodLim <: MOI.AbstractOptimizerAttribute end
+struct OptCA <: MOI.AbstractOptimizerAttribute end
+struct OptCR <: MOI.AbstractOptimizerAttribute end
+struct Solver <: MOI.AbstractOptimizerAttribute end
+struct Threads <: MOI.AbstractOptimizerAttribute end
+struct Trace <: MOI.AbstractOptimizerAttribute end
+struct TraceOpt <: MOI.AbstractOptimizerAttribute end
+struct LogOption <: MOI.AbstractOptimizerAttribute end
+struct SysDir <: MOI.AbstractOptimizerAttribute end
+struct WorkDir <: MOI.AbstractOptimizerAttribute end
+
+struct LP <: MOI.AbstractOptimizerAttribute end
+struct MIP <: MOI.AbstractOptimizerAttribute end
+struct RMIP <: MOI.AbstractOptimizerAttribute end
+struct NLP <: MOI.AbstractOptimizerAttribute end
+struct DNLP <: MOI.AbstractOptimizerAttribute end
+struct CNS <: MOI.AbstractOptimizerAttribute end
+struct MINLP <: MOI.AbstractOptimizerAttribute end
+struct RMINLP <: MOI.AbstractOptimizerAttribute end
+struct QCP <: MOI.AbstractOptimizerAttribute end
+struct MIQCP <: MOI.AbstractOptimizerAttribute end
+struct RMIQCP <: MOI.AbstractOptimizerAttribute end
 
 function MOI.get(
    model::Optimizer,
-   opt::Union{reslim, iterlim, holdfixed, nodlim, optca, optcr, solver, threads, logoption}
+   opt::Union{ResLim, IterLim, HoldFixed, NodLim, OptCA, OptCR, Solver, Threads,
+              Trace, TraceOpt, LogOption, LP, MIP, RMIP, NLP, DNLP, CNS, MINLP,
+              RMINLP, QCP, MIQCP, RMIQCP}
 )
    name = replace(string(typeof(opt)), r"(GAMS.)" => "")
    if haskey(model.gams_options, name)
@@ -25,7 +41,9 @@ end
 
 function MOI.set(
    model::Optimizer,
-   opt::Union{reslim, iterlim, holdfixed, nodlim, optca, optcr, solver, threads, logoption},
+   opt::Union{ResLim, IterLim, HoldFixed, NodLim, OptCA, OptCR, Solver, Threads,
+              Trace, TraceOpt, LogOption, LP, MIP, RMIP, NLP, DNLP, CNS, MINLP,
+              RMINLP, QCP, MIQCP, RMIQCP},
    value
 )
    name = replace(string(typeof(opt)), r"(GAMS.)" => "")
@@ -35,14 +53,14 @@ end
 
 function MOI.get(
    model::Optimizer,
-   ::mtype
+   ::ModelType
 )
    return label(model.mtype)
 end
 
 function MOI.set(
    model::Optimizer,
-   ::mtype,
+   ::ModelType,
    value::String
 )
    value = uppercase(value)
@@ -55,14 +73,14 @@ end
 
 function MOI.get(
    model::Optimizer,
-   ::sysdir
+   ::SysDir
 )
    return model.gamswork.system_dir
 end
 
 function MOI.set(
    model::Optimizer,
-   ::sysdir,
+   ::SysDir,
    value::String
 )
    set_system_dir(model.gamswork, value)
@@ -71,14 +89,14 @@ end
 
 function MOI.get(
    model::Optimizer,
-   ::workdir
+   ::WorkDir
 )
    return model.gamswork.working_dir
 end
 
 function MOI.set(
    model::Optimizer,
-   ::workdir,
+   ::WorkDir,
    value::String
 )
    set_working_dir(model.gamswork, value)
@@ -171,14 +189,14 @@ function MOI.set(
 )
    name = lowercase(option.name)
 
-   if name == "mtype"
-      MOI.set(model, mtype(), value)
+   if name == "modeltype"
+      MOI.set(model, ModelType(), value)
       return
    elseif name == "sysdir"
-      MOI.set(model, sysdir(), value)
+      MOI.set(model, SysDir(), value)
       return
    elseif name == "workdir"
-      MOI.set(model, workdir(), value)
+      MOI.set(model, WorkDir(), value)
       return
    end
 
