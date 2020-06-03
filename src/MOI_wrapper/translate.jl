@@ -430,7 +430,7 @@ function translate_function(
          translate_function(io, model, func.args[2], is_parenthesis=true)
          for i in 3:length(func.args)
             write(io, " " * string(op) * " ")
-            translate_function(io, model, func.args[i], is_parenthesis=true)
+            translate_function(io, model, func.args[i], is_parenthesis=(op==:+))
          end
       end
       if ! is_parenthesis
