@@ -364,6 +364,20 @@ for solver in TEST_SOLVERS
         elseif solver in ("mosek",)
             # not supported
 
+        elseif solver in ("lindo", "lindoglobal")
+            exclude = [
+                "hs071",            # finds global optimal solution
+                "hs071_no_hessian", # finds global optimal solution
+            ]
+            MOIT.nlptest(OPTIMIZER, CONFIG_LOCAL, exclude)
+
+        elseif solver in ("xpress",)
+            exclude = [
+                "hs071",            # finds different point
+                "hs071_no_hessian", # finds different point
+            ]
+            MOIT.nlptest(OPTIMIZER, CONFIG_LOCAL, exclude)
+
         elseif solver in ("localsolver", "localsolver70")
             # needs extra license
 
