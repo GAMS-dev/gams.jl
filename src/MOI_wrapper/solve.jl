@@ -37,6 +37,7 @@ function MOI.optimize!(
 
    # choose model type
    is_discrete = model.n_binary + model.n_integer + model.n_semicont + model.n_semiint > 0
+   is_discrete |= length(model.sos1_constraints) + length(model.sos2_constraints) > 0
    is_nonlinear = model.m_nonlin > 0 || (!isnothing(model.nlp_data) && model.nlp_data.has_objective)
    is_quadratic = model.m_quad > 0 || isa(model.objective, MOI.ScalarQuadraticFunction{Float64})
    mtype = auto_model_type(model.mtype, is_quadratic, is_nonlinear, is_discrete)

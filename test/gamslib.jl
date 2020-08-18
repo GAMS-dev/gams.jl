@@ -41,6 +41,16 @@ const TEST_GAMSLIB_MODELS = (
     "rdata",
     "mine",
     "orani",
+    "cube",
+    "chakra",
+    "andean",
+    "copper",
+    "otpop",
+    "korpet",
+    "sarf",
+    "port",
+    "prodschx",
+    "bidsos",
 )
 
 # we need GAMS 32 for JuMP output in Convert
@@ -97,4 +107,3 @@ end
 end
 
 cd(curdir)
-
