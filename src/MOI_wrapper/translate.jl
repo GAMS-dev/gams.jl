@@ -45,12 +45,6 @@ function writeln(
    io.n_line = 0
 end
 
-function print_float(
-   f::Float64
-)
-   return replace(@sprintf("%.15e", f), r"(0+e)" => "e")
-end
-
 function translate_header(
    io::GAMSTranslateStream
 )
@@ -283,20 +277,20 @@ function translate_coefficient(
       if first && coef == -1.0
          write(io, "-")
       elseif first
-         write(io, "-" * print_float(-coef) * " * ")
+         write(io, "-" * @sprintf("%g", -coef) * " * ")
       elseif coef == -1.0
          write(io, " - ")
       else
-         write(io, " - " * print_float(-coef) * " * ")
+         write(io, " - " * @sprintf("%g", -coef) * " * ")
       end
    elseif coef > 0.0
       if first && coef == 1.0
       elseif first
-         write(io, print_float(coef) * " * ")
+         write(io, @sprintf("%g", coef) * " * ")
       elseif coef == 1.0
          write(io, " + ")
       else
-         write(io, " + " * print_float(coef) * " * ")
+         write(io, " + " * @sprintf("%g", coef) * " * ")
       end
    end
    return
@@ -356,9 +350,9 @@ function translate_function(
 )
    translate_function(io, model, func.terms)
    if func.constant < 0.0
-      write(io, " - " * print_float(-func.constant))
+      write(io, " - " * @sprintf("%g", -func.constant))
    elseif func.constant > 0.0
-      write(io, " + " * print_float(func.constant))
+      write(io, " + " * @sprintf("%g", func.constant))
    end
 end
 
@@ -398,9 +392,9 @@ function translate_function(
    end
 
    if func.constant < 0.0
-      write(io, " - " * print_float(-func.constant))
+      write(io, " - " * @sprintf("%g", -func.constant))
    elseif func.constant > 0.0
-      write(io, " + " * print_float(func.constant))
+      write(io, " + " * @sprintf("%g", func.constant))
    end
 end
 
@@ -501,9 +495,9 @@ function translate_function(
    is_parenthesis::Bool = false
 )
    if is_parenthesis && func > 0.0
-      write(io, print_float(func))
+      write(io, @sprintf("%g", func))
    else
-      write(io, "(" * print_float(func) * ")")
+      write(io, "(" * @sprintf("%g", func) * ")")
    end
 end
 
@@ -593,7 +587,7 @@ function translate_equations(
 )
    write(io, "eq$idx.. ")
    translate_function(io, model, func)
-   writeln(io, " =L= " * print_float(set.upper) * ";")
+   writeln(io, " =L= " * @sprintf("%g", set.upper) * ";")
    return
 end
 
@@ -606,7 +600,7 @@ function translate_equations(
 )
    write(io, "eq$idx.. ")
    translate_function(io, model, func)
-   writeln(io, " =G= " * print_float(set.lower) * ";")
+   writeln(io, " =G= " * @sprintf("%g", set.lower) * ";")
    return
 end
 
@@ -619,7 +613,7 @@ function translate_equations(
 )
    write(io, "eq$idx.. ")
    translate_function(io, model, func)
-   writeln(io, " =E= " * print_float(set.value) * ";")
+   writeln(io, " =E= " * @sprintf("%g", set.value) * ";")
    return
 end
 
@@ -693,20 +687,20 @@ function translate_vardata(
    for (i, var) in enumerate(model.variable_info)
       if is_fixed(var)
          translate_variable(io, model, i)
-         writeln(io, ".fx = " * print_float(var.lower_bound) * ";")
+         writeln(io, ".fx = " * @sprintf("%g", var.lower_bound) * ";")
          continue
       end
       if has_lower_bound(var)
          translate_variable(io, model, i)
-         writeln(io, ".lo = " * print_float(var.lower_bound) * "; ")
+         writeln(io, ".lo = " * @sprintf("%g", var.lower_bound) * "; ")
       end
       if has_start(var)
          translate_variable(io, model, i)
-         writeln(io, ".l = " * print_float(var.start) * "; ")
+         writeln(io, ".l = " * @sprintf("%g", var.start) * "; ")
       end
       if has_upper_bound(var)
          translate_variable(io, model, i)
-         writeln(io, ".up = " * print_float(var.upper_bound) * ";")
+         writeln(io, ".up = " * @sprintf("%g", var.upper_bound) * ";")
       end
    end
    write(io, "\n")
