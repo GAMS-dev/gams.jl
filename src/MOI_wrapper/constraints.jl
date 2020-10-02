@@ -65,6 +65,17 @@ function MOI.add_constraint(
    return MOI.ConstraintIndex{MOI.ScalarQuadraticFunction{Float64}, MOI.EqualTo{Float64}}(n)
 end
 
+function MOI.add_constraint(
+    model::Optimizer,
+    func::MOI.VectorAffineFunction{Float64},
+    set::MOI.Complements
+)
+    check_inbounds(model, func)
+    push!(model.complementarity_constraints, ConstraintInfo(func, set))
+    n = length(model.complementarity_constraints)
+    return MathOptInterface.ConstraintIndex{MOI.VectorAffineFunction{Float64}, MOI.Complements}(n)
+end
+
 function MOI.get(
    model::Optimizer, 
    ::MOI.NumberOfConstraints{MOI.ScalarAffineFunction{Float64}, MOI.LessThan{Float64}}
@@ -105,6 +116,13 @@ function MOI.get(
    ::MOI.NumberOfConstraints{MOI.ScalarQuadraticFunction{Float64}, MOI.EqualTo{Float64}}
 )
    return length(model.quadratic_eq_constraints)
+end
+
+function MOI.get(
+    model::Optimizer, 
+    ::MOI.NumberOfConstraints{MOI.VectorAffineFunction{Float64}, MOI.Complements}
+)
+    return length(model.complementarity_constraints)
 end
 
 function MOI.set(
@@ -325,6 +343,17 @@ function MOI.get(
       error("Invalid constraint index ", ci.value)
    end
    return MOI.EqualTo(model.quadratic_eq_constraints[ci.value].set.value)
+end
+
+function MOI.get(
+    model::Optimizer, 
+    ::MOI.ConstraintName, 
+    ci::MOI.ConstraintIndex{MOI.VectorAffineFunction{Float64}, MOI.Complements}
+)
+    if ! (1 <= ci.value <= length(model.complementarity_constraints))
+        error("Invalid constraint index ", ci.value)
+    end
+    return model.complementarity_constraints[ci.value].name
 end
 
 function MOI.get(

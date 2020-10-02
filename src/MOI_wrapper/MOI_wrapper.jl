@@ -42,6 +42,8 @@ const MOI_SUPPORTED_MODEL_TYPES = (
    GAMS.MODEL_TYPE_QCP,
    GAMS.MODEL_TYPE_MIQCP,
    GAMS.MODEL_TYPE_RMIQCP,
+   GAMS.MODEL_TYPE_MCP,
+   GAMS.MODEL_TYPE_MPEC,
 )
 
 mutable struct VariableInfo
@@ -92,6 +94,7 @@ mutable struct Optimizer <: MOI.AbstractOptimizer
    sos1_constraints::Vector{ConstraintInfo{MOI.VectorOfVariables, MOI.SOS1{Float64}}}
    sos2_constraints::Vector{ConstraintInfo{MOI.VectorOfVariables, MOI.SOS2{Float64}}}
    nlp_data::Union{MOI.NLPBlockData, Nothing}
+   complementarity_constraints::Vector{ConstraintInfo{MOI.VectorAffineFunction{Float64}, MOI.Complements}}
 
    # parameters
    gams_options::Dict{String, Any}
@@ -111,7 +114,7 @@ function Optimizer()
    gams_options["threads"] = 1
    return Optimizer(GAMSWorkspace(), MODEL_TYPE_UNDEFINED, 0, 0, 0, 0, 0, 0, 0, 0,
                     MOI.FEASIBILITY_SENSE, nothing, true, [], [], [], [], [], [],
-                    [], [], [], nothing, gams_options, Dict{String, Any}(), NaN,
+                    [], [], [], nothing, [], gams_options, Dict{String, Any}(), NaN,
                     SOLVE_STATUS_UNDEFINED, MODEL_STATUS_UNDEFINED, nothing, NaN,
                     NaN)
 end
@@ -145,6 +148,7 @@ MOI.supports_constraint(::Optimizer, ::Type{MOI.ScalarAffineFunction{Float64}}, 
 MOI.supports_constraint(::Optimizer, ::Type{MOI.ScalarQuadraticFunction{Float64}}, ::Type{MOI.LessThan{Float64}}) = true
 MOI.supports_constraint(::Optimizer, ::Type{MOI.ScalarQuadraticFunction{Float64}}, ::Type{MOI.GreaterThan{Float64}}) = true
 MOI.supports_constraint(::Optimizer, ::Type{MOI.ScalarQuadraticFunction{Float64}}, ::Type{MOI.EqualTo{Float64}}) = true
+MOI.supports_constraint(::Optimizer, ::Type{MOI.VectorAffineFunction{Float64}}, ::Type{MOI.Complements}) = true
 MOI.supports(::Optimizer, ::MOI.ConstraintDualStart, ::MOI.ConstraintIndex{MOI.SingleVariable, MOI.GreaterThan{Float64}}, ::Union{Real, Nothing}) = true
 MOI.supports(::Optimizer, ::MOI.ConstraintDualStart, ::MOI.ConstraintIndex{MOI.SingleVariable, MOI.LessThan{Float64}}, ::Union{Real, Nothing}) = true
 MOI.supports(::Optimizer, ::MOI.ConstraintDualStart, ::MOI.ConstraintIndex{MOI.SingleVariable, MOI.EqualTo{Float64}}, ::Union{Real, Nothing}) = true
@@ -203,6 +207,7 @@ function MOI.is_empty(
       isempty(model.quadratic_eq_constraints) &&
       isempty(model.sos1_constraints) &&
       isempty(model.sos2_constraints) &&
+      isempty(model.complementarity_constraints) &&
       isnothing(model.nlp_data) &&
       model.solve_status == SOLVE_STATUS_UNDEFINED &&
       model.model_status == MODEL_STATUS_UNDEFINED &&

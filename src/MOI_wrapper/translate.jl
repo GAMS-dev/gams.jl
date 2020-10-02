@@ -680,6 +680,26 @@ function translate_equations(
    return
 end
 
+# Temporary placeholder
+function translate_equations(
+    io::GAMSTranslateStream,
+    model::Optimizer,
+    idx::Int,
+    func::MOI.VectorAffineFunction,
+    set::MOI.Complements
+)
+    write(io, "compeq$idx(comps$idx).. compx$idx(comps$idx) =n= ")
+    for (i, vi) in enumerate(func.variables)
+        if i > 1
+            write(io, " + ")
+        end
+        translate_variable(io, model, vi.value)
+        write(io, "\$sameas('$(vi.value)',comps$idx)")
+    end
+    writeln(io, ";")
+    return
+end
+
 function translate_vardata(
    io::GAMSTranslateStream,
    model::Optimizer
