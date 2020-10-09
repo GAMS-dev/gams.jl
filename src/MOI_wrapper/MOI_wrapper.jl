@@ -130,6 +130,7 @@ MOI.supports(::Optimizer, ::MOI.ConstraintName, ::Type{MOI.ConstraintIndex}) = t
 MOI.supports(::Optimizer, ::MOI.TimeLimitSec) = true
 MOI.supports(::Optimizer, ::MOI.NumberOfThreads) = true
 MOI.supports(::Optimizer, ::MOI.NLPBlock) = true
+MOI.supports(::Optimizer, ::MOI.NLPBlockDual) = true
 MOI.supports_constraint(::Optimizer, ::Type{MOI.SingleVariable}, ::Type{MOI.LessThan{Float64}}) = true
 MOI.supports_constraint(::Optimizer, ::Type{MOI.SingleVariable}, ::Type{MOI.GreaterThan{Float64}}) = true
 MOI.supports_constraint(::Optimizer, ::Type{MOI.SingleVariable}, ::Type{MOI.EqualTo{Float64}}) = true
