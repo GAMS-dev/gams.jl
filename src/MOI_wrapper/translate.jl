@@ -215,7 +215,7 @@ function translate_defequs(
    io::GAMSTranslateStream,
    model::Optimizer
 )
-   m = model.m + length(model.sos1_constraints)
+   m = model.m + length(model.sos1_constraints) + length(model.sos2_constraints)
 
    if m == 0 && ! model.objvar
       return
