@@ -25,6 +25,8 @@ struct RMINLP <: MOI.AbstractOptimizerAttribute end
 struct QCP <: MOI.AbstractOptimizerAttribute end
 struct MIQCP <: MOI.AbstractOptimizerAttribute end
 struct RMIQCP <: MOI.AbstractOptimizerAttribute end
+struct MPEC <: MOI.AbstractOptimizerAttribute end
+struct MCP <: MOI.AbstractOptimizerAttribute end
 
 function MOI.get(
    model::Optimizer,
