@@ -1,1 +1,3 @@
 .vscode
+.emacs
+src/testa.jl

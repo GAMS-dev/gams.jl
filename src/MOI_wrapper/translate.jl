@@ -215,7 +215,7 @@ function translate_defequs(
    io::GAMSTranslateStream,
    model::Optimizer
 )
-   m = model.m + length(model.sos1_constraints) + length(model.complementarity_constraints)
+    m = model.m + length(model.sos1_constraints) + length(model.sos2_constraints) + length(model.complementarity_constraints)
 
    if m == 0 && ! model.objvar
       return
@@ -753,8 +753,12 @@ function translate_solve(
    model::Optimizer,
    name::String
 )
-   if model.mtype == "MPEC"
-      writeln(io, "Model $name /")
+   if label(model.mtype) == "MPEC"
+       write(io, "Model $name /")
+       for i in 1:length(model.complementarity_constraints)
+           write(io, "compeq1_"*@sprintf("%g", i)*".x"*@sprintf("%g", i)*",")
+       end
+       writeln(io, " /;")
    else
       writeln(io, "Model $name / all /;")
    end
