@@ -215,7 +215,7 @@ function translate_defequs(
    io::GAMSTranslateStream,
    model::Optimizer
 )
-   m = model.m + length(model.sos1_constraints)
+   m = model.m + length(model.sos1_constraints) + length(model.complementarity_constraints)
 
    if m == 0 && ! model.objvar
       return
@@ -264,6 +264,15 @@ function translate_defequs(
       write(io, "s2eq$(i)(s2s$(i))")
       first = false
    end
+    # add complementarity constrains
+    n = length(model.complementarity_constraints)
+    for i in 1:n
+        if ! first
+            write(io, ", ")
+        end
+        write(io, "compeq$n"*"_"*@sprintf("%g", i))
+        first = false
+    end
 
    writeln(io, ";\n")
 end
@@ -354,6 +363,15 @@ function translate_function(
    elseif func.constant > 0.0
       write(io, " + " * @sprintf("%g", func.constant))
    end
+end
+
+function translate_function(
+    io::GAMSTranslateStream,
+    model::Optimizer,
+    terms::Vector{MOI.VectorAffineTerm{Float64}}
+)
+    sterms = [term.scalar_term for term in terms]
+    translate_function(io, model, sterms)
 end
 
 function translate_function(
@@ -564,6 +582,9 @@ function translate_equations(
    for (i, con) in enumerate(model.quadratic_eq_constraints)
       translate_equations(io, model, i + offset_quadratic_eq(model), con.func, con.set)
    end
+   for (i, con) in enumerate(model.complementarity_constraints)
+      translate_equations(io, model, i + offset_complementarity(model), con.func, con.set)
+   end
    for i in 1:model.m_nonlin
       translate_equations(io, model, i + offset_nonlin(model), MOI.constraint_expr(model.nlp_data.evaluator, i))
    end
@@ -688,16 +709,17 @@ function translate_equations(
     func::MOI.VectorAffineFunction,
     set::MOI.Complements
 )
-    write(io, "compeq$idx(comps$idx).. compx$idx(comps$idx) =n= ")
-    for (i, vi) in enumerate(func.variables)
-        if i > 1
-            write(io, " + ")
+    for i in 1:Int(length(func.constants)/2)
+        row = filter(term -> term.output_index == i, func.terms)
+        write(io, "compeq$idx" *"_"* @sprintf("%g", i) * ".. ")
+        translate_function(io, model, row)
+        if func.constants[i] < 0
+            write(io, " - " * @sprintf("%g", -func.constants[i]))
+        elseif func.constants[i] > 0.0
+            write(io, " + " * @sprintf("%g", func.constants[i]))
         end
-        translate_variable(io, model, vi.value)
-        write(io, "\$sameas('$(vi.value)',comps$idx)")
+        writeln(io, " =n= 0 ;")
     end
-    writeln(io, ";")
-    return
 end
 
 function translate_vardata(
@@ -731,7 +753,11 @@ function translate_solve(
    model::Optimizer,
    name::String
 )
-   writeln(io, "Model $name / all /;")
+   if model.mtype == "MPEC"
+      writeln(io, "Model $name /")
+   else
+      writeln(io, "Model $name / all /;")
+   end
    write(io, "Solve $name using ")
    write(io, label(model.mtype))
    if model.sense == MOI.MAX_SENSE

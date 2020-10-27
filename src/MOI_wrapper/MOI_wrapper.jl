@@ -185,6 +185,7 @@ function MOI.empty!(
    empty!(model.quadratic_eq_constraints)
    empty!(model.sos1_constraints)
    empty!(model.sos2_constraints)
+   empty!(model.complementarity_constraints)
    model.nlp_data = nothing
    model.solve_status = SOLVE_STATUS_UNDEFINED
    model.model_status = MODEL_STATUS_UNDEFINED
@@ -232,6 +233,7 @@ offset_quadratic_le(model::Optimizer) = offset_linear_eq(model) + length(model.l
 offset_quadratic_ge(model::Optimizer) = offset_quadratic_le(model) + length(model.quadratic_le_constraints)
 offset_quadratic_eq(model::Optimizer) = offset_quadratic_ge(model) + length(model.quadratic_ge_constraints)
 offset_nonlin(model::Optimizer) = offset_quadratic_eq(model) + length(model.quadratic_eq_constraints)
+offset_complementarity(model::Optimizer) = 0
 
 function MOI.set(
    model::Optimizer,

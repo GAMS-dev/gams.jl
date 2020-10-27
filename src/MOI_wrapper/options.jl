@@ -30,7 +30,7 @@ function MOI.get(
    model::Optimizer,
    opt::Union{ResLim, IterLim, HoldFixed, NodLim, OptCA, OptCR, Solver, Threads,
               Trace, TraceOpt, LogOption, LP, MIP, RMIP, NLP, DNLP, CNS, MINLP,
-              RMINLP, QCP, MIQCP, RMIQCP}
+              RMINLP, QCP, MIQCP, RMIQCP, MCP, MPEC}
 )
    name = replace(string(typeof(opt)), r"(GAMS.)" => "")
    if haskey(model.gams_options, name)
@@ -43,7 +43,7 @@ function MOI.set(
    model::Optimizer,
    opt::Union{ResLim, IterLim, HoldFixed, NodLim, OptCA, OptCR, Solver, Threads,
               Trace, TraceOpt, LogOption, LP, MIP, RMIP, NLP, DNLP, CNS, MINLP,
-              RMINLP, QCP, MIQCP, RMIQCP},
+              RMINLP, QCP, MIQCP, RMIQCP, MCP, MPEC},
    value
 )
    name = replace(string(typeof(opt)), r"(GAMS.)" => "")
