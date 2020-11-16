@@ -267,11 +267,13 @@ function translate_defequs(
     # add complementarity constrains
     n = length(model.complementarity_constraints)
     for i in 1:n
-        if ! first
-            write(io, ", ")
+        for j in 1:length(model.variable_info)
+            if ! first
+                write(io, ", ")
+            end
+            write(io, "eq"*@sprintf("%g", i)*"_"*@sprintf("%g", j))
+            first = false
         end
-        write(io, "compeq$n"*"_"*@sprintf("%g", i))
-        first = false
     end
 
    writeln(io, ";\n")
@@ -701,7 +703,6 @@ function translate_equations(
    return
 end
 
-# Temporary placeholder
 function translate_equations(
     io::GAMSTranslateStream,
     model::Optimizer,
@@ -711,14 +712,14 @@ function translate_equations(
 )
     for i in 1:Int(length(func.constants)/2)
         row = filter(term -> term.output_index == i, func.terms)
-        write(io, "compeq$idx" *"_"* @sprintf("%g", i) * ".. ")
+        write(io, "eq$idx" *"_"* @sprintf("%g", i) * ".. ")
         translate_function(io, model, row)
         if func.constants[i] < 0
             write(io, " - " * @sprintf("%g", -func.constants[i]))
         elseif func.constants[i] > 0.0
             write(io, " + " * @sprintf("%g", func.constants[i]))
         end
-        writeln(io, " =n= 0 ;")
+        writeln(io, " =N= 0 ;")
     end
 end
 
@@ -753,12 +754,12 @@ function translate_solve(
    model::Optimizer,
    name::String
 )
-   if label(model.mtype) == "MPEC"
+    if label(model.mtype) == "MPEC"
        write(io, "Model $name /")
-       for i in 1:length(model.complementarity_constraints)
-           write(io, "compeq1_"*@sprintf("%g", i)*".x"*@sprintf("%g", i)*",")
+       for i in 1:length(model.variable_info)
+          write(io, "eq1_"*@sprintf("%g", i)*".x"*@sprintf("%g", i)*", ")
        end
-       writeln(io, " /;")
+       writeln(io, " obj /;")
    else
       writeln(io, "Model $name / all /;")
    end
