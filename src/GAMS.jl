@@ -504,7 +504,8 @@ function auto_model_type(
    mtype::GAMSModelType,
    is_quadratic::Bool,
    is_nonlinear::Bool,
-   is_discrete::Bool
+   is_discrete::Bool,
+   is_complementarity::Bool
 )
    if mtype == GAMS.MODEL_TYPE_UNDEFINED
       if is_nonlinear && is_discrete
@@ -517,6 +518,8 @@ function auto_model_type(
          mtype = GAMS.MODEL_TYPE_QCP
       elseif is_discrete
          mtype = GAMS.MODEL_TYPE_MIP
+      elseif is_complementarity
+         mtype = GAMS.MODEL_TYPE_MPEC
       else
          mtype = GAMS.MODEL_TYPE_LP
       end

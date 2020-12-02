@@ -40,7 +40,8 @@ function MOI.optimize!(
    is_discrete |= length(model.sos1_constraints) + length(model.sos2_constraints) > 0
    is_nonlinear = model.m_nonlin > 0 || (!isnothing(model.nlp_data) && model.nlp_data.has_objective)
    is_quadratic = model.m_quad > 0 || isa(model.objective, MOI.ScalarQuadraticFunction{Float64})
-   mtype = auto_model_type(model.mtype, is_quadratic, is_nonlinear, is_discrete)
+   is_complementarity = length(model.complementarity_constraints) > 0
+   mtype = auto_model_type(model.mtype, is_quadratic, is_nonlinear, is_discrete, is_complementarity)
    if mtype != model.mtype && ! MOI.get(model, MOI.Silent())
       @info "Updated GAMS model type: " * label(model.mtype) * " -> " * label(mtype)
    end
