@@ -753,7 +753,7 @@ function translate_solve(
    model::Optimizer,
    name::String
 )
-    if label(model.mtype) == "MPEC"
+    if model.mtype == GAMS.MODEL_TYPE_MPEC
        write(io, "Model $name /")
        for (i, comp) in enumerate(model.complementarity_constraints)
           d = comp.set.dimension
