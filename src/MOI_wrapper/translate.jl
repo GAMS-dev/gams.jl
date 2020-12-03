@@ -718,7 +718,7 @@ function translate_equations(
         elseif func.constants[i] > 0.0
             write(io, " + " * @sprintf("%g", func.constants[i]))
         end
-        writeln(io, " =N= 0 ;")
+        writeln(io, " =N= 0;")
     end
 end
 
