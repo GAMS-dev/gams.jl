@@ -264,18 +264,15 @@ function translate_defequs(
       write(io, "s2eq$(i)(s2s$(i))")
       first = false
    end
-    # add complementarity constrains
-    n = length(model.complementarity_constraints)
-    for i in 1:n
-        for j in 1:length(model.variable_info)
-            if ! first
-                write(io, ", ")
-            end
-            write(io, "eq"*@sprintf("%g", i)*"_"*@sprintf("%g", j))
-            first = false
-        end
-    end
-
+   # add complementarity constrains
+   for (i, comp) in enumerate(model.complementarity_constraints)
+      for j in 1:Int(length(comp.func.constants)/2)
+         if ! first
+            write(io, ", ")
+         end
+         write(io, "eq"*@sprintf("%g", i)*"_"*@sprintf("%g", j))
+      end
+   end
    writeln(io, ";\n")
 end
 
@@ -756,8 +753,14 @@ function translate_solve(
 )
     if label(model.mtype) == "MPEC"
        write(io, "Model $name /")
-       for i in 1:length(model.variable_info)
-          write(io, "eq1_"*@sprintf("%g", i)*".x"*@sprintf("%g", i)*", ")
+       for (i, comp) in enumerate(model.complementarity_constraints)
+          d = comp.set.dimension
+          for j in 1:d
+             var = filter(term -> term.output_index == j + d, comp.func.terms)
+             write(io, "eq"*@sprintf("%g", i)*"_"*@sprintf("%g", j)*".")
+             translate_function(io, model, var)
+             write(io, ", ")
+          end
        end
        writeln(io, " obj /;")
    else
