@@ -759,7 +759,7 @@ function translate_solve(
           d = comp.set.dimension
           for j in 1:d
              var = filter(term -> term.output_index == j + d, comp.func.terms)
-             write(io, "eq"*@sprintf("%g", i)*"_"*@sprintf("%g", j)*".")
+             write(io, "eq$(i)_$(j).")
              translate_function(io, model, var)
              write(io, ", ")
           end
