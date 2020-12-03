@@ -271,7 +271,7 @@ function translate_defequs(
          if ! first
             write(io, ", ")
          end
-         write(io, "eq"*@sprintf("%g", i)*"_"*@sprintf("%g", j))
+         write(io, "eq$(i)_$(j)")
       end
    end
 
