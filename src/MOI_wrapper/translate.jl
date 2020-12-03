@@ -711,7 +711,7 @@ function translate_equations(
 )
     for i in 1:Int(length(func.constants)/2)
         row = filter(term -> term.output_index == i, func.terms)
-        write(io, "eq$idx" *"_"* @sprintf("%g", i) * ".. ")
+        write(io, "eq$(idx)_$(i).. ")
         translate_function(io, model, row)
         if func.constants[i] < 0
             write(io, " - " * @sprintf("%g", -func.constants[i]))
