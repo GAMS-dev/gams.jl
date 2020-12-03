@@ -264,6 +264,7 @@ function translate_defequs(
       write(io, "s2eq$(i)(s2s$(i))")
       first = false
    end
+
    # add complementarity constrains
    for (i, comp) in enumerate(model.complementarity_constraints)
       for j in 1:Int(length(comp.func.constants)/2)
