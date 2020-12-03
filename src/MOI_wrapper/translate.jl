@@ -274,6 +274,7 @@ function translate_defequs(
          write(io, "eq"*@sprintf("%g", i)*"_"*@sprintf("%g", j))
       end
    end
+
    writeln(io, ";\n")
 end
 
