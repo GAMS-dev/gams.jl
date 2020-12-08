@@ -247,7 +247,7 @@ function translate_defequs(
       first = false
    end
 
-   # add sos1 constrains
+   # add sos1 constraints
    for i in 1:length(model.sos1_constraints)
       if ! first
          write(io, ", ")
@@ -256,7 +256,7 @@ function translate_defequs(
       first = false
    end
 
-   # add sos2 constrains
+   # add sos2 constraints
    for i in 1:length(model.sos2_constraints)
       if ! first
          write(io, ", ")
@@ -265,9 +265,9 @@ function translate_defequs(
       first = false
    end
 
-   # add complementarity constrains
+   # add complementarity constraints
    for (i, comp) in enumerate(model.complementarity_constraints)
-      for j in 1:Int(length(comp.func.constants)/2)
+      for j in 1:comp.set.dimension
          if ! first
             write(io, ", ")
          end
@@ -367,12 +367,12 @@ function translate_function(
 end
 
 function translate_function(
-    io::GAMSTranslateStream,
-    model::Optimizer,
-    terms::Vector{MOI.VectorAffineTerm{Float64}}
+   io::GAMSTranslateStream,
+   model::Optimizer,
+   terms::Vector{MOI.VectorAffineTerm{Float64}}
 )
-    sterms = [term.scalar_term for term in terms]
-    translate_function(io, model, sterms)
+   sterms = [term.scalar_term for term in terms]
+   translate_function(io, model, sterms)
 end
 
 function translate_function(
@@ -703,23 +703,23 @@ function translate_equations(
 end
 
 function translate_equations(
-    io::GAMSTranslateStream,
-    model::Optimizer,
-    idx::Int,
-    func::MOI.VectorAffineFunction,
-    set::MOI.Complements
+   io::GAMSTranslateStream,
+   model::Optimizer,
+   idx::Int,
+   func::MOI.VectorAffineFunction,
+   set::MOI.Complements
 )
-    for i in 1:Int(length(func.constants)/2)
-        row = filter(term -> term.output_index == i, func.terms)
-        write(io, "eq$(idx)_$(i).. ")
-        translate_function(io, model, row)
-        if func.constants[i] < 0
-            write(io, " - " * @sprintf("%g", -func.constants[i]))
-        elseif func.constants[i] > 0.0
-            write(io, " + " * @sprintf("%g", func.constants[i]))
-        end
-        writeln(io, " =N= 0;")
-    end
+   for i in 1:Int(length(func.constants)/2)
+      row = filter(term -> term.output_index == i, func.terms)
+      write(io, "eq$(idx)_$(i).. ")
+      translate_function(io, model, row)
+      if func.constants[i] < 0
+         write(io, " - " * @sprintf("%g", -func.constants[i]))
+      elseif func.constants[i] > 0.0
+         write(io, " + " * @sprintf("%g", func.constants[i]))
+      end
+      writeln(io, " =N= 0;")
+   end
 end
 
 function translate_vardata(
@@ -753,18 +753,18 @@ function translate_solve(
    model::Optimizer,
    name::String
 )
-    if model.mtype == GAMS.MODEL_TYPE_MPEC
-       write(io, "Model $name /")
-       for (i, comp) in enumerate(model.complementarity_constraints)
-          d = comp.set.dimension
-          for j in 1:d
-             var = filter(term -> term.output_index == j + d, comp.func.terms)
-             write(io, "eq$(i)_$(j).")
-             translate_function(io, model, var)
-             write(io, ", ")
-          end
-       end
-       writeln(io, " obj /;")
+   if model.mtype == GAMS.MODEL_TYPE_MPEC
+      write(io, "Model $name /")
+      for (i, comp) in enumerate(model.complementarity_constraints)
+         d = comp.set.dimension
+         for j in 1:d
+            var = filter(term -> term.output_index == j + d, comp.func.terms)
+            write(io, "eq$(i)_$(j).")
+            translate_function(io, model, var)
+            write(io, ", ")
+         end
+      end
+      writeln(io, " obj /;")
    else
       writeln(io, "Model $name / all /;")
    end
