@@ -72,33 +72,39 @@ testname = @sprintf("%-15s", "default")
     @test MOIU.supports_default_copy_to(OPTIMIZER, false)
     @test !MOIU.supports_default_copy_to(OPTIMIZER, true)
     exclude = [
-        "delete_variable",                  # deleting not supported
-        "delete_variables",                 # deleting not supported
-        "solve_affine_deletion_edge_cases", # deleting not supported
-        "solve_affine_lessthan",            # constraint names for variable bounds not supported
-        "solve_objbound_edge_cases",        # constraint names for variable bounds not supported
-        "getconstraint",                    # constraint names for variable bounds not supported
-        "getvariable",                      # constraint names for variable bounds not supported
-        "solve_with_upperbound",            # constraint names for variable bounds not supported
-        "solve_blank_obj",                  # constraint names for variable bounds not supported
-        "solve_affine_equalto",             # constraint names for variable bounds not supported
-        "solve_single_variable_dual_min",   # constraint names for variable bounds not supported
-        "solve_integer_edge_cases",         # constraint names for variable bounds not supported
-        "solve_constant_obj",               # constraint names for variable bounds not supported
-        "solve_singlevariable_obj",         # constraint names for variable bounds not supported
-        "solve_with_lowerbound",            # constraint names for variable bounds not supported
-        "solve_zero_one_with_bounds_1",     # constraint names for variable bounds not supported
-        "solve_zero_one_with_bounds_2",     # constraint names for variable bounds not supported
-        "solve_zero_one_with_bounds_3",     # constraint names for variable bounds not supported
-        "get_objective_function",           # function getters not supported
-        "update_dimension_nonnegative_variables", # function getters not supported
-        "delete_nonnegative_variables",     # function getters not supported
-        "solve_result_index",               # DualObjectiveValue not supported
-        "delete_soc_variables",             # second order cone not supported
-        "solve_affine_interval",            # get constraint index not supported
-        "solve_affine_greaterthan",         # get constraint index not supported
-        "solve_qp_edge_cases",              # conopt finds only local optimal solution
-        "solve_qcp_edge_cases",             # conopt finds only local optimal solution
+        "delete_variable",                          # deleting not supported
+        "delete_variables",                         # deleting not supported
+        "solve_affine_deletion_edge_cases",         # deleting not supported
+        "solve_affine_lessthan",                    # constraint names for variable bounds not supported
+        "solve_objbound_edge_cases",                # constraint names for variable bounds not supported
+        "getconstraint",                            # constraint names for variable bounds not supported
+        "getvariable",                              # constraint names for variable bounds not supported
+        "solve_with_upperbound",                    # constraint names for variable bounds not supported
+        "solve_blank_obj",                          # constraint names for variable bounds not supported
+        "solve_affine_equalto",                     # constraint names for variable bounds not supported
+        "solve_single_variable_dual_min",           # constraint names for variable bounds not supported
+        "solve_integer_edge_cases",                 # constraint names for variable bounds not supported
+        "solve_constant_obj",                       # constraint names for variable bounds not supported
+        "solve_singlevariable_obj",                 # constraint names for variable bounds not supported
+        "solve_with_lowerbound",                    # constraint names for variable bounds not supported
+        "solve_zero_one_with_bounds_1",             # constraint names for variable bounds not supported
+        "solve_zero_one_with_bounds_2",             # constraint names for variable bounds not supported
+        "solve_zero_one_with_bounds_3",             # constraint names for variable bounds not supported
+        "get_objective_function",                   # function getters not supported
+        "update_dimension_nonnegative_variables",   # function getters not supported
+        "delete_nonnegative_variables",             # function getters not supported
+        "solve_result_index",                       # DualObjectiveValue not supported
+        "delete_soc_variables",                     # second order cone not supported
+        "solve_affine_interval",                    # get constraint index not supported
+        "solve_affine_greaterthan",                 # get constraint index not supported
+        "solve_qp_edge_cases",                      # conopt finds only local optimal solution
+        "solve_qcp_edge_cases",                     # conopt finds only local optimal solution
+        "solve_farkas_equalto_upper",               # definition of duals for infeasible models differs
+        "solve_farkas_equalto_lower",               # definition of duals for infeasible models differs
+        "solve_farkas_variable_lessthan",           # definition of duals for infeasible models differs
+        "solve_farkas_variable_lessthan_max",       # definition of duals for infeasible models differs
+        "solve_farkas_interval_upper",              # definition of duals for infeasible models differs
+        "solve_farkas_lessthan",                    # definition of duals for infeasible models differs
     ]
     config = MOIT.TestConfig(atol=1e-3, rtol=1e-3)
     MOIT.unittest(BRIDGED, config, exclude)
@@ -303,9 +309,16 @@ for solver in TEST_SOLVERS
             ]
             MOIT.contquadratictest(CACHING_OPTIMIZER, CONFIG_LOCAL_NODUAL, union(exclude, exclude_solver))
 
-        elseif solver in ("gurobi", "lindo", "lindoglobal")
+        elseif solver in ("gurobi",)
             exclude_solver = [
                 "ncqcp1", # not positive semi-definite
+            ]
+            MOIT.contquadratictest(CACHING_OPTIMIZER, CONFIG_NODUAL, union(exclude, exclude_solver))
+
+        elseif solver in ("lindo", "lindoglobal")
+            exclude_solver = [
+                "ncqcp1", # not positive semi-definite
+                "ncqcp2", # only local optimal
             ]
             MOIT.contquadratictest(CACHING_OPTIMIZER, CONFIG_NODUAL, union(exclude, exclude_solver))
 
