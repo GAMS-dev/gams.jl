@@ -45,6 +45,12 @@ function writeln(
    io.n_line = 0
 end
 
+function dbl2str(
+   value::Number
+)
+   @sprintf("%.16g", value)
+end
+
 function translate_header(
    io::GAMSTranslateStream
 )
@@ -215,6 +221,7 @@ function translate_defequs(
    io::GAMSTranslateStream,
    model::Optimizer
 )
+
    m = model.m + length(model.sos1_constraints) + length(model.sos2_constraints) + length(model.complementarity_constraints)
 
    if m == 0 && ! model.objvar
@@ -287,20 +294,20 @@ function translate_coefficient(
       if first && coef == -1.0
          write(io, "-")
       elseif first
-         write(io, "-" * @sprintf("%g", -coef) * " * ")
+         write(io, "-" * dbl2str(-coef) * " * ")
       elseif coef == -1.0
          write(io, " - ")
       else
-         write(io, " - " * @sprintf("%g", -coef) * " * ")
+         write(io, " - " * dbl2str(-coef) * " * ")
       end
    elseif coef > 0.0
       if first && coef == 1.0
       elseif first
-         write(io, @sprintf("%g", coef) * " * ")
+         write(io, dbl2str(coef) * " * ")
       elseif coef == 1.0
          write(io, " + ")
       else
-         write(io, " + " * @sprintf("%g", coef) * " * ")
+         write(io, " + " * dbl2str(coef) * " * ")
       end
    end
    return
@@ -360,9 +367,9 @@ function translate_function(
 )
    translate_function(io, model, func.terms)
    if func.constant < 0.0
-      write(io, " - " * @sprintf("%g", -func.constant))
+      write(io, " - " * dbl2str(-func.constant))
    elseif func.constant > 0.0
-      write(io, " + " * @sprintf("%g", func.constant))
+      write(io, " + " * dbl2str(func.constant))
    end
 end
 
@@ -411,9 +418,9 @@ function translate_function(
    end
 
    if func.constant < 0.0
-      write(io, " - " * @sprintf("%g", -func.constant))
+      write(io, " - " * dbl2str(-func.constant))
    elseif func.constant > 0.0
-      write(io, " + " * @sprintf("%g", func.constant))
+      write(io, " + " * dbl2str(func.constant))
    end
 end
 
@@ -514,9 +521,9 @@ function translate_function(
    is_parenthesis::Bool = false
 )
    if is_parenthesis && func > 0.0
-      write(io, @sprintf("%g", func))
+      write(io, dbl2str(func))
    else
-      write(io, "(" * @sprintf("%g", func) * ")")
+      write(io, "(" * dbl2str(func) * ")")
    end
 end
 
@@ -609,7 +616,7 @@ function translate_equations(
 )
    write(io, "eq$idx.. ")
    translate_function(io, model, func)
-   writeln(io, " =L= " * @sprintf("%g", set.upper) * ";")
+   writeln(io, " =L= " * dbl2str(set.upper) * ";")
    return
 end
 
@@ -622,7 +629,7 @@ function translate_equations(
 )
    write(io, "eq$idx.. ")
    translate_function(io, model, func)
-   writeln(io, " =G= " * @sprintf("%g", set.lower) * ";")
+   writeln(io, " =G= " * dbl2str(set.lower) * ";")
    return
 end
 
@@ -635,7 +642,7 @@ function translate_equations(
 )
    write(io, "eq$idx.. ")
    translate_function(io, model, func)
-   writeln(io, " =E= " * @sprintf("%g", set.value) * ";")
+   writeln(io, " =E= " * dbl2str(set.value) * ";")
    return
 end
 
@@ -729,20 +736,20 @@ function translate_vardata(
    for (i, var) in enumerate(model.variable_info)
       if is_fixed(var)
          translate_variable(io, model, i)
-         writeln(io, ".fx = " * @sprintf("%g", var.lower_bound) * ";")
+         writeln(io, ".fx = " * dbl2str(var.lower_bound) * ";")
          continue
       end
       if has_lower_bound(var)
          translate_variable(io, model, i)
-         writeln(io, ".lo = " * @sprintf("%g", var.lower_bound) * "; ")
+         writeln(io, ".lo = " * dbl2str(var.lower_bound) * "; ")
       end
       if has_start(var)
          translate_variable(io, model, i)
-         writeln(io, ".l = " * @sprintf("%g", var.start) * "; ")
+         writeln(io, ".l = " * dbl2str(var.start) * "; ")
       end
       if has_upper_bound(var)
          translate_variable(io, model, i)
-         writeln(io, ".up = " * @sprintf("%g", var.upper_bound) * ";")
+         writeln(io, ".up = " * dbl2str(var.upper_bound) * ";")
       end
    end
    write(io, "\n")

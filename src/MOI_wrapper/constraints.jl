@@ -77,42 +77,42 @@ function MOI.add_constraint(
 end
 
 function MOI.get(
-   model::Optimizer, 
+   model::Optimizer,
    ::MOI.NumberOfConstraints{MOI.ScalarAffineFunction{Float64}, MOI.LessThan{Float64}}
 )
    return length(model.linear_le_constraints)
 end
 
 function MOI.get(
-   model::Optimizer, 
+   model::Optimizer,
    ::MOI.NumberOfConstraints{MOI.ScalarAffineFunction{Float64}, MOI.GreaterThan{Float64}}
 )
    return length(model.linear_ge_constraints)
 end
 
 function MOI.get(
-   model::Optimizer, 
+   model::Optimizer,
    ::MOI.NumberOfConstraints{MOI.ScalarAffineFunction{Float64}, MOI.EqualTo{Float64}}
 )
    return length(model.linear_eq_constraints)
 end
 
 function MOI.get(
-   model::Optimizer, 
+   model::Optimizer,
    ::MOI.NumberOfConstraints{MOI.ScalarQuadraticFunction{Float64}, MOI.LessThan{Float64}}
 )
    return length(model.quadratic_le_constraints)
 end
 
 function MOI.get(
-   model::Optimizer, 
+   model::Optimizer,
    ::MOI.NumberOfConstraints{MOI.ScalarQuadraticFunction{Float64}, MOI.GreaterThan{Float64}}
 )
    return length(model.quadratic_ge_constraints)
 end
 
 function MOI.get(
-   model::Optimizer, 
+   model::Optimizer,
    ::MOI.NumberOfConstraints{MOI.ScalarQuadraticFunction{Float64}, MOI.EqualTo{Float64}}
 )
    return length(model.quadratic_eq_constraints)
@@ -126,9 +126,9 @@ function MOI.get(
 end
 
 function MOI.set(
-   model::Optimizer, 
-   attr::MOI.ConstraintName, 
-   ci::MOI.ConstraintIndex{MOI.SingleVariable}, 
+   model::Optimizer,
+   attr::MOI.ConstraintName,
+   ci::MOI.ConstraintIndex{MOI.SingleVariable},
    value
 )
    error("Constraint names for variable bound constraints not supported.")
@@ -136,9 +136,9 @@ function MOI.set(
 end
 
 function MOI.set(
-   model::Optimizer, 
-   attr::MOI.ConstraintName, 
-   ci::MOI.ConstraintIndex{MOI.ScalarAffineFunction{Float64}, MOI.LessThan{Float64}}, 
+   model::Optimizer,
+   attr::MOI.ConstraintName,
+   ci::MOI.ConstraintIndex{MOI.ScalarAffineFunction{Float64}, MOI.LessThan{Float64}},
    value
 )
    if ! (1 <= ci.value <= length(model.linear_le_constraints))
@@ -149,9 +149,9 @@ function MOI.set(
 end
 
 function MOI.set(
-   model::Optimizer, 
-   attr::MOI.ConstraintName, 
-   ci::MOI.ConstraintIndex{MOI.ScalarAffineFunction{Float64}, MOI.GreaterThan{Float64}}, 
+   model::Optimizer,
+   attr::MOI.ConstraintName,
+   ci::MOI.ConstraintIndex{MOI.ScalarAffineFunction{Float64}, MOI.GreaterThan{Float64}},
    value
 )
    if ! (1 <= ci.value <= length(model.linear_ge_constraints))
@@ -162,9 +162,9 @@ function MOI.set(
 end
 
 function MOI.set(
-   model::Optimizer, 
-   attr::MOI.ConstraintName, 
-   ci::MOI.ConstraintIndex{MOI.ScalarAffineFunction{Float64}, MOI.EqualTo{Float64}}, 
+   model::Optimizer,
+   attr::MOI.ConstraintName,
+   ci::MOI.ConstraintIndex{MOI.ScalarAffineFunction{Float64}, MOI.EqualTo{Float64}},
    value
 )
    if ! (1 <= ci.value <= length(model.linear_eq_constraints))
@@ -175,9 +175,9 @@ function MOI.set(
 end
 
 function MOI.set(
-   model::Optimizer, 
-   attr::MOI.ConstraintName, 
-   ci::MOI.ConstraintIndex{MOI.ScalarQuadraticFunction{Float64}, MOI.LessThan{Float64}}, 
+   model::Optimizer,
+   attr::MOI.ConstraintName,
+   ci::MOI.ConstraintIndex{MOI.ScalarQuadraticFunction{Float64}, MOI.LessThan{Float64}},
    value
 )
    if ! (1 <= ci.value <= length(model.quadratic_le_constraints))
@@ -188,9 +188,9 @@ function MOI.set(
 end
 
 function MOI.set(
-   model::Optimizer, 
-   attr::MOI.ConstraintName, 
-   ci::MOI.ConstraintIndex{MOI.ScalarQuadraticFunction{Float64}, MOI.GreaterThan{Float64}}, 
+   model::Optimizer,
+   attr::MOI.ConstraintName,
+   ci::MOI.ConstraintIndex{MOI.ScalarQuadraticFunction{Float64}, MOI.GreaterThan{Float64}},
    value
 )
    if ! (1 <= ci.value <= length(model.quadratic_ge_constraints))
@@ -201,9 +201,9 @@ function MOI.set(
 end
 
 function MOI.set(
-   model::Optimizer, 
-   attr::MOI.ConstraintName, 
-   ci::MOI.ConstraintIndex{MOI.ScalarQuadraticFunction{Float64}, MOI.EqualTo{Float64}}, 
+   model::Optimizer,
+   attr::MOI.ConstraintName,
+   ci::MOI.ConstraintIndex{MOI.ScalarQuadraticFunction{Float64}, MOI.EqualTo{Float64}},
    value
 )
    if ! (1 <= ci.value <= length(model.quadratic_eq_constraints))
@@ -214,8 +214,8 @@ function MOI.set(
 end
 
 function MOI.get(
-   model::Optimizer, 
-   ::MOI.ConstraintName, 
+   model::Optimizer,
+   ::MOI.ConstraintName,
    ci::MOI.ConstraintIndex{MOI.ScalarAffineFunction{Float64}, MOI.LessThan{Float64}}
 )
    if ! (1 <= ci.value <= length(model.linear_le_constraints))
@@ -225,8 +225,8 @@ function MOI.get(
 end
 
 function MOI.get(
-   model::Optimizer, 
-   ::MOI.ConstraintName, 
+   model::Optimizer,
+   ::MOI.ConstraintName,
    ci::MOI.ConstraintIndex{MOI.ScalarAffineFunction{Float64}, MOI.GreaterThan{Float64}}
 )
    if ! (1 <= ci.value <= length(model.linear_ge_constraints))
@@ -236,8 +236,8 @@ function MOI.get(
 end
 
 function MOI.get(
-   model::Optimizer, 
-   ::MOI.ConstraintName, 
+   model::Optimizer,
+   ::MOI.ConstraintName,
    ci::MOI.ConstraintIndex{MOI.ScalarAffineFunction{Float64}, MOI.EqualTo{Float64}}
 )
    if ! (1 <= ci.value <= length(model.linear_eq_constraints))
@@ -247,8 +247,8 @@ function MOI.get(
 end
 
 function MOI.get(
-   model::Optimizer, 
-   ::MOI.ConstraintName, 
+   model::Optimizer,
+   ::MOI.ConstraintName,
    ci::MOI.ConstraintIndex{MOI.ScalarQuadraticFunction{Float64}, MOI.LessThan{Float64}}
 )
    if ! (1 <= ci.value <= length(model.quadratic_le_constraints))
@@ -258,8 +258,8 @@ function MOI.get(
 end
 
 function MOI.get(
-   model::Optimizer, 
-   ::MOI.ConstraintName, 
+   model::Optimizer,
+   ::MOI.ConstraintName,
    ci::MOI.ConstraintIndex{MOI.ScalarQuadraticFunction{Float64}, MOI.GreaterThan{Float64}}
 )
    if ! (1 <= ci.value <= length(model.quadratic_ge_constraints))
@@ -269,8 +269,8 @@ function MOI.get(
 end
 
 function MOI.get(
-   model::Optimizer, 
-   ::MOI.ConstraintName, 
+   model::Optimizer,
+   ::MOI.ConstraintName,
    ci::MOI.ConstraintIndex{MOI.ScalarQuadraticFunction{Float64}, MOI.EqualTo{Float64}}
 )
    if ! (1 <= ci.value <= length(model.quadratic_eq_constraints))
@@ -453,7 +453,7 @@ function MOI.get(
 end
 
 function MOI.get(
-   model::Optimizer, 
+   model::Optimizer,
    attr::MOI.ConstraintDual,
    ci::MOI.ConstraintIndex{MOI.ScalarAffineFunction{Float64}, MOI.LessThan{Float64}}
 )
@@ -469,7 +469,7 @@ function MOI.get(
 end
 
 function MOI.get(
-   model::Optimizer, 
+   model::Optimizer,
    attr::MOI.ConstraintDual,
    ci::MOI.ConstraintIndex{MOI.ScalarAffineFunction{Float64}, MOI.GreaterThan{Float64}}
 )
@@ -485,7 +485,7 @@ function MOI.get(
 end
 
 function MOI.get(
-   model::Optimizer, 
+   model::Optimizer,
    attr::MOI.ConstraintDual,
    ci::MOI.ConstraintIndex{MOI.ScalarAffineFunction{Float64}, MOI.EqualTo{Float64}}
 )
@@ -501,7 +501,7 @@ function MOI.get(
 end
 
 function MOI.get(
-   model::Optimizer, 
+   model::Optimizer,
    attr::MOI.ConstraintDual,
    ci::MOI.ConstraintIndex{MOI.ScalarQuadraticFunction{Float64}, MOI.LessThan{Float64}}
 )
@@ -517,7 +517,7 @@ function MOI.get(
 end
 
 function MOI.get(
-   model::Optimizer, 
+   model::Optimizer,
    attr::MOI.ConstraintDual,
    ci::MOI.ConstraintIndex{MOI.ScalarQuadraticFunction{Float64}, MOI.GreaterThan{Float64}}
 )
@@ -533,7 +533,7 @@ function MOI.get(
 end
 
 function MOI.get(
-   model::Optimizer, 
+   model::Optimizer,
    attr::MOI.ConstraintDual,
    ci::MOI.ConstraintIndex{MOI.ScalarQuadraticFunction{Float64}, MOI.EqualTo{Float64}}
 )
@@ -545,5 +545,19 @@ function MOI.get(
       return model.sol.eq_dual[1 + ci.value + offset_quadratic_eq(model)]
    else
       return model.sol.eq[ci.value + offset_quadratic_eq(model)]
+   end
+end
+
+function MOI.get(
+   model::Optimizer,
+   attr::MOI.NLPBlockDual
+)
+   MOI.check_result_index_bounds(model, attr)
+   if model.objvar
+      offset = 1 + offset_nonlin(model)
+      return -1 * model.sol.eq_dual[offset+1:offset+model.m_nonlin]
+   else
+      offset = offset_nonlin(model)
+      return -1 * model.sol.eq[offset+1:offset+model.m_nonlin]
    end
 end

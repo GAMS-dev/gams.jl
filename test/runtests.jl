@@ -1,6 +1,13 @@
 
 println("")
 println("-"^30)
+println("Translate Tests")
+println("-"^30)
+println("")
+include("translate.jl")
+
+println("")
+println("-"^30)
 println("MathOptInterface Tests")
 println("-"^30)
 println("")
