@@ -721,9 +721,9 @@ function translate_equations(
       write(io, "eq$(idx)_$(i).. ")
       translate_function(io, model, row)
       if func.constants[i] < 0
-         write(io, " - " * @sprintf("%g", -func.constants[i]))
+         write(io, " - " * dbl2str(-func.constants[i]))
       elseif func.constants[i] > 0.0
-         write(io, " + " * @sprintf("%g", func.constants[i]))
+         write(io, " + " * dbl2str(func.constants[i]))
       end
       writeln(io, " =N= 0;")
    end
@@ -761,7 +761,44 @@ function translate_solve(
    name::String
 )
    if model.mtype == GAMS.MODEL_TYPE_MPEC
-      write(io, "Model $name /")
+      write(io, "Model $name / ")
+
+      m = model.m + length(model.sos1_constraints) + length(model.sos2_constraints) + length(model.complementarity_constraints)
+
+      first = true
+      if model.objvar
+         write(io, "obj")
+         first = false
+      end
+
+      for i in 1:model.m
+         if ! first
+            write(io, ", ")
+         end
+         write(io, "eq$i")
+         first = false
+      end
+
+      # add sos1 constraints
+      for i in 1:length(model.sos1_constraints)
+         if ! first
+            write(io, ", ")
+         end
+         write(io, "s1eq$(i)(s1s$(i))")
+         first = false
+      end
+
+      # add sos2 constraints
+      for i in 1:length(model.sos2_constraints)
+         if ! first
+            write(io, ", ")
+         end
+         write(io, "s2eq$(i)(s2s$(i))")
+         first = false
+      end
+      write(io, ", ")
+
+      # add complementarity constraints
       for (i, comp) in enumerate(model.complementarity_constraints)
          d = comp.set.dimension
          for j in 1:d
@@ -771,7 +808,8 @@ function translate_solve(
             write(io, ", ")
          end
       end
-      writeln(io, " obj /;")
+      writeln(io, " /;")
+
    else
       writeln(io, "Model $name / all /;")
    end
