@@ -716,7 +716,7 @@ function translate_equations(
    func::MOI.VectorAffineFunction,
    set::MOI.Complements
 )
-   for i in 1:Int(length(func.constants)/2)
+   for i in 1:set.dimension
       row = filter(term -> term.output_index == i, func.terms)
       write(io, "eq$(idx)_$(i).. ")
       translate_function(io, model, row)
