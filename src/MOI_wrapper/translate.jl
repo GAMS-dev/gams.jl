@@ -760,6 +760,7 @@ function translate_solve(
    model::Optimizer,
    name::String
 )
+   # model statement
    if model.mtype == GAMS.MODEL_TYPE_MPEC
       write(io, "Model $name / ")
 
@@ -796,23 +797,26 @@ function translate_solve(
          write(io, "s2eq$(i)(s2s$(i))")
          first = false
       end
-      write(io, ", ")
 
       # add complementarity constraints
       for (i, comp) in enumerate(model.complementarity_constraints)
          d = comp.set.dimension
          for j in 1:d
+            if ! first
+               write(io, ", ")
+            end
             var = filter(term -> term.output_index == j + d, comp.func.terms)
             write(io, "eq$(i)_$(j).")
             translate_function(io, model, var)
-            write(io, ", ")
+            first = false
          end
       end
       writeln(io, " /;")
-
    else
       writeln(io, "Model $name / all /;")
    end
+
+   # solve statement
    write(io, "Solve $name using ")
    write(io, label(model.mtype))
    if model.sense == MOI.MAX_SENSE
