@@ -365,11 +365,7 @@ function MOI.get(
    if ! (1 <= ci.value <= length(model.linear_le_constraints))
       error("Invalid constraint index ", ci.value)
    end
-   if model.objvar
-      return model.sol.eq[1 + ci.value + offset_linear_le(model)]
-   else
-      return model.sol.eq[ci.value + offset_linear_le(model)]
-   end
+   return model.sol.equ["eq$(ci.value + offset_linear_le(model))"].level[1]
 end
 
 function MOI.get(
@@ -381,11 +377,7 @@ function MOI.get(
    if ! (1 <= ci.value <= length(model.linear_ge_constraints))
       error("Invalid constraint index ", ci.value)
    end
-   if model.objvar
-      return model.sol.eq[1 + ci.value + offset_linear_ge(model)]
-   else
-      return model.sol.eq[ci.value + offset_linear_ge(model)]
-   end
+   return model.sol.equ["eq$(ci.value + offset_linear_ge(model))"].level[1]
 end
 
 function MOI.get(
@@ -397,11 +389,7 @@ function MOI.get(
    if ! (1 <= ci.value <= length(model.linear_eq_constraints))
       error("Invalid constraint index ", ci.value)
    end
-   if model.objvar
-      return model.sol.eq[1 + ci.value + offset_linear_eq(model)]
-   else
-      return model.sol.eq[ci.value + offset_linear_eq(model)]
-   end
+   return model.sol.equ["eq$(ci.value + offset_linear_eq(model))"].level[1]
 end
 
 function MOI.get(
@@ -413,11 +401,7 @@ function MOI.get(
    if ! (1 <= ci.value <= length(model.quadratic_le_constraints))
       error("Invalid constraint index ", ci.value)
    end
-   if model.objvar
-      return model.sol.eq[1 + ci.value + offset_quadratic_le(model)]
-   else
-      return model.sol.eq[ci.value + offset_quadratic_le(model)]
-   end
+   return model.sol.equ["eq$(ci.value + offset_quadratic_le(model))"].level[1]
 end
 
 function MOI.get(
@@ -429,11 +413,7 @@ function MOI.get(
    if ! (1 <= ci.value <= length(model.quadratic_ge_constraints))
       error("Invalid constraint index ", ci.value)
    end
-   if model.objvar
-      return model.sol.eq[1 + ci.value + offset_quadratic_ge(model)]
-   else
-      return model.sol.eq[ci.value + offset_quadratic_ge(model)]
-   end
+   return model.sol.equ["eq$(ci.value + offset_quadratic_ge(model))"].level[1]
 end
 
 function MOI.get(
@@ -445,11 +425,7 @@ function MOI.get(
    if ! (1 <= ci.value <= length(model.quadratic_eq_constraints))
       error("Invalid constraint index ", ci.value)
    end
-   if model.objvar
-      return model.sol.eq[1 + ci.value + offset_quadratic_eq(model)]
-   else
-      return model.sol.eq[ci.value + offset_quadratic_eq(model)]
-   end
+   return model.sol.equ["eq$(ci.value + offset_quadratic_eq(model))"].level[1]
 end
 
 function MOI.get(
@@ -461,11 +437,7 @@ function MOI.get(
    if !(1 <= ci.value <= length(model.linear_le_constraints))
       error("Invalid constraint index ", ci.value)
    end
-   if model.objvar
-      return -1 * model.sol.eq_dual[1 + ci.value + offset_linear_le(model)]
-   else
-      return -1 * model.sol.eq[ci.value + offset_linear_le(model)]
-   end
+   return -model.sol.equ["eq$(ci.value + offset_linear_le(model))"].dual[1]
 end
 
 function MOI.get(
@@ -477,11 +449,7 @@ function MOI.get(
    if !(1 <= ci.value <= length(model.linear_ge_constraints))
       error("Invalid constraint index ", ci.value)
    end
-   if model.objvar
-      return model.sol.eq_dual[1 + ci.value + offset_linear_ge(model)]
-   else
-      return model.sol.eq[ci.value + offset_linear_ge(model)]
-   end
+   return model.sol.equ["eq$(ci.value + offset_linear_ge(model))"].dual[1]
 end
 
 function MOI.get(
@@ -493,11 +461,7 @@ function MOI.get(
    if !(1 <= ci.value <= length(model.linear_eq_constraints))
       error("Invalid constraint index ", ci.value)
    end
-   if model.objvar
-      return model.sol.eq_dual[1 + ci.value + offset_linear_eq(model)]
-   else
-      return model.sol.eq[ci.value + offset_linear_eq(model)]
-   end
+   return model.sol.equ["eq$(ci.value + offset_linear_eq(model))"].dual[1]
 end
 
 function MOI.get(
@@ -509,11 +473,7 @@ function MOI.get(
    if !(1 <= ci.value <= length(model.quadratic_le_constraints))
       error("Invalid constraint index ", ci.value)
    end
-   if model.objvar
-      return -1 * model.sol.eq_dual[1 + ci.value + offset_quadratic_le(model)]
-   else
-      return -1 * model.sol.eq[ci.value + offset_quadratic_le(model)]
-   end
+   return -model.sol.equ["eq$(ci.value + offset_quadratic_le(model))"].dual[1]
 end
 
 function MOI.get(
@@ -525,11 +485,7 @@ function MOI.get(
    if !(1 <= ci.value <= length(model.quadratic_ge_constraints))
       error("Invalid constraint index ", ci.value)
    end
-   if model.objvar
-      return model.sol.eq_dual[1 + ci.value + offset_quadratic_ge(model)]
-   else
-      return model.sol.eq[ci.value + offset_quadratic_ge(model)]
-   end
+   return -model.sol.equ["eq$(ci.value + offset_quadratic_ge(model))"].dual[1]
 end
 
 function MOI.get(
@@ -541,11 +497,7 @@ function MOI.get(
    if !(1 <= ci.value <= length(model.quadratic_eq_constraints))
       error("Invalid constraint index ", ci.value)
    end
-   if model.objvar
-      return model.sol.eq_dual[1 + ci.value + offset_quadratic_eq(model)]
-   else
-      return model.sol.eq[ci.value + offset_quadratic_eq(model)]
-   end
+   return -model.sol.equ["eq$(ci.value + offset_quadratic_eq(model))"].dual[1]
 end
 
 function MOI.get(
@@ -553,11 +505,9 @@ function MOI.get(
    attr::MOI.NLPBlockDual
 )
    MOI.check_result_index_bounds(model, attr)
-   if model.objvar
-      offset = 1 + offset_nonlin(model)
-      return -1 * model.sol.eq_dual[offset+1:offset+model.m_nonlin]
-   else
-      offset = offset_nonlin(model)
-      return -1 * model.sol.eq[offset+1:offset+model.m_nonlin]
+   values = zeros(model.m_nonlin)
+   for i = offset_nonlin(model)+1:offset_nonlin(model)+model.m_nonlin
+      values[i] = -model.sol.equ["eq$i"].dual[1]
    end
+   return values
 end

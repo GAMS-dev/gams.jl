@@ -73,9 +73,12 @@ function MOI.optimize!(
 
    # process solution
    if model.objvar
-      model.obj = model.sol.x[1]
+      objvar_name = "objvar"
    else
-      model.obj = model.sol.x[model.objective.variable.value]
+      objvar_name = "x$(model.objective.variable.value)"
+   end
+   if haskey(model.sol.var, objvar_name)
+      model.obj = model.sol.var[objvar_name].level[1]
    end
    model.solve_status = stats["solveStat"]
    model.model_status = stats["modelStat"]

@@ -357,10 +357,10 @@ function MOI.get(
 )
    MOI.check_result_index_bounds(model, attr)
    check_inbounds(model, vi)
-   if model.objvar
-      return model.sol.x[1 + vi.value]
-   else
-      return model.sol.x[vi.value]
+   try
+      return model.sol.var[translate_variable(model, vi.value)].level[1]
+   catch
+      return NaN
    end
 end
 
@@ -375,10 +375,10 @@ function MOI.get(
    if ! has_upper_bound(model, vi)
       error("Variable $vi has no upper bound -- ConstraintPrimal not defined.")
    end
-   if model.objvar
-      return model.sol.x[1 + vi.value]
-   else
-      return model.sol.x[vi.value]
+   try
+      return model.sol.var[translate_variable(model, vi.value)].level[1]
+   catch
+      return NaN
    end
 end
 
@@ -393,10 +393,10 @@ function MOI.get(
    if ! has_lower_bound(model, vi)
       error("Variable $vi has no lower bound -- ConstraintPrimal not defined.")
    end
-   if model.objvar
-      return model.sol.x[1 + vi.value]
-   else
-      return model.sol.x[vi.value]
+   try
+      return model.sol.var[translate_variable(model, vi.value)].level[1]
+   catch
+      return NaN
    end
 end
 
@@ -411,10 +411,10 @@ function MOI.get(
    if ! is_fixed(model, vi)
       error("Variable $vi is not fixed -- ConstraintPrimal not defined.")
    end
-   if model.objvar
-      return model.sol.x[1 + vi.value]
-   else
-      return model.sol.x[vi.value]
+   try
+      return model.sol.var[translate_variable(model, vi.value)].level[1]
+   catch
+      return NaN
    end
 end
 
@@ -429,10 +429,10 @@ function MOI.get(
    if ! has_upper_bound(model, vi)
       error("Variable $vi has no upper bound -- ConstraintDual not defined.")
    end
-   if model.objvar
-      return -1 * model.sol.x_dual[1 + vi.value]
-   else
-      return -1 * model.sol.x_dual[vi.value]
+   try
+      return -model.sol.var[translate_variable(model, vi.value)].dual[1]
+   catch
+      return NaN
    end
 end
 
@@ -449,10 +449,12 @@ function MOI.get(
    end
    if is_fixed(model, vi)
       return 0.0
-   elseif model.objvar
-      return model.sol.x_dual[1 + vi.value]
    else
-      return model.sol.x_dual[vi.value]
+      try
+         return model.sol.var[translate_variable(model, vi.value)].dual[1]
+      catch
+         return NaN
+      end
    end
 end
 
@@ -467,9 +469,9 @@ function MOI.get(
    if ! is_fixed(model, vi)
       error("Variable $vi is not fixed -- ConstraintDual not defined.")
    end
-   if model.objvar
-      return model.sol.x_dual[1 + vi.value]
-   else
-      return model.sol.x_dual[vi.value]
+   try
+      return model.sol.var[translate_variable(model, vi.value)].dual[1]
+   catch
+      return NaN
    end
 end

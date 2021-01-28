@@ -90,6 +90,14 @@ const GAMS_VALUE_LOWER = 3
 const GAMS_VALUE_UPPER = 4
 const GAMS_VALUE_SCALE = 5
 
+# GAMS data types
+const GMS_DT_SET = 0
+const GMS_DT_PAR = 1
+const GMS_DT_VAR = 2
+const GMS_DT_EQU = 3
+const GMS_DT_ALIAS = 4
+const GMS_DT_MAX = 5
+
 # GAMS special values
 const GAMS_SV_UNDEF = 1.0e300       # undefined
 const GAMS_SV_NA    = 2.0e300       # not available / applicable
@@ -175,14 +183,20 @@ function model_type_from_label(
    end
 end
 
-mutable struct GAMSSolution
-   x::Vector{Float64}
-   x_dual::Vector{Float64}
-   eq::Vector{Float64}
-   eq_dual::Vector{Float64}
+mutable struct GAMSSolutionSymbol
+   n_records::Int
+   level::Vector{Float64}
+   dual::Vector{Float64}
 end
 
-GAMSSolution(n::Int, m::Int) = GAMSSolution(zeros(n), zeros(n), zeros(m), zeros(m))
+GAMSSolutionSymbol(n_records::Int) = GAMSSolutionSymbol(n_records, zeros(n_records), zeros(n_records))
+
+mutable struct GAMSSolution
+   var::Dict{String, GAMSSolutionSymbol}
+   equ::Dict{String, GAMSSolutionSymbol}
+end
+
+GAMSSolution() = GAMSSolution(Dict{String, GAMSSolutionSymbol}(), Dict{String, GAMSSolutionSymbol}())
 
 mutable struct GAMSWorkspace
    version::Tuple{Int, Int, Int}
@@ -452,7 +466,7 @@ function run(
       end
    end
 
-   sol::GAMSSolution = GAMSSolution(stats["numVar"], stats["numEqu"])
+   sol::GAMSSolution = GAMSSolution()
 
    # return if we don't expect any solution file
    if stats["modelStat"] in GAMS_MODEL_STATUS_NO_SOLUTION
@@ -463,34 +477,24 @@ function run(
    gdx_open_read(gdx, joinpath(job.workspace.working_dir, "$(job.jobname)_p.gdx"))
 
    # read solution gdx file
-   i = j = 1
-   while true
+   n_syms, n_uels = gdx_system_info(gdx)
+   for i = 1:n_syms
+      sym_name, sym_dim, sym_type = gdx_symbol_info(gdx, i)
+      if sym_type != GMS_DT_VAR && sym_type != GMS_DT_EQU
+         continue
+      end
       n_rec = gdx_data_read_raw_start(gdx, i)
-      for k in 1:n_rec
+      solsym::GAMSSolutionSymbol = GAMSSolutionSymbol(n_rec)
+      for j in 1:n_rec
          gdx_data_read_raw(gdx, idx, vals)
-         sol.eq[j] = parse_gdx_value(vals[GAMS_VALUE_LEVEL])
-         sol.eq_dual[j] = parse_gdx_value(vals[GAMS_VALUE_MARGINAL])
-         j += 1
+         solsym.level[j] = parse_gdx_value(vals[GAMS_VALUE_LEVEL])
+         solsym.dual[j] = parse_gdx_value(vals[GAMS_VALUE_MARGINAL])
       end
-      i += 1
-      if j > stats["numEqu"]
-         gdx_data_read_done(gdx)
-         break
-      end
-   end
-   j = 1
-   while true
-      n_rec = gdx_data_read_raw_start(gdx, i)
-      for k in 1:n_rec
-         gdx_data_read_raw(gdx, idx, vals)
-         sol.x[j] = parse_gdx_value(vals[GAMS_VALUE_LEVEL])
-         sol.x_dual[j] = parse_gdx_value(vals[GAMS_VALUE_MARGINAL])
-         j += 1
-      end
-      i += 1
-      if j > stats["numVar"]
-         gdx_data_read_done(gdx)
-         break
+      gdx_data_read_done(gdx)
+      if sym_type == GMS_DT_VAR
+         sol.var[sym_name] = solsym
+      elseif sym_type == GMS_DT_EQU
+         sol.equ[sym_name] = solsym
       end
    end
 
