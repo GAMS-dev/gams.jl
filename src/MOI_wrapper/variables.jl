@@ -296,19 +296,19 @@ function check_inbounds(
 end
 
 function check_inbounds(
-    model::Optimizer,
-    vaf::MOI.VectorAffineFunction
+   model::Optimizer,
+   vaf::MOI.VectorAffineFunction
 )
-    for vi in vaf.terms
-        check_inbounds(model, vi.scalar_term)
-    end
+   for vi in vaf.terms
+      check_inbounds(model, vi.scalar_term)
+   end
 end
 
 function check_inbounds(
-    model::Optimizer,
-    aft::MOI.ScalarAffineTerm
+   model::Optimizer,
+   aft::MOI.ScalarAffineTerm
 )
-    return check_inbounds(model, aft.variable_index)
+   return check_inbounds(model, aft.variable_index)
 end
 
 function MOI.get(
