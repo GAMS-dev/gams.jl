@@ -303,21 +303,28 @@ function translate_coefficient(
 end
 
 function translate_variable(
-   io::GAMSTranslateStream,
    model::Optimizer,
    idx::Int
 )
    if model.variable_info[idx].type == VARTYPE_FREE
-      write(io, "x$idx")
+      return "x$idx"
    elseif model.variable_info[idx].type == VARTYPE_BINARY
-      write(io, "b$idx")
+      return "b$idx"
    elseif model.variable_info[idx].type == VARTYPE_INTEGER
-      write(io, "i$idx")
+      return "i$idx"
    elseif model.variable_info[idx].type == VARTYPE_SEMICONT
-      write(io, "sc$idx")
+      return "sc$idx"
    elseif model.variable_info[idx].type == VARTYPE_SEMIINT
-      write(io, "si$idx")
+      return "si$idx"
    end
+end
+
+function translate_variable(
+   io::GAMSTranslateStream,
+   model::Optimizer,
+   idx::Int
+)
+   write(io, translate_variable(model, idx))
 end
 
 function translate_function(

@@ -156,6 +156,12 @@ for solver in TEST_SOLVERS
             ]
             MOIT.contlineartest(OPTIMIZER_SPLITINTERVAL, CONFIG, union(exclude, exclude_solver))
 
+        elseif solver in ("lindo", "lindoglobal", "pathnlp", "xpress")
+            exclude_solver = [
+                "linear8c", # does not return solution
+            ]
+            MOIT.contlineartest(OPTIMIZER_SPLITINTERVAL, CONFIG, union(exclude, exclude_solver))
+
         elseif solver in ("localsolver", "localsolver70")
             # needs extra license
 

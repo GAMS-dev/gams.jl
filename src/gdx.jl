@@ -8,6 +8,7 @@ end
 mutable struct GDXHandle
    cptr::Ref{Ptr{Cvoid}}
    cival::Ref{Cint}
+   cival2::Ref{Cint}
    civec::Vector{Cint}
    crvec::Vector{Cdouble}
    buf::Vector{Vector{UInt8}}
@@ -23,7 +24,7 @@ mutable struct GDXHandle
       cbuf = pointer.(buf)
       crvec = Vector{Cdouble}(undef, 5)
       civec = Vector{Cint}(undef, 5)
-      new(cptr, Ref{Cint}(-1), civec, crvec, buf, cbuf)
+      new(cptr, Ref{Cint}(-1), Ref{Cint}(-1), civec, crvec, buf, cbuf)
    end
 end
 
@@ -86,6 +87,50 @@ function gdx_open_read(
       throw(GDXException("Can't open file '$file'", gdx.cival[]))
    end
    return
+end
+
+function gdx_system_info(
+   gdx_ptr::Ptr{Cvoid},
+   sym_count::Ref{Cint},
+   uel_count::Ref{Cint}
+)
+   return ccall((:gdxsysteminfo, LIBGDX), Cint,
+      (Ptr{Cvoid}, Ref{Cint}, Ref{Cint}),
+      gdx_ptr, sym_count, uel_count)
+end
+
+function gdx_system_info(
+   gdx::GDXHandle
+)
+   rc = gdx_system_info(gdx.cptr[], gdx.cival, gdx.cival2)
+   if rc != 1
+      throw(GDXException("Can't read system info", 0))
+   end
+   return Int(gdx.cival[]), Int(gdx.cival2[])
+end
+
+function gdx_symbol_info(
+   gdx_ptr::Ptr{Cvoid},
+   sym_id::Int,
+   name::Cstring,
+   dim::Ref{Cint},
+   type::Ref{Cint}
+)
+   return ccall((:cgdxsymbolinfo, LIBGDX), Cint,
+      (Ptr{Cvoid}, Cint, Cstring, Ref{Cint}, Ref{Cint}),
+      gdx_ptr, sym_id, name, dim, type)
+end
+
+function gdx_symbol_info(
+   gdx::GDXHandle,
+   sym_id::Int
+)
+   gdx.buf[1][1] = '\0'
+   rc = gdx_symbol_info(gdx.cptr[], sym_id, gdx.cbuf[1], gdx.cival, gdx.cival2)
+   if rc != 1
+      throw(GDXException("Can't read symbol info", 0))
+   end
+   return unsafe_string(gdx.cbuf[1]), Int(gdx.cival[]), Int(gdx.cival2[])
 end
 
 function gdx_data_read_raw_start(
