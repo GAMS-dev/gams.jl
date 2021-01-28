@@ -51,7 +51,7 @@ const TEST_GAMSLIB_MODELS = (
     "port",
     "prodschx",
     "bidsos",
-    "nash"
+    # "nash"
 )
 
 # we need GAMS 32 for JuMP output in Convert
