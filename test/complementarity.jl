@@ -54,6 +54,7 @@ using JuMP, Test
    gg = 5000^(1/g)
 
    gnash1m = Model(GAMS.Optimizer)
+   set_optimizer_attribute(gnash1m, MOI.Silent(), true)
 
    @variable(gnash1m, 0 <= x <= L)
    @variable(gnash1m, 0 <= y[1:4] <= L)
@@ -78,10 +79,10 @@ using JuMP, Test
 
    JuMP.optimize!(gnash1m)
 
-   @show JuMP.value.(y)
-   @show JuMP.value.(l)
-   @show JuMP.value(x)
-   @show JuMP.value(Q)
+   # @show JuMP.value.(y)
+   # @show JuMP.value.(l)
+   # @show JuMP.value(x)
+   # @show JuMP.value(Q)
 
    # JuMP.value.(y) = [11.3327, 19.5003, 20.0, 20.0]
    # JuMP.value.(l) = [-1.35686e-10, -9.7489e-9, -2.51077, -5.18082]
@@ -89,7 +90,7 @@ using JuMP, Test
    # JuMP.value(Q) = 77.20235592852553
    # JuMP.objective_value(gnash1m) = -6.116708234438121
 
-   @show JuMP.objective_value(gnash1m)
+   # @show JuMP.objective_value(gnash1m)
    @test isapprox(JuMP.objective_value(gnash1m), -6.11671, atol=1e-4)
    @test isapprox( JuMP.value.(l)' * (L .- JuMP.value.(y)), 0, atol=1e-5)
 end
@@ -119,6 +120,7 @@ end
 @testset "bard1" begin
    bard1 = Model(GAMS.Optimizer)
    set_optimizer_attribute(bard1, GAMS.ModelType(), "MPEC")
+   set_optimizer_attribute(bard1, MOI.Silent(), true)
 
    @variable(bard1, x>=0)
    @variable(bard1, y>=0)
@@ -139,7 +141,7 @@ end
 
    JuMP.optimize!(bard1)
 
-   @show JuMP.objective_value(bard1)
+   # @show JuMP.objective_value(bard1)
    @test isapprox(JuMP.objective_value(bard1), 17.0000, atol=1e-4)
 end
 
@@ -176,6 +178,7 @@ end
 @testset "dempe" begin
 
    dempe = Model(GAMS.Optimizer)
+   set_optimizer_attribute(dempe, MOI.Silent(), true)
 
    @variable(dempe, x)
    @variable(dempe, z)
@@ -198,7 +201,7 @@ end
 
    JuMP.optimize!(dempe)
 
-   @show JuMP.objective_value(dempe)
+   # @show JuMP.objective_value(dempe)
    @test isapprox(JuMP.objective_value(dempe), 28.25, atol=1e-4)
 
    xx = JuMP.value(x)
