@@ -102,4 +102,20 @@ end
    @test isapprox(zz - 3 + 2 * zz * ww, 0, atol=1e-4)
 end
 
+@testset "MCP" begin
+
+   mcp = Model(GAMS.Optimizer)
+   set_optimizer_attribute(mcp, GAMS.ModelType(), "MCP")
+
+   @variable(mcp, x[1:4] >= 0)
+
+   @constraint(mcp, x[1]+2x[2]-2x[3]+4x[4] -6⟂ x[4])
+   @constraint(mcp, -x[3]-x[4] +2 ⟂ x[1])
+   @constraint(mcp, x[1]-x[2]+2x[3]-2x[4] -2 ⟂ x[3])
+   @constraint(mcp, x[3]-2x[4] +2 ⟂ x[2])
+
+   JuMP.optimize!(mcp)
+   @test isapprox(value.(x), [2.8, 0.0, 0.8, 1.2])
+end
+
 return
