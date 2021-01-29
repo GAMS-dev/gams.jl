@@ -28,6 +28,7 @@ GAMS comes with dozens of supported solvers. Among them are:
 [MINOS](https://www.gams.com/latest/docs/S_MINOS.html),
 [MOSEK](https://www.gams.com/latest/docs/S_MOSEK.html),
 [MSNLP](https://www.gams.com/latest/docs/S_MSNLP.html),
+[NLPEC](https://www.gams.com/latest/docs/S_NLPEC.html),
 [PATH](https://www.gams.com/latest/docs/S_PATH.html),
 [QUADMINOS](https://www.gams.com/latest/docs/S_MINOS.html),
 [SBB](https://www.gams.com/latest/docs/S_SBB.html),
@@ -43,6 +44,7 @@ GAMS.jl supports the following JuMP features:
 - linear, quadratic and nonlinear (convex and non-convex) objective and constraints
 - continuous, binary, integer, semi-continuous and semi-integer variables
 - SOS1 and SOS2 sets
+- complementarity constraints
 
 
 ## Installation
@@ -97,8 +99,10 @@ supports the command line options
 [MINLP](https://www.gams.com/latest/docs/UG_GamsCall.html#GAMSAOminlp),
 [RMINLP](https://www.gams.com/latest/docs/UG_GamsCall.html#GAMSAOrminlp),
 [QCP](https://www.gams.com/latest/docs/UG_GamsCall.html#GAMSAOqcp),
-[MIQCP](https://www.gams.com/latest/docs/UG_GamsCall.html#GAMSAOmiqcp) and
-[RMIQCP](https://www.gams.com/latest/docs/UG_GamsCall.html#GAMSAOrmiqcp).
+[MIQCP](https://www.gams.com/latest/docs/UG_GamsCall.html#GAMSAOmiqcp),
+[RMIQCP](https://www.gams.com/latest/docs/UG_GamsCall.html#GAMSAOrmiqcp),
+[MCP](https://www.gams.com/latest/docs/UG_GamsCall.html#GAMSAOmcp) and
+[MPEC](https://www.gams.com/latest/docs/UG_GamsCall.html#GAMSAOmpec).
 Note that `GAMS.ResLim()` is equivalent to `MOI.TimeLimitSec()` and
 `GAMS.Threads()` to `MOI.NumberOfThreads()`.
 
@@ -110,9 +114,6 @@ for you. Choosing a different model type:
 ```julia
 set_optimizer_attribute(model, GAMS.ModelType(), "<model_type>")
 ```
-Supported [GAMS model
-types](https://www.gams.com/latest/docs/UG_ModelSolve.html#UG_ModelSolve_ModelClassificationOfModels)
-are LP, MIP, RMIP, NLP, MINLP, RMINLP, QCP, MIQCP and RMIQCP.
 
 #### GAMS System
 

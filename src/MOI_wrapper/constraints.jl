@@ -65,6 +65,17 @@ function MOI.add_constraint(
    return MOI.ConstraintIndex{MOI.ScalarQuadraticFunction{Float64}, MOI.EqualTo{Float64}}(n)
 end
 
+function MOI.add_constraint(
+   model::Optimizer,
+   func::MOI.VectorAffineFunction{Float64},
+   set::MOI.Complements
+)
+   check_inbounds(model, func)
+   push!(model.complementarity_constraints, ConstraintInfo(func, set))
+   n = length(model.complementarity_constraints)
+   return MathOptInterface.ConstraintIndex{MOI.VectorAffineFunction{Float64}, MOI.Complements}(n)
+end
+
 function MOI.get(
    model::Optimizer,
    ::MOI.NumberOfConstraints{MOI.ScalarAffineFunction{Float64}, MOI.LessThan{Float64}}
@@ -105,6 +116,13 @@ function MOI.get(
    ::MOI.NumberOfConstraints{MOI.ScalarQuadraticFunction{Float64}, MOI.EqualTo{Float64}}
 )
    return length(model.quadratic_eq_constraints)
+end
+
+function MOI.get(
+   model::Optimizer, 
+   ::MOI.NumberOfConstraints{MOI.VectorAffineFunction{Float64}, MOI.Complements}
+)
+   return length(model.complementarity_constraints)
 end
 
 function MOI.set(
@@ -328,6 +346,17 @@ function MOI.get(
 end
 
 function MOI.get(
+   model::Optimizer, 
+   ::MOI.ConstraintName, 
+   ci::MOI.ConstraintIndex{MOI.VectorAffineFunction{Float64}, MOI.Complements}
+)
+   if ! (1 <= ci.value <= length(model.complementarity_constraints))
+      error("Invalid constraint index ", ci.value)
+   end
+   return model.complementarity_constraints[ci.value].name
+end
+
+function MOI.get(
    model::Optimizer,
    attr::MOI.ConstraintPrimal,
    ci::MOI.ConstraintIndex{MOI.ScalarAffineFunction{Float64}, MOI.LessThan{Float64}}
@@ -406,7 +435,7 @@ function MOI.get(
 )
    MOI.check_result_index_bounds(model, attr)
    if !(1 <= ci.value <= length(model.linear_le_constraints))
-         error("Invalid constraint index ", ci.value)
+      error("Invalid constraint index ", ci.value)
    end
    return -model.sol.equ["eq$(ci.value + offset_linear_le(model))"].dual[1]
 end
@@ -418,7 +447,7 @@ function MOI.get(
 )
    MOI.check_result_index_bounds(model, attr)
    if !(1 <= ci.value <= length(model.linear_ge_constraints))
-         error("Invalid constraint index ", ci.value)
+      error("Invalid constraint index ", ci.value)
    end
    return model.sol.equ["eq$(ci.value + offset_linear_ge(model))"].dual[1]
 end
@@ -430,7 +459,7 @@ function MOI.get(
 )
    MOI.check_result_index_bounds(model, attr)
    if !(1 <= ci.value <= length(model.linear_eq_constraints))
-         error("Invalid constraint index ", ci.value)
+      error("Invalid constraint index ", ci.value)
    end
    return model.sol.equ["eq$(ci.value + offset_linear_eq(model))"].dual[1]
 end
@@ -442,7 +471,7 @@ function MOI.get(
 )
    MOI.check_result_index_bounds(model, attr)
    if !(1 <= ci.value <= length(model.quadratic_le_constraints))
-         error("Invalid constraint index ", ci.value)
+      error("Invalid constraint index ", ci.value)
    end
    return -model.sol.equ["eq$(ci.value + offset_quadratic_le(model))"].dual[1]
 end
@@ -454,7 +483,7 @@ function MOI.get(
 )
    MOI.check_result_index_bounds(model, attr)
    if !(1 <= ci.value <= length(model.quadratic_ge_constraints))
-         error("Invalid constraint index ", ci.value)
+      error("Invalid constraint index ", ci.value)
    end
    return -model.sol.equ["eq$(ci.value + offset_quadratic_ge(model))"].dual[1]
 end
@@ -466,7 +495,7 @@ function MOI.get(
 )
    MOI.check_result_index_bounds(model, attr)
    if !(1 <= ci.value <= length(model.quadratic_eq_constraints))
-         error("Invalid constraint index ", ci.value)
+      error("Invalid constraint index ", ci.value)
    end
    return -model.sol.equ["eq$(ci.value + offset_quadratic_eq(model))"].dual[1]
 end

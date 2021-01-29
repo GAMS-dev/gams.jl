@@ -221,7 +221,8 @@ function translate_defequs(
    io::GAMSTranslateStream,
    model::Optimizer
 )
-   m = model.m + length(model.sos1_constraints) + length(model.sos2_constraints)
+
+   m = model.m + length(model.sos1_constraints) + length(model.sos2_constraints) + length(model.complementarity_constraints)
 
    if m == 0 && ! model.objvar
       return
@@ -253,7 +254,7 @@ function translate_defequs(
       first = false
    end
 
-   # add sos1 constrains
+   # add sos1 constraints
    for i in 1:length(model.sos1_constraints)
       if ! first
          write(io, ", ")
@@ -262,12 +263,23 @@ function translate_defequs(
       first = false
    end
 
-   # add sos2 constrains
+   # add sos2 constraints
    for i in 1:length(model.sos2_constraints)
       if ! first
          write(io, ", ")
       end
       write(io, "s2eq$(i)(s2s$(i))")
+      first = false
+   end
+
+   # add complementarity constraints
+   for (i, comp) in enumerate(model.complementarity_constraints)
+      for j in 1:comp.set.dimension
+         if ! first
+            write(io, ", ")
+         end
+         write(io, "eq$(i)_$(j)")
+      end
       first = false
    end
 
@@ -367,6 +379,15 @@ function translate_function(
    elseif func.constant > 0.0
       write(io, " + " * dbl2str(func.constant))
    end
+end
+
+function translate_function(
+   io::GAMSTranslateStream,
+   model::Optimizer,
+   terms::Vector{MOI.VectorAffineTerm{Float64}}
+)
+   sterms = [term.scalar_term for term in terms]
+   translate_function(io, model, sterms)
 end
 
 function translate_function(
@@ -528,6 +549,9 @@ function translate_objective(
    model::Optimizer
 )
    # do nothing if we don't need objective variable
+   if model.mtype == GAMS.MODEL_TYPE_MCP || model.mtype == GAMS.MODEL_TYPE_CNS
+      return
+   end
    if ! model.objvar
       if ! (typeof(model.objective) == MOI.SingleVariable)
          error("GAMS needs obj variable")
@@ -576,6 +600,9 @@ function translate_equations(
    end
    for (i, con) in enumerate(model.quadratic_eq_constraints)
       translate_equations(io, model, i + offset_quadratic_eq(model), con.func, con.set)
+   end
+   for (i, con) in enumerate(model.complementarity_constraints)
+      translate_equations(io, model, i + offset_complementarity(model), con.func, con.set)
    end
    for i in 1:model.m_nonlin
       translate_equations(io, model, i + offset_nonlin(model), MOI.constraint_expr(model.nlp_data.evaluator, i))
@@ -693,6 +720,26 @@ function translate_equations(
    return
 end
 
+function translate_equations(
+   io::GAMSTranslateStream,
+   model::Optimizer,
+   idx::Int,
+   func::MOI.VectorAffineFunction,
+   set::MOI.Complements
+)
+   for i in 1:set.dimension
+      row = filter(term -> term.output_index == i, func.terms)
+      write(io, "eq$(idx)_$(i).. ")
+      translate_function(io, model, row)
+      if func.constants[i] < 0
+         write(io, " - " * dbl2str(-func.constants[i]))
+      elseif func.constants[i] > 0.0
+         write(io, " + " * dbl2str(func.constants[i]))
+      end
+      writeln(io, " =N= 0;")
+   end
+end
+
 function translate_vardata(
    io::GAMSTranslateStream,
    model::Optimizer
@@ -724,20 +771,78 @@ function translate_solve(
    model::Optimizer,
    name::String
 )
-   writeln(io, "Model $name / all /;")
+   # model statement
+   if model.mtype == GAMS.MODEL_TYPE_MPEC || model.mtype == GAMS.MODEL_TYPE_MCP
+      write(io, "Model $name / ")
+
+      m = model.m + length(model.sos1_constraints) + length(model.sos2_constraints) + length(model.complementarity_constraints)
+
+      first = true
+      if model.objvar
+         write(io, "obj")
+         first = false
+      end
+
+      for i in 1:model.m
+         if ! first
+            write(io, ", ")
+         end
+         write(io, "eq$i")
+         first = false
+      end
+
+      # add sos1 constraints
+      for i in 1:length(model.sos1_constraints)
+         if ! first
+            write(io, ", ")
+         end
+         write(io, "s1eq$(i)(s1s$(i))")
+         first = false
+      end
+
+      # add sos2 constraints
+      for i in 1:length(model.sos2_constraints)
+         if ! first
+            write(io, ", ")
+         end
+         write(io, "s2eq$(i)(s2s$(i))")
+         first = false
+      end
+
+      # add complementarity constraints
+      for (i, comp) in enumerate(model.complementarity_constraints)
+         d = comp.set.dimension
+         for j in 1:d
+            if ! first
+               write(io, ", ")
+            end
+            var = filter(term -> term.output_index == j + d, comp.func.terms)
+            var_str = translate_variable(model, var[1].scalar_term.variable_index.value)
+            write(io, "eq$(i)_$(j).$(var_str)")
+            first = false
+         end
+      end
+      writeln(io, " /;")
+   else
+      writeln(io, "Model $name / all /;")
+   end
+
+   # solve statement
    write(io, "Solve $name using ")
    write(io, label(model.mtype))
-   if model.sense == MOI.MAX_SENSE
-      write(io, " maximizing ")
-   else
-      write(io, " minimizing ")
+   if model.mtype != GAMS.MODEL_TYPE_MCP && model.mtype != GAMS.MODEL_TYPE_CNS
+      if model.sense == MOI.MAX_SENSE
+         write(io, " maximizing ")
+      else
+         write(io, " minimizing ")
+      end
+      if model.objvar
+         write(io, "objvar")
+      elseif typeof(model.objective) == MOI.SingleVariable
+         translate_variable(io, model, model.objective.variable.value)
+      else
+         error("GAMS needs obj variable")
+      end
    end
-   if model.objvar
-      writeln(io, "objvar;\n")
-   elseif typeof(model.objective) == MOI.SingleVariable
-      translate_variable(io, model, model.objective.variable.value)
-      writeln(io, ";\n")
-   else
-      error("GAMS needs obj variable")
-   end
+   writeln(io, ";\n")
 end

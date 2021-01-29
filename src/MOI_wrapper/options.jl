@@ -25,12 +25,14 @@ struct RMINLP <: MOI.AbstractOptimizerAttribute end
 struct QCP <: MOI.AbstractOptimizerAttribute end
 struct MIQCP <: MOI.AbstractOptimizerAttribute end
 struct RMIQCP <: MOI.AbstractOptimizerAttribute end
+struct MPEC <: MOI.AbstractOptimizerAttribute end
+struct MCP <: MOI.AbstractOptimizerAttribute end
 
 function MOI.get(
    model::Optimizer,
    opt::Union{ResLim, IterLim, HoldFixed, NodLim, OptCA, OptCR, Solver, Threads,
               Trace, TraceOpt, LogOption, LP, MIP, RMIP, NLP, DNLP, CNS, MINLP,
-              RMINLP, QCP, MIQCP, RMIQCP}
+              RMINLP, QCP, MIQCP, RMIQCP, MCP, MPEC}
 )
    name = replace(string(typeof(opt)), r"(GAMS.)" => "")
    if haskey(model.gams_options, name)
@@ -43,7 +45,7 @@ function MOI.set(
    model::Optimizer,
    opt::Union{ResLim, IterLim, HoldFixed, NodLim, OptCA, OptCR, Solver, Threads,
               Trace, TraceOpt, LogOption, LP, MIP, RMIP, NLP, DNLP, CNS, MINLP,
-              RMINLP, QCP, MIQCP, RMIQCP},
+              RMINLP, QCP, MIQCP, RMIQCP, MCP, MPEC},
    value
 )
    name = replace(string(typeof(opt)), r"(GAMS.)" => "")

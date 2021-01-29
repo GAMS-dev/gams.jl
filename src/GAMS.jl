@@ -508,10 +508,13 @@ function auto_model_type(
    mtype::GAMSModelType,
    is_quadratic::Bool,
    is_nonlinear::Bool,
-   is_discrete::Bool
+   is_discrete::Bool,
+   is_complementarity::Bool
 )
    if mtype == GAMS.MODEL_TYPE_UNDEFINED
-      if is_nonlinear && is_discrete
+      if is_complementarity
+         mtype = GAMS.MODEL_TYPE_MPEC
+      elseif is_nonlinear && is_discrete
          mtype = GAMS.MODEL_TYPE_MINLP
       elseif is_nonlinear
          mtype = GAMS.MODEL_TYPE_NLP
@@ -526,7 +529,9 @@ function auto_model_type(
       end
    else
       if mtype == GAMS.MODEL_TYPE_LP
-         if is_quadratic
+         if is_complementarity
+            mtype = GAMS.MODEL_TYPE_MPEC
+         elseif is_quadratic
             mtype = GAMS.MODEL_TYPE_QCP
          elseif is_nonlinear
             mtype = GAMS.MODEL_TYPE_NLP
@@ -535,26 +540,34 @@ function auto_model_type(
          end
       end
       if mtype == GAMS.MODEL_TYPE_MIP
-         if is_quadratic
+         if is_complementarity
+            mtype = GAMS.MODEL_TYPE_MPEC
+         elseif is_quadratic
             mtype = GAMS.MODEL_TYPE_MIQCP
          elseif is_nonlinear
             mtype = GAMS.MODEL_TYPE_MINLP
          end
       end
       if mtype == GAMS.MODEL_TYPE_QCP
-         if is_nonlinear
+         if is_complementarity
+            mtype = GAMS.MODEL_TYPE_MPEC
+         elseif is_nonlinear
             mtype = GAMS.MODEL_TYPE_NLP
          elseif is_discrete
             mtype = GAMS.MODEL_TYPE_MIQCP
          end
       end
       if mtype == GAMS.MODEL_TYPE_MIQCP
-         if is_nonlinear
+         if is_complementarity
+            mtype = GAMS.MODEL_TYPE_MPEC
+         elseif is_nonlinear
             mtype = GAMS.MODEL_TYPE_MINLP
          end
       end
       if mtype == GAMS.MODEL_TYPE_NLP
-         if is_discrete
+         if is_complementarity
+            mtype = GAMS.MODEL_TYPE_MPEC
+         elseif is_discrete
             mtype = GAMS.MODEL_TYPE_MINLP
          end
       end

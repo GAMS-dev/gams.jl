@@ -40,7 +40,8 @@ function MOI.optimize!(
    is_discrete |= length(model.sos1_constraints) + length(model.sos2_constraints) > 0
    is_nonlinear = model.m_nonlin > 0 || (!isnothing(model.nlp_data) && model.nlp_data.has_objective)
    is_quadratic = model.m_quad > 0 || isa(model.objective, MOI.ScalarQuadraticFunction{Float64})
-   mtype = auto_model_type(model.mtype, is_quadratic, is_nonlinear, is_discrete)
+   is_complementarity = length(model.complementarity_constraints) > 0
+   mtype = auto_model_type(model.mtype, is_quadratic, is_nonlinear, is_discrete, is_complementarity)
    if mtype != model.mtype && ! MOI.get(model, MOI.Silent())
       @info "Updated GAMS model type: " * label(model.mtype) * " -> " * label(mtype)
    end
@@ -49,6 +50,9 @@ function MOI.optimize!(
    # use additional objective variable?
    model.objvar = true
    if typeof(model.objective) == MOI.SingleVariable && model.m > 0
+      model.objvar = false
+   end
+   if model.mtype == GAMS.MODEL_TYPE_MCP || model.mtype == GAMS.MODEL_TYPE_CNS
       model.objvar = false
    end
 
@@ -70,22 +74,25 @@ function MOI.optimize!(
    job = GAMSJob(model.gamswork, filename, "moi")
    model.sol, stats = run(job, options=model.gams_options, solver_options=model.solver_options)
 
-   # process solution
-   if model.objvar
-      objvar_name = "objvar"
-   else
-      objvar_name = "x$(model.objective.variable.value)"
+   # process optimal objective
+   if model.mtype != GAMS.MODEL_TYPE_MCP && model.mtype != GAMS.MODEL_TYPE_CNS
+      if model.objvar
+         objvar_name = "objvar"
+      else
+         objvar_name = "x$(model.objective.variable.value)"
+      end
+      if haskey(model.sol.var, objvar_name)
+         model.obj = model.sol.var[objvar_name].level[1]
+      end
    end
-   if haskey(model.sol.var, objvar_name)
-      model.obj = model.sol.var[objvar_name].level[1]
-   end
+
+   # process solution statistics
    model.solve_status = stats["solveStat"]
    model.model_status = stats["modelStat"]
    if haskey(stats, "objEst")
       model.obj_est = stats["objEst"]
    end
 
-   # model.solve_time = time() - start_time
    if haskey(stats, "resUsd")
       model.solve_time = stats["resUsd"]
    else
