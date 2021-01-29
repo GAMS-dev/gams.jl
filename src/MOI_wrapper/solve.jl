@@ -52,6 +52,9 @@ function MOI.optimize!(
    if typeof(model.objective) == MOI.SingleVariable && model.m > 0
       model.objvar = false
    end
+   if model.mtype == GAMS.MODEL_TYPE_MCP || model.mtype == GAMS.MODEL_TYPE_CNS
+      model.objvar = false
+   end
 
    # write GMS file
    filename = joinpath(model.gamswork.working_dir, "moi.gms")
@@ -71,22 +74,25 @@ function MOI.optimize!(
    job = GAMSJob(model.gamswork, filename, "moi")
    model.sol, stats = run(job, options=model.gams_options, solver_options=model.solver_options)
 
-   # process solution
-   if model.objvar
-      objvar_name = "objvar"
-   else
-      objvar_name = "x$(model.objective.variable.value)"
+   # process optimal objective
+   if model.mtype != GAMS.MODEL_TYPE_MCP && model.mtype != GAMS.MODEL_TYPE_CNS
+      if model.objvar
+         objvar_name = "objvar"
+      else
+         objvar_name = "x$(model.objective.variable.value)"
+      end
+      if haskey(model.sol.var, objvar_name)
+         model.obj = model.sol.var[objvar_name].level[1]
+      end
    end
-   if haskey(model.sol.var, objvar_name)
-      model.obj = model.sol.var[objvar_name].level[1]
-   end
+
+   # process solution statistics
    model.solve_status = stats["solveStat"]
    model.model_status = stats["modelStat"]
    if haskey(stats, "objEst")
       model.obj_est = stats["objEst"]
    end
 
-   # model.solve_time = time() - start_time
    if haskey(stats, "resUsd")
       model.solve_time = stats["resUsd"]
    else

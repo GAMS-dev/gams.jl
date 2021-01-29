@@ -280,6 +280,7 @@ function translate_defequs(
          end
          write(io, "eq$(i)_$(j)")
       end
+      first = false
    end
 
    writeln(io, ";\n")
@@ -548,6 +549,9 @@ function translate_objective(
    model::Optimizer
 )
    # do nothing if we don't need objective variable
+   if model.mtype == GAMS.MODEL_TYPE_MCP || model.mtype == GAMS.MODEL_TYPE_CNS
+      return
+   end
    if ! model.objvar
       if ! (typeof(model.objective) == MOI.SingleVariable)
          error("GAMS needs obj variable")
@@ -768,7 +772,7 @@ function translate_solve(
    name::String
 )
    # model statement
-   if model.mtype == GAMS.MODEL_TYPE_MPEC
+   if model.mtype == GAMS.MODEL_TYPE_MPEC || model.mtype == GAMS.MODEL_TYPE_MCP
       write(io, "Model $name / ")
 
       m = model.m + length(model.sos1_constraints) + length(model.sos2_constraints) + length(model.complementarity_constraints)
@@ -826,17 +830,19 @@ function translate_solve(
    # solve statement
    write(io, "Solve $name using ")
    write(io, label(model.mtype))
-   if model.sense == MOI.MAX_SENSE
-      write(io, " maximizing ")
-   else
-      write(io, " minimizing ")
+   if model.mtype != GAMS.MODEL_TYPE_MCP && model.mtype != GAMS.MODEL_TYPE_CNS
+      if model.sense == MOI.MAX_SENSE
+         write(io, " maximizing ")
+      else
+         write(io, " minimizing ")
+      end
+      if model.objvar
+         write(io, "objvar")
+      elseif typeof(model.objective) == MOI.SingleVariable
+         translate_variable(io, model, model.objective.variable.value)
+      else
+         error("GAMS needs obj variable")
+      end
    end
-   if model.objvar
-      writeln(io, "objvar;\n")
-   elseif typeof(model.objective) == MOI.SingleVariable
-      translate_variable(io, model, model.objective.variable.value)
-      writeln(io, ";\n")
-   else
-      error("GAMS needs obj variable")
-   end
+   writeln(io, ";\n")
 end
