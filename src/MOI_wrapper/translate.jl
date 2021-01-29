@@ -817,8 +817,8 @@ function translate_solve(
                write(io, ", ")
             end
             var = filter(term -> term.output_index == j + d, comp.func.terms)
-            write(io, "eq$(i)_$(j).")
-            translate_function(io, model, var)
+            var_str = translate_variable(model, var[1].scalar_term.variable_index.value)
+            write(io, "eq$(i)_$(j).$(var_str)")
             first = false
          end
       end

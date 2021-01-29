@@ -51,7 +51,8 @@ const TEST_GAMSLIB_MODELS = (
    "port",
    "prodschx",
    "bidsos",
-   "wallmcp"
+   "wallmcp",
+   "transmcp",
    # "nash"
 )
 
