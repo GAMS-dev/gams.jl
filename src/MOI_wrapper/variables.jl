@@ -344,7 +344,7 @@ function MOI.get(
    try
       return model.sol.var[translate_variable(model, vi.value)].level[1]
    catch
-      return NaN
+      return 0
    end
 end
 
@@ -362,7 +362,7 @@ function MOI.get(
    try
       return model.sol.var[translate_variable(model, vi.value)].level[1]
    catch
-      return NaN
+      return 0
    end
 end
 
@@ -380,7 +380,7 @@ function MOI.get(
    try
       return model.sol.var[translate_variable(model, vi.value)].level[1]
    catch
-      return NaN
+      return 0
    end
 end
 
@@ -398,7 +398,7 @@ function MOI.get(
    try
       return model.sol.var[translate_variable(model, vi.value)].level[1]
    catch
-      return NaN
+      return 0
    end
 end
 
@@ -416,7 +416,7 @@ function MOI.get(
    try
       return -model.sol.var[translate_variable(model, vi.value)].dual[1]
    catch
-      return NaN
+      return 0
    end
 end
 
@@ -437,7 +437,7 @@ function MOI.get(
       try
          return model.sol.var[translate_variable(model, vi.value)].dual[1]
       catch
-         return NaN
+         return 0
       end
    end
 end
@@ -456,6 +456,6 @@ function MOI.get(
    try
       return model.sol.var[translate_variable(model, vi.value)].dual[1]
    catch
-      return NaN
+      return 0
    end
 end
