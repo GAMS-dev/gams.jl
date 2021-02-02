@@ -68,7 +68,7 @@ cd(tempdir)
 
 # prepare GAMS Convert option file to write JuMP model
 open("convert.opt", "w") do io
-   println(io, "jump")
+   println(io, "jump jump.jl")
 end
 
 @testset "gamslib        " begin
@@ -97,7 +97,7 @@ end
          end
 
          # solve JuMP model using GAMS
-         include(joinpath(tempdir, "gams.jl"))
+         include(joinpath(tempdir, "jump.jl"))
          set_optimizer(m, GAMS.Optimizer)
          set_optimizer_attribute(m, GAMS.WorkDir(), tempdir)
          set_optimizer_attribute(m, MOI.Silent(), true)
