@@ -69,7 +69,9 @@ end
 ConstraintInfo(func, set) = ConstraintInfo("", func, set, nothing)
 
 mutable struct Optimizer <: MOI.AbstractOptimizer
-   gamswork::GAMSWorkspace
+   sysdir::Union{String, Nothing}
+   workdir::Union{String, Nothing}
+   gamswork::Union{GAMSWorkspace, Nothing}
 
    # problem attributes
    mtype::GAMSModelType
@@ -112,11 +114,11 @@ end
 function Optimizer()
    gams_options = Dict{String, Any}()
    gams_options["threads"] = 1
-   return Optimizer(GAMSWorkspace(), MODEL_TYPE_UNDEFINED, 0, 0, 0, 0, 0, 0, 0, 0,
-                    MOI.FEASIBILITY_SENSE, nothing, true, [], [], [], [], [], [],
-                    [], [], [], nothing, [], gams_options, Dict{String, Any}(), NaN,
-                    SOLVE_STATUS_UNDEFINED, MODEL_STATUS_UNDEFINED, nothing, NaN,
-                    NaN)
+   return Optimizer(nothing, nothing, nothing, MODEL_TYPE_UNDEFINED, 0, 0, 0, 0,
+                    0, 0, 0, 0, MOI.FEASIBILITY_SENSE, nothing, true, [], [], [],
+                    [], [], [], [], [], [], nothing, [], gams_options,
+                    Dict{String, Any}(), NaN, SOLVE_STATUS_UNDEFINED,
+                    MODEL_STATUS_UNDEFINED, nothing, NaN, NaN)
 end
 
 MOI.get(::Optimizer, ::MOI.SolverName) = "GAMS"

@@ -12,6 +12,7 @@ import GAMS
 
 const OPTIMIZER_CONSTRUCTOR = MOI.OptimizerWithAttributes(GAMS.Optimizer, MOI.Silent() => true)
 const OPTIMIZER = MOI.instantiate(OPTIMIZER_CONSTRUCTOR)
+OPTIMIZER.gamswork = GAMSWorkspace()
 
 const CACHING_OPTIMIZER = MOIU.CachingOptimizer(MOIU.Model{Float64}(), OPTIMIZER);
 const OPTIMIZER_SPLITINTERVAL = MOIB.Constraint.SplitInterval{Float64}(
@@ -116,7 +117,7 @@ for solver in TEST_SOLVERS
     if ! GAMS.check_solver(OPTIMIZER.gamswork, solver, GAMS.MODEL_TYPE_LP)
         continue
     end
-    testname = @sprintf("%-15s", "$solver")
+    testname_s = @sprintf("%-15s", "$solver")
     MOI.set(OPTIMIZER_SPLITINTERVAL, GAMS.Solver(), solver)
     exclude = [
         "linear7",  # VectorAffineFunction not supported
@@ -128,7 +129,7 @@ for solver in TEST_SOLVERS
         "linear12", # dual behavior in infeasible case doesn't match test
         "linear8a", # dual behavior in infeasible case doesn't match test
     ]
-    @testset "$testname" begin
+    @testset "$testname_s" begin
         if solver in ("xa",)
             exclude_solver = [
                 "linear8c", # wrong primal variables
@@ -174,7 +175,7 @@ for solver in TEST_SOLVERS
     if ! GAMS.check_solver(OPTIMIZER.gamswork, solver, GAMS.MODEL_TYPE_MIP)
         continue
     end
-    testname = @sprintf("%-15s", "$solver")
+    testname_s = @sprintf("%-15s", "$solver")
     MOI.set(OPTIMIZER, GAMS.Solver(), solver)
     exclude = [
         "indicator1",   # indicator constraints not supported
@@ -182,7 +183,7 @@ for solver in TEST_SOLVERS
         "indicator3",   # indicator constraints not supported
         "indicator4",   # indicator constraints not supported
     ]
-    @testset "$testname" begin
+    @testset "$testname_s" begin
         if solver in ("baron", "mosek")
             exclude_solver = [
                 "semiconttest", # semicont constraints not supported
@@ -248,12 +249,12 @@ for solver in TEST_SOLVERS
     if ! GAMS.check_solver(OPTIMIZER.gamswork, solver, GAMS.MODEL_TYPE_QCP)
         continue
     end
-    testname = @sprintf("%-15s", "$solver")
+    testname_s = @sprintf("%-15s", "$solver")
     MOI.set(OPTIMIZER, GAMS.Solver(), solver)
     exclude = [
         "qcp1",   # VectorAffineFunction not supported
     ]
-    @testset "$testname" begin
+    @testset "$testname_s" begin
         if solver in ("antigone", "glomiqo")
             exclude_solver = [
                 "ncqcp1", # finds only local optimal solution
@@ -356,9 +357,9 @@ for solver in TEST_SOLVERS
     if ! GAMS.check_solver(OPTIMIZER.gamswork, solver, GAMS.MODEL_TYPE_NLP)
         continue
     end
-    testname = @sprintf("%-15s", "$solver")
+    testname_s = @sprintf("%-15s", "$solver")
     MOI.set(OPTIMIZER, GAMS.Solver(), solver)
-    @testset "$testname" begin
+    @testset "$testname_s" begin
         if solver in ("antigone", "baron", "couenne")
             exclude = [
                 "hs071",            # finds only local optimal solution / fails to prove optimality

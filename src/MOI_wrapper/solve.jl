@@ -4,6 +4,23 @@ function MOI.optimize!(
 )
    start_time = time()
 
+   # create GAMS Workspace if not done so far
+   if isnothing(model.gamswork)
+      if isnothing(model.sysdir) && isnothing(model.workdir)
+         model.gamswork = GAMSWorkspace()
+      elseif isnothing(model.sysdir)
+         model.gamswork = GAMSWorkspace()
+         set_working_dir(model.gamswork, model.workdir)
+      elseif isnothing(model.workdir)
+         model.gamswork = GAMSWorkspace(model.sysdir)
+      else
+         model.gamswork = GAMSWorkspace(model.sysdir, model.workdir)
+      end
+      model.sysdir = nothing
+      model.workdir = nothing
+   end
+
+   # check solver options
    if length(model.solver_options) > 0 && ! haskey(model.gams_options, "solver")
       error("No GAMS solver selected (attribute 'solver') but solver options specified: ",
          model.solver_options)

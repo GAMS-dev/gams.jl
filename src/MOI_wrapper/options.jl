@@ -77,7 +77,14 @@ function MOI.get(
    model::Optimizer,
    ::SysDir
 )
-   return model.gamswork.system_dir
+   if isnothing(model.gamswork)
+      if isnothing(model.sysdir)
+         error("GAMS system directory has not been set.")
+      end
+      return model.sysdir
+   else
+      return model.gamswork.system_dir
+   end
 end
 
 function MOI.set(
@@ -85,7 +92,12 @@ function MOI.set(
    ::SysDir,
    value::String
 )
-   set_system_dir(model.gamswork, value)
+   if isnothing(model.gamswork)
+      check_system_dir(value)
+      model.sysdir = value
+   else
+      set_system_dir(model.gamswork, value)
+   end
    return
 end
 
@@ -93,7 +105,14 @@ function MOI.get(
    model::Optimizer,
    ::WorkDir
 )
-   return model.gamswork.working_dir
+   if isnothing(model.gamswork)
+      if isnothing(model.workdir)
+         error("GAMS working directory has not been set.")
+      end
+      return model.workdir
+   else
+      return model.gamswork.working_dir
+   end
 end
 
 function MOI.set(
@@ -101,7 +120,11 @@ function MOI.set(
    ::WorkDir,
    value::String
 )
-   set_working_dir(model.gamswork, value)
+   if isnothing(model.gamswork)
+      model.workdir = value
+   else
+      set_working_dir(model.gamswork, value)
+   end
    return
 end
 
@@ -171,6 +194,15 @@ function MOI.get(
    option::MOI.RawParameter
 )
    name = lowercase(option.name)
+
+   if name == "modeltype"
+      return MOI.get(model, ModelType())
+   elseif name == "sysdir"
+      return MOI.get(model, SysDir())
+   elseif name == "workdir"
+      return MOI.get(model, WorkDir())
+   end
+
    if name in GAMS.MOI_SUPPORTED_CLOPTIONS
       if haskey(model.gams_options, name)
          return model.gams_options[name]
