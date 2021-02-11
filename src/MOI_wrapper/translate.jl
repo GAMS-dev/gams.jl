@@ -499,13 +499,31 @@ function translate_function(
          translate_function(io, model, func.args[3], is_parenthesis=false)
       end
 
-   elseif op in (:sqrt, :log, :log10, :log2, :exp, :sin, :sinh, :cos, :cosh, :tan, :tanh, :abs)
+   elseif op in (:sqrt, :log, :log10, :log2, :exp, :sin, :sinh, :cos, :cosh, :tan, :tanh, :abs, :sign)
       @assert length(func.args) == 2
       write(io, string(op) * "(")
       translate_function(io, model, func.args[2], is_parenthesis=true)
       write(io, ")")
 
-   elseif op in (:max, :min)
+   elseif op in (:acos,)
+      @assert length(func.args) == 2
+      write(io, "arccos(")
+      translate_function(io, model, func.args[2], is_parenthesis=true)
+      write(io, ")")
+
+   elseif op in (:asin,)
+      @assert length(func.args) == 2
+      write(io, "arcsin(")
+      translate_function(io, model, func.args[2], is_parenthesis=true)
+      write(io, ")")
+
+   elseif op in (:atan,)
+      @assert length(func.args) == 2
+      write(io, "arctan(")
+      translate_function(io, model, func.args[2], is_parenthesis=true)
+      write(io, ")")
+
+   elseif op in (:max, :min, :mod)
       @assert length(func.args) >= 2
       write(io, string(op) * "(")
       translate_function(io, model, func.args[2], is_parenthesis=true)
