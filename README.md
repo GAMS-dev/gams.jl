@@ -70,6 +70,17 @@ model = Model(GAMS.Optimizer)
 
 ### GAMS Options
 
+#### GAMS System
+
+If the GAMS system directory has been added to the `PATH` variable (you can
+check this with `print(ENV["PATH"])`), GAMS.jl will find it automatically.
+Otherwise, or if you like to switch between systems, the system directory can be
+specified by (one of the following):
+```julia
+set_optimizer_attribute(model, "SysDir", "<gams_system_dir>")
+set_optimizer_attribute(model, GAMS.SysDir(), "<gams_system_dir>")
+```
+
 #### Solver
 
 Choosing a GAMS solver (one of the following):
@@ -113,16 +124,6 @@ type](https://www.gams.com/latest/docs/UG_ModelSolve.html#UG_ModelSolve_ModelCla
 for you. Choosing a different model type:
 ```julia
 set_optimizer_attribute(model, GAMS.ModelType(), "<model_type>")
-```
-
-#### GAMS System
-
-If the GAMS system directory has been added to the `PATH` variable, GAMS.jl will find
-it automatically. Otherwise, or if you like to switch between systems, the
-system directory can be specified by (one of the following):
-```julia
-set_optimizer_attribute(model, "SysDir", "<gams_system_dir>")
-set_optimizer_attribute(model, GAMS.SysDir(), "<gams_system_dir>")
 ```
 
 ### GAMS Solver Options
