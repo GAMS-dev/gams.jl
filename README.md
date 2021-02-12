@@ -80,8 +80,11 @@ specified by (one of the following):
 set_optimizer_attribute(model, "SysDir", "<gams_system_dir>")
 set_optimizer_attribute(model, GAMS.SysDir(), "<gams_system_dir>")
 ```
+Analogously, you can specify a working directory with `"WorkDir"` or
+`GAMS.WorkDir()`. If no working directory has been set, GAMS.jl will create a
+temporary one.
 
-#### Solver
+#### Solver (and other GAMS options)
 
 Choosing a GAMS solver (one of the following):
 ```julia
