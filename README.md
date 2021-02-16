@@ -97,7 +97,7 @@ model = Model(() -> GAMS.Optimizer(ws))
 
 ### GAMS Options
 
-[GAMS command line options](https://www.gams.com/latest/docs/UG_GamsCall.html#UG_GamsCall_ListOfCommandLineParameters) can be specified the by
+[GAMS command line options](https://www.gams.com/latest/docs/UG_GamsCall.html#UG_GamsCall_ListOfCommandLineParameters) can be specified by
 ```julia
 set_optimizer_attribute(model, "<option>", "<solver_name>")
 set_optimizer_attribute(model, GAMS.<option>(), "<solver_name>")
