@@ -84,6 +84,19 @@ Analogously, you can specify a working directory with `"WorkDir"` or
 `GAMS.WorkDir()`. If no working directory has been set, GAMS.jl will create a
 temporary one.
 
+If you want to use the same GAMS workspace (same system and working directory)
+for multiple models, you can create a `GAMSWorkspace` first with either of the
+following
+```julia
+ws = GAMS.GAMSWorkspace()
+ws = GAMS.GAMSWorkspace("<gams_system_dir>")
+ws = GAMS.GAMSWorkspace("<gams_system_dir>", "<gams_working_dir>")
+```
+and then pass it to your models:
+```
+model = Model(() -> GAMS.Optimizer(ws))
+```
+
 #### Solver (and other GAMS options)
 
 Choosing a GAMS solver (one of the following):

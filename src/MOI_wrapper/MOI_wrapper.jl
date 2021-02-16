@@ -111,10 +111,10 @@ mutable struct Optimizer <: MOI.AbstractOptimizer
    obj_est::Float64
 end
 
-function Optimizer()
+function Optimizer(workspace::Union{Nothing, GAMSWorkspace} = nothing)
    gams_options = Dict{String, Any}()
    gams_options["threads"] = 1
-   return Optimizer(nothing, nothing, nothing, MODEL_TYPE_UNDEFINED, 0, 0, 0, 0,
+   return Optimizer(nothing, nothing, workspace, MODEL_TYPE_UNDEFINED, 0, 0, 0, 0,
                     0, 0, 0, 0, MOI.FEASIBILITY_SENSE, nothing, true, [], [], [],
                     [], [], [], [], [], [], nothing, [], gams_options,
                     Dict{String, Any}(), NaN, SOLVE_STATUS_UNDEFINED,
@@ -169,7 +169,9 @@ end
 function MOI.empty!(
    model::Optimizer
 )
-   model.sense = MOI.FEASIBILITY_SENSE
+   model.sysdir = nothing
+   model.workdir = nothing
+   model.mtype = MODEL_TYPE_UNDEFINED
    model.n_binary = 0
    model.n_integer = 0
    model.n_semicont = 0
@@ -178,6 +180,7 @@ function MOI.empty!(
    model.m_lin = 0
    model.m_quad = 0
    model.m_nonlin = 0
+   model.sense = MOI.FEASIBILITY_SENSE
    model.objective = nothing
    empty!(model.variable_info)
    empty!(model.linear_le_constraints)
@@ -188,8 +191,9 @@ function MOI.empty!(
    empty!(model.quadratic_eq_constraints)
    empty!(model.sos1_constraints)
    empty!(model.sos2_constraints)
-   empty!(model.complementarity_constraints)
    model.nlp_data = nothing
+   empty!(model.complementarity_constraints)
+   model.solve_time = NaN
    model.solve_status = SOLVE_STATUS_UNDEFINED
    model.model_status = MODEL_STATUS_UNDEFINED
    model.sol = nothing
@@ -200,7 +204,17 @@ end
 function MOI.is_empty(
    model::Optimizer
 )
-   return model.sense == MOI.FEASIBILITY_SENSE &&
+   return isnothing(model.sysdir) &&
+      isnothing(model.workdir) &&
+      model.n_binary == 0 &&
+      model.n_integer == 0 &&
+      model.n_semicont == 0 &&
+      model.n_semiint == 0 &&
+      model.m == 0 &&
+      model.m_lin == 0 &&
+      model.m_quad == 0 &&
+      model.m_nonlin == 0 &&
+      model.sense == MOI.FEASIBILITY_SENSE &&
       isnothing(model.objective) &&
       isempty(model.variable_info) &&
       isempty(model.linear_le_constraints) &&
@@ -211,8 +225,9 @@ function MOI.is_empty(
       isempty(model.quadratic_eq_constraints) &&
       isempty(model.sos1_constraints) &&
       isempty(model.sos2_constraints) &&
-      isempty(model.complementarity_constraints) &&
       isnothing(model.nlp_data) &&
+      isempty(model.complementarity_constraints) &&
+      isnan(model.solve_time) &&
       model.solve_status == SOLVE_STATUS_UNDEFINED &&
       model.model_status == MODEL_STATUS_UNDEFINED &&
       isnothing(model.sol) &&
