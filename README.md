@@ -68,9 +68,7 @@ using GAMS, JuMP
 model = Model(GAMS.Optimizer)
 ```
 
-### GAMS Options
-
-#### GAMS System
+### GAMS System
 
 If the GAMS system directory has been added to the `PATH` variable (you can
 check this with `print(ENV["PATH"])`), GAMS.jl will find it automatically.
@@ -97,15 +95,14 @@ and then pass it to your models:
 model = Model(() -> GAMS.Optimizer(ws))
 ```
 
-#### Solver (and other GAMS options)
+### GAMS Options
 
-Choosing a GAMS solver (one of the following):
+[GAMS command line options](https://www.gams.com/latest/docs/UG_GamsCall.html#UG_GamsCall_ListOfCommandLineParameters) can be specified the by
 ```julia
-set_optimizer_attribute(model, "Solver", "<solver_name>")
-set_optimizer_attribute(model, GAMS.Solver(), "<solver_name>")
+set_optimizer_attribute(model, "<option>", "<solver_name>")
+set_optimizer_attribute(model, GAMS.<option>(), "<solver_name>")
 ```
-Other [GAMS command line options](https://www.gams.com/latest/docs/UG_GamsCall.html#UG_GamsCall_ListOfCommandLineParameters) can be specified the same way. GAMS.jl
-supports the command line options
+where `<option>` is either
 [HoldFixed](https://www.gams.com/latest/docs/UG_GamsCall.html#GAMSAOholdfixed),
 [IterLim](https://www.gams.com/latest/docs/UG_GamsCall.html#GAMSAOiterlim),
 [LogOption](https://www.gams.com/latest/docs/UG_GamsCall.html#GAMSAOlogoption),
@@ -128,7 +125,7 @@ supports the command line options
 [QCP](https://www.gams.com/latest/docs/UG_GamsCall.html#GAMSAOqcp),
 [MIQCP](https://www.gams.com/latest/docs/UG_GamsCall.html#GAMSAOmiqcp),
 [RMIQCP](https://www.gams.com/latest/docs/UG_GamsCall.html#GAMSAOrmiqcp),
-[MCP](https://www.gams.com/latest/docs/UG_GamsCall.html#GAMSAOmcp) and
+[MCP](https://www.gams.com/latest/docs/UG_GamsCall.html#GAMSAOmcp) or
 [MPEC](https://www.gams.com/latest/docs/UG_GamsCall.html#GAMSAOmpec).
 Note that `GAMS.ResLim()` is equivalent to `MOI.TimeLimitSec()` and
 `GAMS.Threads()` to `MOI.NumberOfThreads()`.
