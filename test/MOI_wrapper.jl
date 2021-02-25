@@ -12,7 +12,7 @@ import GAMS
 
 const OPTIMIZER_CONSTRUCTOR = MOI.OptimizerWithAttributes(GAMS.Optimizer, MOI.Silent() => true)
 const OPTIMIZER = MOI.instantiate(OPTIMIZER_CONSTRUCTOR)
-OPTIMIZER.gamswork = GAMSWorkspace()
+OPTIMIZER.gamswork = GAMS.GAMSWorkspace()
 
 const CACHING_OPTIMIZER = MOIU.CachingOptimizer(MOIU.Model{Float64}(), OPTIMIZER);
 const OPTIMIZER_SPLITINTERVAL = MOIB.Constraint.SplitInterval{Float64}(
@@ -100,6 +100,7 @@ testname = @sprintf("%-15s", "default")
         "solve_affine_greaterthan",                 # get constraint index not supported
         "solve_qp_edge_cases",                      # conopt finds only local optimal solution
         "solve_qcp_edge_cases",                     # conopt finds only local optimal solution
+        "solve_qp_zero_offdiag",                    # conopt finds only local optimal solution
         "solve_farkas_equalto_upper",               # definition of duals for infeasible models differs
         "solve_farkas_equalto_lower",               # definition of duals for infeasible models differs
         "solve_farkas_variable_lessthan",           # definition of duals for infeasible models differs

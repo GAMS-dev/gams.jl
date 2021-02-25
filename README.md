@@ -91,7 +91,7 @@ ws = GAMS.GAMSWorkspace("<gams_system_dir>")
 ws = GAMS.GAMSWorkspace("<gams_system_dir>", "<gams_working_dir>")
 ```
 and then pass it to your models:
-```
+```julia
 model = Model(() -> GAMS.Optimizer(ws))
 ```
 
