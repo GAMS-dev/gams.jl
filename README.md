@@ -105,6 +105,7 @@ set_optimizer_attribute(model, GAMS.<option>(), "<solver_name>")
 where `<option>` is either
 [HoldFixed](https://www.gams.com/latest/docs/UG_GamsCall.html#GAMSAOholdfixed),
 [IterLim](https://www.gams.com/latest/docs/UG_GamsCall.html#GAMSAOiterlim),
+[License](https://www.gams.com/latest/docs/UG_GamsCall.html#GAMSAOlicense),
 [LogOption](https://www.gams.com/latest/docs/UG_GamsCall.html#GAMSAOlogoption),
 [NodLim](https://www.gams.com/latest/docs/UG_GamsCall.html#GAMSAOnodlim),
 [OptCA](https://www.gams.com/latest/docs/UG_GamsCall.html#GAMSAOoptca),

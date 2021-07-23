@@ -1,38 +1,40 @@
 
+abstract type AbstractGAMSCmdAttribute <: MOI.AbstractOptimizerAttribute end
+
 struct ModelType <: MOI.AbstractOptimizerAttribute end
-struct ResLim <: MOI.AbstractOptimizerAttribute end
-struct IterLim <: MOI.AbstractOptimizerAttribute end
-struct HoldFixed <: MOI.AbstractOptimizerAttribute end
-struct NodLim <: MOI.AbstractOptimizerAttribute end
-struct OptCA <: MOI.AbstractOptimizerAttribute end
-struct OptCR <: MOI.AbstractOptimizerAttribute end
-struct Solver <: MOI.AbstractOptimizerAttribute end
-struct Threads <: MOI.AbstractOptimizerAttribute end
-struct Trace <: MOI.AbstractOptimizerAttribute end
-struct TraceOpt <: MOI.AbstractOptimizerAttribute end
-struct LogOption <: MOI.AbstractOptimizerAttribute end
 struct SysDir <: MOI.AbstractOptimizerAttribute end
 struct WorkDir <: MOI.AbstractOptimizerAttribute end
 
-struct LP <: MOI.AbstractOptimizerAttribute end
-struct MIP <: MOI.AbstractOptimizerAttribute end
-struct RMIP <: MOI.AbstractOptimizerAttribute end
-struct NLP <: MOI.AbstractOptimizerAttribute end
-struct DNLP <: MOI.AbstractOptimizerAttribute end
-struct CNS <: MOI.AbstractOptimizerAttribute end
-struct MINLP <: MOI.AbstractOptimizerAttribute end
-struct RMINLP <: MOI.AbstractOptimizerAttribute end
-struct QCP <: MOI.AbstractOptimizerAttribute end
-struct MIQCP <: MOI.AbstractOptimizerAttribute end
-struct RMIQCP <: MOI.AbstractOptimizerAttribute end
-struct MPEC <: MOI.AbstractOptimizerAttribute end
-struct MCP <: MOI.AbstractOptimizerAttribute end
+struct HoldFixed <: AbstractGAMSCmdAttribute end
+struct IterLim <: AbstractGAMSCmdAttribute end
+struct License <: AbstractGAMSCmdAttribute end
+struct LogOption <: AbstractGAMSCmdAttribute end
+struct NodLim <: AbstractGAMSCmdAttribute end
+struct OptCA <: AbstractGAMSCmdAttribute end
+struct OptCR <: AbstractGAMSCmdAttribute end
+struct ResLim <: AbstractGAMSCmdAttribute end
+struct Solver <: AbstractGAMSCmdAttribute end
+struct Threads <: AbstractGAMSCmdAttribute end
+struct Trace <: AbstractGAMSCmdAttribute end
+struct TraceOpt <: AbstractGAMSCmdAttribute end
+
+struct CNS <: AbstractGAMSCmdAttribute end
+struct DNLP <: AbstractGAMSCmdAttribute end
+struct LP <: AbstractGAMSCmdAttribute end
+struct MCP <: AbstractGAMSCmdAttribute end
+struct MINLP <: AbstractGAMSCmdAttribute end
+struct MIP <: AbstractGAMSCmdAttribute end
+struct MIQCP <: AbstractGAMSCmdAttribute end
+struct MPEC <: AbstractGAMSCmdAttribute end
+struct NLP <: AbstractGAMSCmdAttribute end
+struct QCP <: AbstractGAMSCmdAttribute end
+struct RMINLP <: AbstractGAMSCmdAttribute end
+struct RMIP <: AbstractGAMSCmdAttribute end
+struct RMIQCP <: AbstractGAMSCmdAttribute end
 
 function MOI.get(
    model::Optimizer,
-   opt::Union{ResLim, IterLim, HoldFixed, NodLim, OptCA, OptCR, Solver, Threads,
-              Trace, TraceOpt, LogOption, LP, MIP, RMIP, NLP, DNLP, CNS, MINLP,
-              RMINLP, QCP, MIQCP, RMIQCP, MCP, MPEC}
+   opt::AbstractGAMSCmdAttribute
 )
    name = replace(string(typeof(opt)), r"(GAMS.)" => "")
    if haskey(model.gams_options, name)
@@ -43,9 +45,7 @@ end
 
 function MOI.set(
    model::Optimizer,
-   opt::Union{ResLim, IterLim, HoldFixed, NodLim, OptCA, OptCR, Solver, Threads,
-              Trace, TraceOpt, LogOption, LP, MIP, RMIP, NLP, DNLP, CNS, MINLP,
-              RMINLP, QCP, MIQCP, RMIQCP, MCP, MPEC},
+   opt::AbstractGAMSCmdAttribute,
    value
 )
    name = replace(string(typeof(opt)), r"(GAMS.)" => "")
