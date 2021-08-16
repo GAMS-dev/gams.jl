@@ -36,7 +36,7 @@ function MOI.get(
    model::Optimizer,
    opt::AbstractGAMSCmdAttribute
 )
-   name = replace(string(typeof(opt)), r"(GAMS.)" => "")
+   name = lowercase(replace(string(typeof(opt)), r"(GAMS.)" => ""))
    if haskey(model.gams_options, name)
       return model.gams_options[name]
    end
@@ -48,7 +48,7 @@ function MOI.set(
    opt::AbstractGAMSCmdAttribute,
    value
 )
-   name = replace(string(typeof(opt)), r"(GAMS.)" => "")
+   name = lowercase(replace(string(typeof(opt)), r"(GAMS.)" => ""))
    model.gams_options[name] = value
    return
 end

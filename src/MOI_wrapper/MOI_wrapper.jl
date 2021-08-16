@@ -17,6 +17,7 @@ const MOI_SUPPORTED_CLOPTIONS = (
    "threads",
    "trace",
    "traceopt",
+   "license",
    "logoption",
    "lp",
    "mip",
