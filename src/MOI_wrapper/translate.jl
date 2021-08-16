@@ -567,7 +567,7 @@ function translate_objective(
    model::Optimizer
 )
    # do nothing if we don't need objective variable
-   if model.mtype == GAMS.MODEL_TYPE_MCP || model.mtype == GAMS.MODEL_TYPE_CNS
+   if model.model_type == GAMS.MODEL_TYPE_MCP || model.model_type == GAMS.MODEL_TYPE_CNS
       return
    end
    if ! model.objvar
@@ -790,7 +790,7 @@ function translate_solve(
    name::String
 )
    # model statement
-   if model.mtype == GAMS.MODEL_TYPE_MPEC || model.mtype == GAMS.MODEL_TYPE_MCP
+   if model.model_type == GAMS.MODEL_TYPE_MPEC || model.model_type == GAMS.MODEL_TYPE_MCP
       write(io, "Model $name / ")
 
       m = model.m + length(model.sos1_constraints) + length(model.sos2_constraints) + length(model.complementarity_constraints)
@@ -847,8 +847,8 @@ function translate_solve(
 
    # solve statement
    write(io, "Solve $name using ")
-   write(io, label(model.mtype))
-   if model.mtype != GAMS.MODEL_TYPE_MCP && model.mtype != GAMS.MODEL_TYPE_CNS
+   write(io, label(model.model_type))
+   if model.model_type != GAMS.MODEL_TYPE_MCP && model.model_type != GAMS.MODEL_TYPE_CNS
       if model.sense == MOI.MAX_SENSE
          write(io, " maximizing ")
       else

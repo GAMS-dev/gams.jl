@@ -57,7 +57,7 @@ function MOI.get(
    model::Optimizer,
    ::ModelType
 )
-   return label(model.mtype)
+   return label(model.user_model_type)
 end
 
 function MOI.set(
@@ -66,8 +66,8 @@ function MOI.set(
    value::String
 )
    value = uppercase(value)
-   model.mtype = model_type_from_label(value)
-   if model.mtype == MODEL_TYPE_UNDEFINED
+   model.user_model_type = model_type_from_label(value)
+   if model.user_model_type == MODEL_TYPE_UNDEFINED
       error("Unsupported model type '$value'.")
    end
    return

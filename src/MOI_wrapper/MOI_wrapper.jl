@@ -70,12 +70,10 @@ end
 ConstraintInfo(func, set) = ConstraintInfo("", func, set, nothing)
 
 mutable struct Optimizer <: MOI.AbstractOptimizer
-   sysdir::Union{String, Nothing}
-   workdir::Union{String, Nothing}
    gamswork::Union{GAMSWorkspace, Nothing}
 
    # problem attributes
-   mtype::GAMSModelType
+   model_type::GAMSModelType
    n_binary::Int
    n_integer::Int
    n_semicont::Int
@@ -100,6 +98,9 @@ mutable struct Optimizer <: MOI.AbstractOptimizer
    complementarity_constraints::Vector{ConstraintInfo{MOI.VectorAffineFunction{Float64}, MOI.Complements}}
 
    # parameters
+   sysdir::Union{String, Nothing}
+   workdir::Union{String, Nothing}
+   user_model_type::GAMSModelType
    gams_options::Dict{String, Any}
    solver_options::Dict{String, Any}
 
@@ -115,10 +116,10 @@ end
 function Optimizer(workspace::Union{Nothing, GAMSWorkspace} = nothing)
    gams_options = Dict{String, Any}()
    gams_options["threads"] = 1
-   return Optimizer(nothing, nothing, workspace, MODEL_TYPE_UNDEFINED, 0, 0, 0, 0,
-                    0, 0, 0, 0, MOI.FEASIBILITY_SENSE, nothing, true, [], [], [],
-                    [], [], [], [], [], [], nothing, [], gams_options,
-                    Dict{String, Any}(), NaN, SOLVE_STATUS_UNDEFINED,
+   return Optimizer(workspace, MODEL_TYPE_UNDEFINED, 0, 0, 0, 0, 0, 0, 0, 0,
+                    MOI.FEASIBILITY_SENSE, nothing, true, [], [], [], [], [], [],
+                    [], [], [], nothing, [], nothing, nothing, MODEL_TYPE_UNDEFINED,
+                    gams_options, Dict{String, Any}(), NaN, SOLVE_STATUS_UNDEFINED,
                     MODEL_STATUS_UNDEFINED, nothing, NaN, NaN)
 end
 
@@ -170,9 +171,7 @@ end
 function MOI.empty!(
    model::Optimizer
 )
-   model.sysdir = nothing
-   model.workdir = nothing
-   model.mtype = MODEL_TYPE_UNDEFINED
+   model.model_type = MODEL_TYPE_UNDEFINED
    model.n_binary = 0
    model.n_integer = 0
    model.n_semicont = 0
@@ -205,8 +204,7 @@ end
 function MOI.is_empty(
    model::Optimizer
 )
-   return isnothing(model.sysdir) &&
-      isnothing(model.workdir) &&
+   return model.model_type == MODEL_TYPE_UNDEFINED
       model.n_binary == 0 &&
       model.n_integer == 0 &&
       model.n_semicont == 0 &&
@@ -227,13 +225,7 @@ function MOI.is_empty(
       isempty(model.sos1_constraints) &&
       isempty(model.sos2_constraints) &&
       isnothing(model.nlp_data) &&
-      isempty(model.complementarity_constraints) &&
-      isnan(model.solve_time) &&
-      model.solve_status == SOLVE_STATUS_UNDEFINED &&
-      model.model_status == MODEL_STATUS_UNDEFINED &&
-      isnothing(model.sol) &&
-      isnan(model.obj) &&
-      isnan(model.obj_est)
+      isempty(model.complementarity_constraints)
 end
 
 has_start(var::VariableInfo) = ! isnothing(var.start)
