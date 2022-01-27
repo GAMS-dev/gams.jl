@@ -271,6 +271,57 @@ end
 
 function MOI.get(
    model::Optimizer,
+   ::GeneratedConstraintName,
+   ci::MOI.ConstraintIndex{F, S}
+) where {
+   F <: Union{
+      MOI.ScalarAffineFunction{Float64},
+      MOI.ScalarQuadraticFunction{Float64},
+   },
+   S,
+}
+   return equation_name(model, ci)
+end
+
+function MOI.get(
+   model::Optimizer,
+   attr::OriginalConstraintName
+)
+   for (i, con) in enumerate(model.linear_le_constraints)
+      if equation_name(model, MOI.ConstraintIndex{MOI.ScalarAffineFunction{Float64}, MOI.LessThan{Float64}}(i)) == attr.name
+         return con.name
+      end
+   end
+   for (i, con) in enumerate(model.linear_ge_constraints)
+      if equation_name(model, MOI.ConstraintIndex{MOI.ScalarAffineFunction{Float64}, MOI.GreaterThan{Float64}}(i)) == attr.name
+         return con.name
+      end
+   end
+   for (i, con) in enumerate(model.linear_eq_constraints)
+      if equation_name(model, MOI.ConstraintIndex{MOI.ScalarAffineFunction{Float64}, MOI.EqualTo{Float64}}(i)) == attr.name
+         return con.name
+      end
+   end
+   for (i, con) in enumerate(model.quadratic_le_constraints)
+      if equation_name(model, MOI.ConstraintIndex{MOI.ScalarQuadraticFunction{Float64}, MOI.LessThan{Float64}}(i)) == attr.name
+         return con.name
+      end
+   end
+   for (i, con) in enumerate(model.quadratic_ge_constraints)
+      if equation_name(model, MOI.ConstraintIndex{MOI.ScalarQuadraticFunction{Float64}, MOI.GreaterThan{Float64}}(i)) == attr.name
+         return con.name
+      end
+   end
+   for (i, con) in enumerate(model.quadratic_eq_constraints)
+      if equation_name(model, MOI.ConstraintIndex{MOI.ScalarQuadraticFunction{Float64}, MOI.EqualTo{Float64}}(i)) == attr.name
+         return con.name
+      end
+   end
+   return nothing
+end
+
+function MOI.get(
+   model::Optimizer,
    ::MOI.ConstraintSet,
    ci::MOI.ConstraintIndex{MOI.ScalarAffineFunction{Float64}, MOI.LessThan{Float64}}
 )

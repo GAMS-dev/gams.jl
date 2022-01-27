@@ -123,6 +123,15 @@ function Optimizer(workspace::Union{Nothing, GAMSWorkspace} = nothing)
                     MODEL_STATUS_UNDEFINED, nothing, NaN, NaN)
 end
 
+struct GeneratedVariableName <: MOI.AbstractVariableAttribute end
+struct GeneratedConstraintName <: MOI.AbstractConstraintAttribute end
+struct OriginalVariableName <: MOI.AbstractModelAttribute
+   name::String
+end
+struct OriginalConstraintName <: MOI.AbstractModelAttribute
+   name::String
+end
+
 MOI.get(::Optimizer, ::MOI.SolverName) = "GAMS"
 
 MOI.supports(::Optimizer, ::MOI.SolverVersion) = true
@@ -132,13 +141,22 @@ MOI.supports(::Optimizer, ::MOI.RawOptimizerAttribute) = true
 MOI.supports(::Optimizer, ::MOI.ObjectiveFunction{MOI.VariableIndex}) = true
 MOI.supports(::Optimizer, ::MOI.ObjectiveFunction{MOI.ScalarAffineFunction{Float64}}) = true
 MOI.supports(::Optimizer, ::MOI.ObjectiveFunction{MOI.ScalarQuadraticFunction{Float64}}) = true
+MOI.supports(::Optimizer, ::OriginalVariableName) = true
+MOI.supports(::Optimizer, ::OriginalConstraintName) = true
 MOI.supports(::Optimizer, ::MOI.VariableName, ::Type{MOI.VariableIndex}) = true
+MOI.supports(::Optimizer, ::GeneratedVariableName, ::Type{MOI.VariableIndex}) = true
 MOI.supports(::Optimizer, ::MOI.ConstraintName, ::Type{MOI.ConstraintIndex{MOI.ScalarAffineFunction{Float64}, MOI.LessThan{Float64}}}) = true
 MOI.supports(::Optimizer, ::MOI.ConstraintName, ::Type{MOI.ConstraintIndex{MOI.ScalarAffineFunction{Float64}, MOI.GreaterThan{Float64}}}) = true
 MOI.supports(::Optimizer, ::MOI.ConstraintName, ::Type{MOI.ConstraintIndex{MOI.ScalarAffineFunction{Float64}, MOI.EqualTo{Float64}}}) = true
 MOI.supports(::Optimizer, ::MOI.ConstraintName, ::Type{MOI.ConstraintIndex{MOI.ScalarQuadraticFunction{Float64}, MOI.LessThan{Float64}}}) = true
 MOI.supports(::Optimizer, ::MOI.ConstraintName, ::Type{MOI.ConstraintIndex{MOI.ScalarQuadraticFunction{Float64}, MOI.GreaterThan{Float64}}}) = true
 MOI.supports(::Optimizer, ::MOI.ConstraintName, ::Type{MOI.ConstraintIndex{MOI.ScalarQuadraticFunction{Float64}, MOI.EqualTo{Float64}}}) = true
+MOI.supports(::Optimizer, ::GeneratedConstraintName, ::Type{MOI.ConstraintIndex{MOI.ScalarAffineFunction{Float64}, MOI.LessThan{Float64}}}) = true
+MOI.supports(::Optimizer, ::GeneratedConstraintName, ::Type{MOI.ConstraintIndex{MOI.ScalarAffineFunction{Float64}, MOI.GreaterThan{Float64}}}) = true
+MOI.supports(::Optimizer, ::GeneratedConstraintName, ::Type{MOI.ConstraintIndex{MOI.ScalarAffineFunction{Float64}, MOI.EqualTo{Float64}}}) = true
+MOI.supports(::Optimizer, ::GeneratedConstraintName, ::Type{MOI.ConstraintIndex{MOI.ScalarQuadraticFunction{Float64}, MOI.LessThan{Float64}}}) = true
+MOI.supports(::Optimizer, ::GeneratedConstraintName, ::Type{MOI.ConstraintIndex{MOI.ScalarQuadraticFunction{Float64}, MOI.GreaterThan{Float64}}}) = true
+MOI.supports(::Optimizer, ::GeneratedConstraintName, ::Type{MOI.ConstraintIndex{MOI.ScalarQuadraticFunction{Float64}, MOI.EqualTo{Float64}}}) = true
 MOI.supports(::Optimizer, ::MOI.TimeLimitSec) = true
 MOI.supports(::Optimizer, ::MOI.NumberOfThreads) = true
 MOI.supports(::Optimizer, ::MOI.NLPBlock) = true

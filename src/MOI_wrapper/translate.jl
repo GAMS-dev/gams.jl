@@ -56,13 +56,6 @@ function variable_name(
    idx::MOI.VariableIndex
 )
    idx = idx.value
-   if !isempty(model.variable_info[idx].name)
-      name = replace(model.variable_info[idx].name, r"[^a-zA-Z0-9_]" => s"_")
-      if length(name) > 0 && name[1] != '_'
-         return name
-      end
-   end
-
    if model.variable_info[idx].type == VARTYPE_FREE
       return "x$idx"
    elseif model.variable_info[idx].type == VARTYPE_BINARY
@@ -86,15 +79,7 @@ function equation_name(
    },
    S,
 }
-   idx = idx.value
-   if !isempty(_constraints(model, F, S)[idx].name)
-      name = replace(_constraints(model, F, S)[idx].name, r"[^a-zA-Z0-9_]" => s"_")
-      if length(name) > 0 && name[1] != '_'
-         return name
-      end
-   end
-
-   idx += _offset(model, F, S)
+   idx = idx.value + _offset(model, F, S)
    return "eq$idx"
 end
 

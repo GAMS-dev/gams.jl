@@ -97,6 +97,26 @@ end
 
 function MOI.get(
    model::Optimizer,
+   ::GeneratedVariableName,
+   vi::MOI.VariableIndex
+)
+   return variable_name(model, vi)
+end
+
+function MOI.get(
+   model::Optimizer,
+   attr::OriginalVariableName
+)
+   for (i, var) in enumerate(model.variable_info)
+      if variable_name(model, MOI.VariableIndex(i)) == attr.name
+         return var.name
+      end
+   end
+   return nothing
+end
+
+function MOI.get(
+   model::Optimizer,
    ::Type{MathOptInterface.VariableIndex},
    name::String
 )

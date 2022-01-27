@@ -159,3 +159,30 @@ do
 GAMS.check_solver(GAMS.GAMSWorkspace(), "<solver_name>")
 GAMS.check_solver(GAMS.GAMSWorkspace(), "<solver_name>", "<model_type>")
 ```
+
+### GAMS Names vs. JuMP Names
+
+GAMS uses generated variable and constraint names although it is possible to
+pass the JuMP names to the GAMS optimizer, because GAMS is more restrictive
+when it comes to variable and constraint naming. Use the attributes
+`GeneratedVariableName`, `GeneratedConstraintName`, `OriginalVariableName`,
+`OriginalConstraintName` to query a GAMS symbol name from a JuMP symbol and vice
+versa. This can help for debugging, e.g., in case of GAMS compilation errors.
+For example:
+```julia
+using GAMS
+
+model = direct_model(GAMS.Optimizer())
+
+@variable(model, x[1:2,1:3] >= 0)
+@constraint(model, c[i = 1:2], sum(x[i,j] for j = 1:3) <= 10)
+
+MOI.get(model, GAMS.GeneratedVariableName(), x[2,2]) # returns x4
+MOI.get(model, GAMS.OriginalVariableName("x6"))      # returns x[2,3]
+MOI.get(model, GAMS.OriginalVariableName("x10"))     # returns nothing
+
+MOI.get(model, GAMS.GeneratedConstraintName(), c[2]) # returns eq2
+MOI.get(model, GAMS.OriginalConstraintName("eq1"))   # returns c[1]
+MOI.get(model, GAMS.OriginalConstraintName("eq10"))  # returns nothing
+```
+Note that JuMP direct-mode is used.
