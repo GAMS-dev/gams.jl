@@ -65,7 +65,7 @@ function MOI.optimize!(
 
    # use additional objective variable?
    model.objvar = true
-   if typeof(model.objective) == MOI.SingleVariable && model.m > 0
+   if typeof(model.objective) == MOI.VariableIndex && model.m > 0
       model.objvar = false
    end
    if model.model_type == GAMS.MODEL_TYPE_MCP || model.model_type == GAMS.MODEL_TYPE_CNS
@@ -95,7 +95,7 @@ function MOI.optimize!(
       if model.objvar
          objvar_name = "objvar"
       else
-         objvar_name = "x$(model.objective.variable.value)"
+         objvar_name = "x$(model.objective.value)"
       end
       if haskey(model.sol.var, objvar_name)
          model.obj = model.sol.var[objvar_name].level[1]
@@ -119,7 +119,7 @@ end
 
 function MOI.get(
    model::Optimizer,
-   ::MOI.SolveTime
+   ::MOI.SolveTimeSec
 )
    return model.solve_time
 end
@@ -216,7 +216,7 @@ function MOI.get(
    model::Optimizer,
    attr::MOI.PrimalStatus
 )
-   if ! (1 <= attr.N <= MOI.get(model, MOI.ResultCount()))
+   if ! (1 <= attr.result_index <= MOI.get(model, MOI.ResultCount()))
       return MOI.NO_SOLUTION
    end
 
@@ -230,9 +230,10 @@ function MOI.get(
          return MOI.FEASIBLE_POINT
       elseif model.model_status == MODEL_STATUS_INFEASIBLE_GLOBAL ||
          model.model_status == MODEL_STATUS_INFEASIBLE_NO_SOLUTION ||
-         model.model_status == MODEL_STATUS_UNBOUNDED ||
-         model.model_status == MODEL_STATUS_UNBOUNDED_NO_SOLUTION ||
          model.model_status == MODEL_STATUS_INTEGER_INFEASIBLE
+         return MOI.NO_SOLUTION
+      elseif model.model_status == MODEL_STATUS_UNBOUNDED ||
+         model.model_status == MODEL_STATUS_UNBOUNDED_NO_SOLUTION ||
          return MOI.INFEASIBILITY_CERTIFICATE
       elseif model.model_status == MODEL_STATUS_INFEASIBLE_LOCAL
          return MOI.INFEASIBLE_POINT
@@ -245,7 +246,7 @@ function MOI.get(
    model::Optimizer,
    attr::MOI.DualStatus
 )
-   if ! (1 <= attr.N <= MOI.get(model, MOI.ResultCount()))
+   if ! (1 <= attr.result_index <= MOI.get(model, MOI.ResultCount()))
       return MOI.NO_SOLUTION
    end
 

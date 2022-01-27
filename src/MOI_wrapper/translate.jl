@@ -274,7 +274,7 @@ function translate_defequs(
 
    # add complementarity constraints
    for (i, comp) in enumerate(model.complementarity_constraints)
-      for j in 1:comp.set.dimension
+      for j in 1:(comp.set.dimension ÷ 2)
          if ! first
             write(io, ", ")
          end
@@ -342,9 +342,9 @@ end
 function translate_function(
    io::GAMSTranslateStream,
    model::Optimizer,
-   func::MOI.SingleVariable
+   func::MOI.VariableIndex
 )
-   translate_variable(io, model, func.variable.value)
+   translate_variable(io, model, func.value)
 end
 
 function translate_function(
@@ -352,19 +352,18 @@ function translate_function(
    model::Optimizer,
    terms::Vector{MOI.ScalarAffineTerm{Float64}}
 )
-   if length(terms) == 0
-      write(io, "0.0")
-      return
-   end
-
    first = true
    for (j, term) in enumerate(terms)
       if term.coefficient == 0.0
          continue
       end
       translate_coefficient(io, term.coefficient, first=first)
-      translate_variable(io, model, term.variable_index.value)
+      translate_variable(io, model, term.variable.value)
       first = false
+   end
+
+   if first
+      write(io, "0.0")
    end
 end
 
@@ -412,8 +411,8 @@ function translate_function(
       if term.coefficient == 0.0
          continue
       end
-      idx1 = term.variable_index_1
-      idx2 = term.variable_index_2
+      idx1 = term.variable_1
+      idx2 = term.variable_2
       if idx1 == idx2
          translate_coefficient(io, term.coefficient / 2.0, first=first)
       else
@@ -543,6 +542,15 @@ end
 function translate_function(
    io::GAMSTranslateStream,
    model::Optimizer,
+   func::Symbol;
+   is_parenthesis::Bool = false
+)
+   write(io, string(func))
+end
+
+function translate_function(
+   io::GAMSTranslateStream,
+   model::Optimizer,
    func::Float64;
    is_parenthesis::Bool = false
 )
@@ -571,7 +579,7 @@ function translate_objective(
       return
    end
    if ! model.objvar
-      if ! (typeof(model.objective) == MOI.SingleVariable)
+      if ! (typeof(model.objective) == MOI.VariableIndex)
          error("GAMS needs obj variable")
       end
       return
@@ -745,7 +753,7 @@ function translate_equations(
    func::MOI.VectorAffineFunction,
    set::MOI.Complements
 )
-   for i in 1:set.dimension
+   for i in 1:set.dimension ÷ 2
       row = filter(term -> term.output_index == i, func.terms)
       write(io, "eq$(idx)_$(i).. ")
       translate_function(io, model, row)
@@ -829,13 +837,13 @@ function translate_solve(
 
       # add complementarity constraints
       for (i, comp) in enumerate(model.complementarity_constraints)
-         d = comp.set.dimension
+         d = comp.set.dimension ÷ 2
          for j in 1:d
             if ! first
                write(io, ", ")
             end
             var = filter(term -> term.output_index == j + d, comp.func.terms)
-            var_str = translate_variable(model, var[1].scalar_term.variable_index.value)
+            var_str = translate_variable(model, var[1].scalar_term.variable.value)
             write(io, "eq$(i)_$(j).$(var_str)")
             first = false
          end
@@ -856,8 +864,8 @@ function translate_solve(
       end
       if model.objvar
          write(io, "objvar")
-      elseif typeof(model.objective) == MOI.SingleVariable
-         translate_variable(io, model, model.objective.variable.value)
+      elseif typeof(model.objective) == MOI.VariableIndex
+         translate_variable(io, model, model.objective.value)
       else
          error("GAMS needs obj variable")
       end

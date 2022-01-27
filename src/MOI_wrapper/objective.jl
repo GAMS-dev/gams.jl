@@ -18,7 +18,7 @@ end
 function MOI.set(
    model::Optimizer,
    ::MOI.ObjectiveFunction,
-   func::Union{MOI.SingleVariable, MOI.ScalarAffineFunction, MOI.ScalarQuadraticFunction}
+   func::Union{MOI.VariableIndex, MOI.ScalarAffineFunction, MOI.ScalarQuadraticFunction}
 )
    check_inbounds(model, func)
    model.objective = func
@@ -27,8 +27,9 @@ end
 
 function MOI.get(
    model::Optimizer,
-   ::MOI.ObjectiveValue
+   attr::MOI.ObjectiveValue
 )
+   MOI.check_result_index_bounds(model, attr)
    return model.obj
 end
 

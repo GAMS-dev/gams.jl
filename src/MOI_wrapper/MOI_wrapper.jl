@@ -83,7 +83,7 @@ mutable struct Optimizer <: MOI.AbstractOptimizer
    m_quad::Int
    m_nonlin::Int
    sense::MOI.OptimizationSense
-   objective::Union{MOI.SingleVariable, MOI.ScalarAffineFunction{Float64}, MOI.ScalarQuadraticFunction{Float64}, Nothing}
+   objective::Union{MOI.VariableIndex, MOI.ScalarAffineFunction{Float64}, MOI.ScalarQuadraticFunction{Float64}, Nothing}
    objvar::Bool
    variable_info::Vector{VariableInfo}
    linear_le_constraints::Vector{ConstraintInfo{MOI.ScalarAffineFunction{Float64}, MOI.LessThan{Float64}}}
@@ -125,26 +125,26 @@ end
 
 MOI.get(::Optimizer, ::MOI.SolverName) = "GAMS"
 
+MOI.supports(::Optimizer, ::MOI.SolverVersion) = true
 MOI.supports(::Optimizer, ::MOI.Silent) = true
 MOI.supports(::Optimizer, ::MOI.ObjectiveSense) = true
-MOI.supports(::Optimizer, ::MOI.RawParameter) = true
-MOI.supports(::Optimizer, ::MOI.ObjectiveFunction{MOI.SingleVariable}) = true
+MOI.supports(::Optimizer, ::MOI.RawOptimizerAttribute) = true
+MOI.supports(::Optimizer, ::MOI.ObjectiveFunction{MOI.VariableIndex}) = true
 MOI.supports(::Optimizer, ::MOI.ObjectiveFunction{MOI.ScalarAffineFunction{Float64}}) = true
 MOI.supports(::Optimizer, ::MOI.ObjectiveFunction{MOI.ScalarQuadraticFunction{Float64}}) = true
-MOI.supports(::Optimizer, ::MOI.VariablePrimalStart, ::Type{MOI.VariableIndex}) = true
 MOI.supports(::Optimizer, ::MOI.VariableName, ::Type{MOI.VariableIndex}) = true
 MOI.supports(::Optimizer, ::MOI.ConstraintName, ::Type{MOI.ConstraintIndex}) = true
 MOI.supports(::Optimizer, ::MOI.TimeLimitSec) = true
 MOI.supports(::Optimizer, ::MOI.NumberOfThreads) = true
 MOI.supports(::Optimizer, ::MOI.NLPBlock) = true
 MOI.supports(::Optimizer, ::MOI.NLPBlockDual) = true
-MOI.supports_constraint(::Optimizer, ::Type{MOI.SingleVariable}, ::Type{MOI.LessThan{Float64}}) = true
-MOI.supports_constraint(::Optimizer, ::Type{MOI.SingleVariable}, ::Type{MOI.GreaterThan{Float64}}) = true
-MOI.supports_constraint(::Optimizer, ::Type{MOI.SingleVariable}, ::Type{MOI.EqualTo{Float64}}) = true
-MOI.supports_constraint(::Optimizer, ::Type{MOI.SingleVariable}, ::Type{MOI.ZeroOne}) = true
-MOI.supports_constraint(::Optimizer, ::Type{MOI.SingleVariable}, ::Type{MOI.Integer}) = true
-MOI.supports_constraint(::Optimizer, ::Type{MOI.SingleVariable}, ::Type{MOI.Semicontinuous{Float64}}) = true
-MOI.supports_constraint(::Optimizer, ::Type{MOI.SingleVariable}, ::Type{MOI.Semiinteger{Float64}}) = true
+MOI.supports_constraint(::Optimizer, ::Type{MOI.VariableIndex}, ::Type{MOI.LessThan{Float64}}) = true
+MOI.supports_constraint(::Optimizer, ::Type{MOI.VariableIndex}, ::Type{MOI.GreaterThan{Float64}}) = true
+MOI.supports_constraint(::Optimizer, ::Type{MOI.VariableIndex}, ::Type{MOI.EqualTo{Float64}}) = true
+MOI.supports_constraint(::Optimizer, ::Type{MOI.VariableIndex}, ::Type{MOI.ZeroOne}) = true
+MOI.supports_constraint(::Optimizer, ::Type{MOI.VariableIndex}, ::Type{MOI.Integer}) = true
+MOI.supports_constraint(::Optimizer, ::Type{MOI.VariableIndex}, ::Type{MOI.Semicontinuous{Float64}}) = true
+MOI.supports_constraint(::Optimizer, ::Type{MOI.VariableIndex}, ::Type{MOI.Semiinteger{Float64}}) = true
 MOI.supports_constraint(::Optimizer, ::Type{MOI.VectorOfVariables}, ::Type{MOI.SOS1{Float64}}) = true
 MOI.supports_constraint(::Optimizer, ::Type{MOI.VectorOfVariables}, ::Type{MOI.SOS2{Float64}}) = true
 MOI.supports_constraint(::Optimizer, ::Type{MOI.ScalarAffineFunction{Float64}}, ::Type{MOI.LessThan{Float64}}) = true
@@ -154,18 +154,26 @@ MOI.supports_constraint(::Optimizer, ::Type{MOI.ScalarQuadraticFunction{Float64}
 MOI.supports_constraint(::Optimizer, ::Type{MOI.ScalarQuadraticFunction{Float64}}, ::Type{MOI.GreaterThan{Float64}}) = true
 MOI.supports_constraint(::Optimizer, ::Type{MOI.ScalarQuadraticFunction{Float64}}, ::Type{MOI.EqualTo{Float64}}) = true
 MOI.supports_constraint(::Optimizer, ::Type{MOI.VectorAffineFunction{Float64}}, ::Type{MOI.Complements}) = true
-MOI.supports(::Optimizer, ::MOI.ConstraintDualStart, ::MOI.ConstraintIndex{MOI.SingleVariable, MOI.GreaterThan{Float64}}, ::Union{Real, Nothing}) = true
-MOI.supports(::Optimizer, ::MOI.ConstraintDualStart, ::MOI.ConstraintIndex{MOI.SingleVariable, MOI.LessThan{Float64}}, ::Union{Real, Nothing}) = true
-MOI.supports(::Optimizer, ::MOI.ConstraintDualStart, ::MOI.ConstraintIndex{MOI.SingleVariable, MOI.EqualTo{Float64}}, ::Union{Real, Nothing}) = true
+MOI.supports(::Optimizer, ::MOI.VariablePrimalStart, ::Type{MOI.VariableIndex}) = true
+MOI.supports(::Optimizer, ::MOI.ConstraintDualStart, ::MOI.ConstraintIndex{MOI.VariableIndex, MOI.GreaterThan{Float64}}, ::Union{Real, Nothing}) = true
+MOI.supports(::Optimizer, ::MOI.ConstraintDualStart, ::MOI.ConstraintIndex{MOI.VariableIndex, MOI.LessThan{Float64}}, ::Union{Real, Nothing}) = true
+MOI.supports(::Optimizer, ::MOI.ConstraintDualStart, ::MOI.ConstraintIndex{MOI.VariableIndex, MOI.EqualTo{Float64}}, ::Union{Real, Nothing}) = true
 
-MOIU.supports_default_copy_to(model::Optimizer, copy_names::Bool) = !copy_names
+MOI.supports_incremental_interface(::Optimizer) = true
+
+function MOI.get(
+   model::Optimizer,
+   ::MOI.SolverVersion
+)
+   ver = get_version(model.gamswork);
+   return "$ver[1].$ver[2].$ver[3]"
+end
 
 function MOI.copy_to(
    model::Optimizer,
-   src::MOI.ModelLike;
-   copy_names = false
+   src::MOI.ModelLike
 )
-   return MOIU.default_copy_to(model, src, copy_names)
+   return MOIU.default_copy_to(model, src)
 end
 
 function MOI.empty!(
@@ -255,6 +263,8 @@ function MOI.set(
    MOI.initialize(model.nlp_data.evaluator, [:ExprGraph])
    return
 end
+
+_dual_multiplier(model::Optimizer) = model.sense == MOI.MIN_SENSE ? 1.0 : -1.0
 
 include("options.jl")
 include("variables.jl")

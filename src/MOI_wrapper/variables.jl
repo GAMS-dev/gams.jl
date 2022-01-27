@@ -15,7 +15,7 @@ end
 
 function MOI.get(
    model::Optimizer,
-   ::MOI.NumberOfConstraints{MOI.SingleVariable, MOI.LessThan{Float64}}
+   ::MOI.NumberOfConstraints{MOI.VariableIndex, MOI.LessThan{Float64}}
 )
    n = 0
    for var in model.variable_info
@@ -28,7 +28,7 @@ end
 
 function MOI.get(
    model::Optimizer,
-   ::MOI.NumberOfConstraints{MOI.SingleVariable, MOI.GreaterThan{Float64}}
+   ::MOI.NumberOfConstraints{MOI.VariableIndex, MOI.GreaterThan{Float64}}
 )
    n = 0
    for var in model.variable_info
@@ -41,7 +41,7 @@ end
 
 function MOI.get(
    model::Optimizer,
-   ::MOI.NumberOfConstraints{MOI.SingleVariable, MOI.EqualTo{Float64}}
+   ::MOI.NumberOfConstraints{MOI.VariableIndex, MOI.EqualTo{Float64}}
 )
    n = 0
    for var in model.variable_info
@@ -110,116 +110,122 @@ end
 
 function MOI.add_constraint(
    model::Optimizer,
-   v::MOI.SingleVariable,
+   vi::MOI.VariableIndex,
    lt::MOI.LessThan{Float64}
 )
-   vi = v.variable
    check_inbounds(model, vi)
    if isnan(lt.upper)
       error("Invalid upper bound value $(lt.upper).")
    end
-   if has_upper_bound(model, vi)
-      error("Upper bound on variable $vi already exists.")
+   upper_bound = model.variable_info[vi.value].upper_bound
+   if upper_bound === nothing
+      upper_bound = lt.upper
+   else
+      upper_bound = min(lt.upper, upper_bound)
    end
-   if is_fixed(model, vi)
-      error("Variable $vi is fixed. Cannot also set upper bound.")
-   end
-   model.variable_info[vi.value].upper_bound = lt.upper
-   return MOI.ConstraintIndex{MOI.SingleVariable, MOI.LessThan{Float64}}(vi.value)
+   model.variable_info[vi.value].upper_bound = upper_bound
+   return MOI.ConstraintIndex{MOI.VariableIndex, MOI.LessThan{Float64}}(vi.value)
 end
 
 function MOI.add_constraint(
    model::Optimizer,
-   v::MOI.SingleVariable,
+   vi::MOI.VariableIndex,
    gt::MOI.GreaterThan{Float64}
 )
-   vi = v.variable
    check_inbounds(model, vi)
    if isnan(gt.lower)
       error("Invalid lower bound value $(gt.lower).")
    end
-   if has_lower_bound(model, vi)
-      error("Lower bound on variable $vi already exists.")
+   lower_bound = model.variable_info[vi.value].lower_bound
+   if lower_bound === nothing
+      lower_bound = gt.lower
+   else
+      lower_bound = max(gt.lower, lower_bound)
    end
-   if is_fixed(model, vi)
-      error("Variable $vi is fixed. Cannot also set lower bound.")
-   end
-   model.variable_info[vi.value].lower_bound = gt.lower
-   return MOI.ConstraintIndex{MOI.SingleVariable, MOI.GreaterThan{Float64}}(vi.value)
+   model.variable_info[vi.value].lower_bound = lower_bound
+   return MOI.ConstraintIndex{MOI.VariableIndex, MOI.GreaterThan{Float64}}(vi.value)
 end
 
 function MOI.add_constraint(
    model::Optimizer,
-   v::MOI.SingleVariable,
+   vi::MOI.VariableIndex,
    eq::MOI.EqualTo{Float64}
 )
-   vi = v.variable
    check_inbounds(model, vi)
    if isnan(eq.value)
       error("Invalid fixed value $(eq.value).")
    end
-   if has_lower_bound(model, vi)
-      error("Variable $vi has a lower bound. Cannot be fixed.")
-   end
-   if has_upper_bound(model, vi)
-      error("Variable $vi has an upper bound. Cannot be fixed.")
-   end
-   if is_fixed(model, vi)
-      error("Variable $vi is already fixed.")
-   end
    model.variable_info[vi.value].lower_bound = eq.value
    model.variable_info[vi.value].upper_bound = eq.value
-   return MOI.ConstraintIndex{MOI.SingleVariable, MOI.EqualTo{Float64}}(vi.value)
+   return MOI.ConstraintIndex{MOI.VariableIndex, MOI.EqualTo{Float64}}(vi.value)
 end
 
 function MOI.add_constraint(
    model::Optimizer,
-   v::MOI.SingleVariable,
+   vi::MOI.VariableIndex,
    ::MOI.ZeroOne
 )
-   vi = v.variable
    check_inbounds(model, vi)
-   model.variable_info[vi.value].lower_bound = 0
-   model.variable_info[vi.value].upper_bound = 1
+   lower_bound = model.variable_info[vi.value].lower_bound
+   upper_bound = model.variable_info[vi.value].upper_bound
+   if lower_bound === nothing
+      lower_bound = 0
+   else
+      lower_bound = ceil(max(0, lower_bound))
+   end
+   if upper_bound === nothing
+      upper_bound = 1
+   else
+      upper_bound = floor(min(1, upper_bound))
+   end
+   model.variable_info[vi.value].lower_bound = lower_bound
+   model.variable_info[vi.value].upper_bound = upper_bound
    model.variable_info[vi.value].type = VARTYPE_BINARY
-   return MOI.ConstraintIndex{MOI.SingleVariable, MOI.ZeroOne}(vi.value)
+   return MOI.ConstraintIndex{MOI.VariableIndex, MOI.ZeroOne}(vi.value)
 end
 
 function MOI.add_constraint(
    model::Optimizer,
-   v::MOI.SingleVariable,
+   vi::MOI.VariableIndex,
    ::MOI.Integer
 )
-   vi = v.variable
    check_inbounds(model, vi)
+   lower_bound = model.variable_info[vi.value].lower_bound
+   upper_bound = model.variable_info[vi.value].upper_bound
+   if lower_bound !== nothing
+      lower_bound = ceil(lower_bound)
+   end
+   if upper_bound !== nothing
+      upper_bound = floor(upper_bound)
+   end
+   model.variable_info[vi.value].lower_bound = lower_bound
+   model.variable_info[vi.value].upper_bound = upper_bound
    model.variable_info[vi.value].type = VARTYPE_INTEGER
-   return MOI.ConstraintIndex{MOI.SingleVariable, MOI.Integer}(vi.value)
+   return MOI.ConstraintIndex{MOI.VariableIndex, MOI.Integer}(vi.value)
 end
 
 function MOI.add_constraint(
    model::Optimizer,
-   v::MOI.SingleVariable,
+   vi::MOI.VariableIndex,
    sc::MOI.Semicontinuous{Float64}
 )
-   vi = v.variable
    check_inbounds(model, vi)
    model.variable_info[vi.value].type = VARTYPE_SEMICONT
    model.variable_info[vi.value].lower_bound = sc.lower
    model.variable_info[vi.value].upper_bound = sc.upper
-   return MOI.ConstraintIndex{MOI.SingleVariable, MOI.Semicontinuous{Float64}}(vi.value)
+   return MOI.ConstraintIndex{MOI.VariableIndex, MOI.Semicontinuous{Float64}}(vi.value)
 end
 
 function MOI.add_constraint(
    model::Optimizer,
-   v::MOI.SingleVariable,
+   vi::MOI.VariableIndex,
    si::MOI.Semiinteger{Float64}
 )
-   vi = v.variable
    check_inbounds(model, vi)
    model.variable_info[vi.value].type = VARTYPE_SEMIINT
    model.variable_info[vi.value].lower_bound = si.lower
    model.variable_info[vi.value].upper_bound = si.upper
-   return MOI.ConstraintIndex{MOI.SingleVariable, MOI.Semiinteger{Float64}}(vi.value)
+   return MOI.ConstraintIndex{MOI.VariableIndex, MOI.Semiinteger{Float64}}(vi.value)
 end
 
 function MOI.add_constraint(
@@ -259,13 +265,6 @@ end
 
 function check_inbounds(
    model::Optimizer,
-   var::MOI.SingleVariable
-)
-   return check_inbounds(model, var.variable)
-end
-
-function check_inbounds(
-   model::Optimizer,
    var::MOI.VectorOfVariables
 )
    for vi in var.variables
@@ -278,7 +277,7 @@ function check_inbounds(
    aff::MOI.ScalarAffineFunction
 )
    for term in aff.terms
-      check_inbounds(model, term.variable_index)
+      check_inbounds(model, term.variable)
    end
 end
 
@@ -287,11 +286,11 @@ function check_inbounds(
    quad::MOI.ScalarQuadraticFunction
 )
    for term in quad.affine_terms
-      check_inbounds(model, term.variable_index)
+      check_inbounds(model, term.variable)
    end
    for term in quad.quadratic_terms
-      check_inbounds(model, term.variable_index_1)
-      check_inbounds(model, term.variable_index_2)
+      check_inbounds(model, term.variable_1)
+      check_inbounds(model, term.variable_2)
    end
 end
 
@@ -308,13 +307,13 @@ function check_inbounds(
    model::Optimizer,
    aft::MOI.ScalarAffineTerm
 )
-   return check_inbounds(model, aft.variable_index)
+   return check_inbounds(model, aft.variable)
 end
 
 function MOI.get(
    model::Optimizer,
    ::MOI.ConstraintSet,
-   ci::MOI.ConstraintIndex{MOI.SingleVariable, MOI.LessThan{Float64}}
+   ci::MOI.ConstraintIndex{MOI.VariableIndex, MOI.LessThan{Float64}}
 )
    vi = MOI.VariableIndex(ci.value)
    check_inbounds(model, vi)
@@ -327,7 +326,7 @@ end
 function MOI.get(
    model::Optimizer,
    ::MOI.ConstraintSet,
-   ci::MOI.ConstraintIndex{MOI.SingleVariable, MOI.GreaterThan{Float64}}
+   ci::MOI.ConstraintIndex{MOI.VariableIndex, MOI.GreaterThan{Float64}}
 )
    vi = MOI.VariableIndex(ci.value)
    check_inbounds(model, vi)
@@ -340,7 +339,7 @@ end
 function MOI.get(
    model::Optimizer,
    ::MOI.ConstraintSet,
-   ci::MOI.ConstraintIndex{MOI.SingleVariable, MOI.EqualTo{Float64}}
+   ci::MOI.ConstraintIndex{MOI.VariableIndex, MOI.EqualTo{Float64}}
 )
    vi = MOI.VariableIndex(ci.value)
    check_inbounds(model, vi)
@@ -367,7 +366,7 @@ end
 function MOI.get(
    model::Optimizer,
    attr::MOI.ConstraintPrimal,
-   ci::MOI.ConstraintIndex{MOI.SingleVariable, MOI.LessThan{Float64}}
+   ci::MOI.ConstraintIndex{MOI.VariableIndex, MOI.LessThan{Float64}}
 )
    MOI.check_result_index_bounds(model, attr)
    vi = MOI.VariableIndex(ci.value)
@@ -385,7 +384,7 @@ end
 function MOI.get(
    model::Optimizer,
    attr::MOI.ConstraintPrimal,
-   ci::MOI.ConstraintIndex{MOI.SingleVariable, MOI.GreaterThan{Float64}}
+   ci::MOI.ConstraintIndex{MOI.VariableIndex, MOI.GreaterThan{Float64}}
 )
    MOI.check_result_index_bounds(model, attr)
    vi = MOI.VariableIndex(ci.value)
@@ -403,7 +402,7 @@ end
 function MOI.get(
    model::Optimizer,
    attr::MOI.ConstraintPrimal,
-   ci::MOI.ConstraintIndex{MOI.SingleVariable, MOI.EqualTo{Float64}}
+   ci::MOI.ConstraintIndex{MOI.VariableIndex, MOI.EqualTo{Float64}}
 )
    MOI.check_result_index_bounds(model, attr)
    vi = MOI.VariableIndex(ci.value)
@@ -421,7 +420,7 @@ end
 function MOI.get(
    model::Optimizer,
    attr::MOI.ConstraintDual,
-   ci::MOI.ConstraintIndex{MOI.SingleVariable, MOI.LessThan{Float64}}
+   ci::MOI.ConstraintIndex{MOI.VariableIndex, MOI.LessThan{Float64}}
 )
    MOI.check_result_index_bounds(model, attr)
    vi = MOI.VariableIndex(ci.value)
@@ -429,8 +428,9 @@ function MOI.get(
    if ! has_upper_bound(model, vi)
       error("Variable $vi has no upper bound -- ConstraintDual not defined.")
    end
+   s = _dual_multiplier(model)
    try
-      return -model.sol.var[translate_variable(model, vi.value)].dual[1]
+      return s * model.sol.var[translate_variable(model, vi.value)].dual[1]
    catch
       return 0
    end
@@ -439,7 +439,7 @@ end
 function MOI.get(
    model::Optimizer,
    attr::MOI.ConstraintDual,
-   ci::MOI.ConstraintIndex{MOI.SingleVariable, MOI.GreaterThan{Float64}}
+   ci::MOI.ConstraintIndex{MOI.VariableIndex, MOI.GreaterThan{Float64}}
 )
    MOI.check_result_index_bounds(model, attr)
    vi = MOI.VariableIndex(ci.value)
@@ -450,8 +450,9 @@ function MOI.get(
    if is_fixed(model, vi)
       return 0.0
    else
+      s = _dual_multiplier(model)
       try
-         return model.sol.var[translate_variable(model, vi.value)].dual[1]
+         return s * model.sol.var[translate_variable(model, vi.value)].dual[1]
       catch
          return 0
       end
@@ -461,7 +462,7 @@ end
 function MOI.get(
    model::Optimizer,
    attr::MOI.ConstraintDual,
-   ci::MOI.ConstraintIndex{MOI.SingleVariable, MOI.EqualTo{Float64}}
+   ci::MOI.ConstraintIndex{MOI.VariableIndex, MOI.EqualTo{Float64}}
 )
    MOI.check_result_index_bounds(model, attr)
    vi = MOI.VariableIndex(ci.value)
@@ -470,7 +471,8 @@ function MOI.get(
       error("Variable $vi is not fixed -- ConstraintDual not defined.")
    end
    try
-      return model.sol.var[translate_variable(model, vi.value)].dual[1]
+      s = _dual_multiplier(model)
+      return s * model.sol.var[translate_variable(model, vi.value)].dual[1]
    catch
       return 0
    end

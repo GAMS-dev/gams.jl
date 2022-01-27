@@ -9,5 +9,5 @@ MathOptInterface = "b8f27783-ece8-5eb3-8dc8-9495eed66fee"
 Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 
 [compat]
-MathOptInterface = "~0.9.13"
+MathOptInterface = "~0.10.7"
 julia = "^1.2"

@@ -141,9 +141,9 @@ function MOI.set(
    silent::Bool
 )
    if silent
-      MOI.set(model, MOI.RawParameter("logoption"), 0)
+      MOI.set(model, MOI.RawOptimizerAttribute("logoption"), 0)
    else
-      MOI.set(model, MOI.RawParameter("logoption"), 1)
+      MOI.set(model, MOI.RawOptimizerAttribute("logoption"), 1)
    end
    return
 end
@@ -160,7 +160,7 @@ function MOI.set(
    ::MOI.TimeLimitSec,
    value::Real
 )
-   MOI.set(model, MOI.RawParameter("reslim"), Float64(value))
+   MOI.set(model, MOI.RawOptimizerAttribute("reslim"), Float64(value))
    return
 end
 
@@ -185,13 +185,13 @@ function MOI.set(
    ::MOI.NumberOfThreads,
    value::Int
 )
-   MOI.set(model, MOI.RawParameter("threads"), value)
+   MOI.set(model, MOI.RawOptimizerAttribute("threads"), value)
    return
 end
 
 function MOI.get(
    model::Optimizer,
-   option::MOI.RawParameter
+   option::MOI.RawOptimizerAttribute
 )
    name = lowercase(option.name)
 
@@ -218,7 +218,7 @@ end
 
 function MOI.set(
    model::Optimizer,
-   option::MOI.RawParameter,
+   option::MOI.RawOptimizerAttribute,
    value::String
 )
    name = lowercase(option.name)
@@ -244,7 +244,7 @@ end
 
 function MOI.set(
    model::Optimizer,
-   option::MOI.RawParameter,
+   option::MOI.RawOptimizerAttribute,
    value::Number
 )
    name = lowercase(option.name)
