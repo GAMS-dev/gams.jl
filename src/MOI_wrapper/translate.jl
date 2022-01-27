@@ -57,8 +57,13 @@ function variable_name(
 )
    idx = idx.value
    if !isempty(model.variable_info[idx].name)
-      return replace(model.variable_info[idx].name, r"[^a-zA-Z0-9_]" => s"_")
-   elseif model.variable_info[idx].type == VARTYPE_FREE
+      name = replace(model.variable_info[idx].name, r"[^a-zA-Z0-9_]" => s"_")
+      if length(name) > 0 && name[1] != '_'
+         return name
+      end
+   end
+
+   if model.variable_info[idx].type == VARTYPE_FREE
       return "x$idx"
    elseif model.variable_info[idx].type == VARTYPE_BINARY
       return "b$idx"
@@ -83,11 +88,14 @@ function equation_name(
 }
    idx = idx.value
    if !isempty(_constraints(model, F, S)[idx].name)
-      return replace(_constraints(model, F, S)[idx].name, r"[^a-zA-Z0-9_]" => s"_")
-   else
-      idx += _offset(model, F, S)
-      return "eq$idx"
+      name = replace(_constraints(model, F, S)[idx].name, r"[^a-zA-Z0-9_]" => s"_")
+      if length(name) > 0 && name[1] != '_'
+         return name
+      end
    end
+
+   idx += _offset(model, F, S)
+   return "eq$idx"
 end
 
 function translate_header(
