@@ -128,16 +128,6 @@ end
 function MOI.set(
    model::Optimizer,
    attr::MOI.ConstraintName,
-   ci::MOI.ConstraintIndex{MOI.SingleVariable},
-   value
-)
-   error("Constraint names for variable bound constraints not supported.")
-   return
-end
-
-function MOI.set(
-   model::Optimizer,
-   attr::MOI.ConstraintName,
    ci::MOI.ConstraintIndex{MOI.ScalarAffineFunction{Float64}, MOI.LessThan{Float64}},
    value
 )
@@ -365,7 +355,7 @@ function MOI.get(
    if ! (1 <= ci.value <= length(model.linear_le_constraints))
       error("Invalid constraint index ", ci.value)
    end
-   return model.sol.equ["eq$(ci.value + offset_linear_le(model))"].level[1]
+   return model.sol.equ[equation_name(model, ci)].level[1]
 end
 
 function MOI.get(
@@ -377,7 +367,7 @@ function MOI.get(
    if ! (1 <= ci.value <= length(model.linear_ge_constraints))
       error("Invalid constraint index ", ci.value)
    end
-   return model.sol.equ["eq$(ci.value + offset_linear_ge(model))"].level[1]
+   return model.sol.equ[equation_name(model, ci)].level[1]
 end
 
 function MOI.get(
@@ -389,7 +379,7 @@ function MOI.get(
    if ! (1 <= ci.value <= length(model.linear_eq_constraints))
       error("Invalid constraint index ", ci.value)
    end
-   return model.sol.equ["eq$(ci.value + offset_linear_eq(model))"].level[1]
+   return model.sol.equ[equation_name(model, ci)].level[1]
 end
 
 function MOI.get(
@@ -401,7 +391,7 @@ function MOI.get(
    if ! (1 <= ci.value <= length(model.quadratic_le_constraints))
       error("Invalid constraint index ", ci.value)
    end
-   return model.sol.equ["eq$(ci.value + offset_quadratic_le(model))"].level[1]
+   return model.sol.equ[equation_name(model, ci)].level[1]
 end
 
 function MOI.get(
@@ -413,7 +403,7 @@ function MOI.get(
    if ! (1 <= ci.value <= length(model.quadratic_ge_constraints))
       error("Invalid constraint index ", ci.value)
    end
-   return model.sol.equ["eq$(ci.value + offset_quadratic_ge(model))"].level[1]
+   return model.sol.equ[equation_name(model, ci)].level[1]
 end
 
 function MOI.get(
@@ -425,7 +415,7 @@ function MOI.get(
    if ! (1 <= ci.value <= length(model.quadratic_eq_constraints))
       error("Invalid constraint index ", ci.value)
    end
-   return model.sol.equ["eq$(ci.value + offset_quadratic_eq(model))"].level[1]
+   return model.sol.equ[equation_name(model, ci)].level[1]
 end
 
 function MOI.get(
@@ -438,7 +428,7 @@ function MOI.get(
       error("Invalid constraint index ", ci.value)
    end
    s = _dual_multiplier(model)
-   return s * model.sol.equ["eq$(ci.value + offset_linear_le(model))"].dual[1]
+   return s * model.sol.equ[equation_name(model, ci)].dual[1]
 end
 
 function MOI.get(
@@ -451,7 +441,7 @@ function MOI.get(
       error("Invalid constraint index ", ci.value)
    end
    s = _dual_multiplier(model)
-   return s * model.sol.equ["eq$(ci.value + offset_linear_ge(model))"].dual[1]
+   return s * model.sol.equ[equation_name(model, ci)].dual[1]
 end
 
 function MOI.get(
@@ -464,7 +454,7 @@ function MOI.get(
       error("Invalid constraint index ", ci.value)
    end
    s = _dual_multiplier(model)
-   return s * model.sol.equ["eq$(ci.value + offset_linear_eq(model))"].dual[1]
+   return s * model.sol.equ[equation_name(model, ci)].dual[1]
 end
 
 function MOI.get(
@@ -477,7 +467,7 @@ function MOI.get(
       error("Invalid constraint index ", ci.value)
    end
    s = _dual_multiplier(model)
-   return s * model.sol.equ["eq$(ci.value + offset_quadratic_le(model))"].dual[1]
+   return s * model.sol.equ[equation_name(model, ci)].dual[1]
 end
 
 function MOI.get(
@@ -490,7 +480,7 @@ function MOI.get(
       error("Invalid constraint index ", ci.value)
    end
    s = _dual_multiplier(model)
-   return s * model.sol.equ["eq$(ci.value + offset_quadratic_ge(model))"].dual[1]
+   return s * model.sol.equ[equation_name(model, ci)].dual[1]
 end
 
 function MOI.get(
@@ -503,7 +493,7 @@ function MOI.get(
       error("Invalid constraint index ", ci.value)
    end
    s = _dual_multiplier(model)
-   return s * model.sol.equ["eq$(ci.value + offset_quadratic_eq(model))"].dual[1]
+   return s * model.sol.equ[equation_name(model, ci)].dual[1]
 end
 
 function MOI.get(

@@ -133,7 +133,12 @@ MOI.supports(::Optimizer, ::MOI.ObjectiveFunction{MOI.VariableIndex}) = true
 MOI.supports(::Optimizer, ::MOI.ObjectiveFunction{MOI.ScalarAffineFunction{Float64}}) = true
 MOI.supports(::Optimizer, ::MOI.ObjectiveFunction{MOI.ScalarQuadraticFunction{Float64}}) = true
 MOI.supports(::Optimizer, ::MOI.VariableName, ::Type{MOI.VariableIndex}) = true
-MOI.supports(::Optimizer, ::MOI.ConstraintName, ::Type{MOI.ConstraintIndex}) = true
+MOI.supports(::Optimizer, ::MOI.ConstraintName, ::Type{MOI.ConstraintIndex{MOI.ScalarAffineFunction{Float64}, MOI.LessThan{Float64}}}) = true
+MOI.supports(::Optimizer, ::MOI.ConstraintName, ::Type{MOI.ConstraintIndex{MOI.ScalarAffineFunction{Float64}, MOI.GreaterThan{Float64}}}) = true
+MOI.supports(::Optimizer, ::MOI.ConstraintName, ::Type{MOI.ConstraintIndex{MOI.ScalarAffineFunction{Float64}, MOI.EqualTo{Float64}}}) = true
+MOI.supports(::Optimizer, ::MOI.ConstraintName, ::Type{MOI.ConstraintIndex{MOI.ScalarQuadraticFunction{Float64}, MOI.LessThan{Float64}}}) = true
+MOI.supports(::Optimizer, ::MOI.ConstraintName, ::Type{MOI.ConstraintIndex{MOI.ScalarQuadraticFunction{Float64}, MOI.GreaterThan{Float64}}}) = true
+MOI.supports(::Optimizer, ::MOI.ConstraintName, ::Type{MOI.ConstraintIndex{MOI.ScalarQuadraticFunction{Float64}, MOI.EqualTo{Float64}}}) = true
 MOI.supports(::Optimizer, ::MOI.TimeLimitSec) = true
 MOI.supports(::Optimizer, ::MOI.NumberOfThreads) = true
 MOI.supports(::Optimizer, ::MOI.NLPBlock) = true
@@ -253,6 +258,102 @@ offset_quadratic_ge(model::Optimizer) = offset_quadratic_le(model) + length(mode
 offset_quadratic_eq(model::Optimizer) = offset_quadratic_ge(model) + length(model.quadratic_ge_constraints)
 offset_nonlin(model::Optimizer) = offset_quadratic_eq(model) + length(model.quadratic_eq_constraints)
 offset_complementarity(model::Optimizer) = 0
+
+function _constraints(
+   model::Optimizer,
+   ::Type{MOI.ScalarAffineFunction{Float64}},
+   ::Type{MOI.LessThan{Float64}},
+)
+   return model.linear_le_constraints
+end
+
+function _constraints(
+   model::Optimizer,
+   ::Type{MOI.ScalarAffineFunction{Float64}},
+   ::Type{MOI.GreaterThan{Float64}},
+)
+   return model.linear_ge_constraints
+end
+
+function _constraints(
+   model::Optimizer,
+   ::Type{MOI.ScalarAffineFunction{Float64}},
+   ::Type{MOI.EqualTo{Float64}},
+)
+   return model.linear_eq_constraints
+end
+
+function _constraints(
+   model::Optimizer,
+   ::Type{MOI.ScalarQuadraticFunction{Float64}},
+   ::Type{MOI.LessThan{Float64}},
+)
+   return model.quadratic_le_constraints
+end
+
+function _constraints(
+   model::Optimizer,
+   ::Type{MOI.ScalarQuadraticFunction{Float64}},
+   ::Type{MOI.GreaterThan{Float64}},
+)
+   return model.quadratic_ge_constraints
+end
+
+function _constraints(
+   model::Optimizer,
+   ::Type{MOI.ScalarQuadraticFunction{Float64}},
+   ::Type{MOI.EqualTo{Float64}},
+)
+   return model.quadratic_eq_constraints
+end
+
+function _offset(
+   model::Optimizer,
+   ::Type{MOI.ScalarAffineFunction{Float64}},
+   ::Type{MOI.LessThan{Float64}},
+)
+   return 0
+end
+
+function _offset(
+   model::Optimizer,
+   ::Type{MOI.ScalarAffineFunction{Float64}},
+   ::Type{MOI.GreaterThan{Float64}},
+)
+   return length(model.linear_le_constraints)
+end
+
+function _offset(
+   model::Optimizer,
+   ::Type{MOI.ScalarAffineFunction{Float64}},
+   ::Type{MOI.EqualTo{Float64}},
+)
+   return _offset(model, MOI.ScalarAffineFunction{Float64}, MOI.GreaterThan{Float64}) + length(model.linear_ge_constraints)
+end
+
+function _offset(
+   model::Optimizer,
+   ::Type{MOI.ScalarQuadraticFunction{Float64}},
+   ::Type{MOI.LessThan{Float64}},
+)
+   return _offset(model, MOI.ScalarAffineFunction{Float64}, MOI.EqualTo{Float64}) + length(model.linear_eq_constraints)
+end
+
+function _offset(
+   model::Optimizer,
+   ::Type{MOI.ScalarQuadraticFunction{Float64}},
+   ::Type{MOI.GreaterThan{Float64}},
+)
+   return _offset(model, MOI.ScalarQuadraticFunction{Float64}, MOI.LessThan{Float64}) + length(model.quadratic_le_constraints)
+end
+
+function _offset(
+   model::Optimizer,
+   ::Type{MOI.ScalarQuadraticFunction{Float64}},
+   ::Type{MOI.EqualTo{Float64}},
+)
+   return _offset(model, MOI.ScalarQuadraticFunction{Float64}, MOI.GreaterThan{Float64}) + length(model.quadratic_ge_constraints)
+end
 
 function MOI.set(
    model::Optimizer,

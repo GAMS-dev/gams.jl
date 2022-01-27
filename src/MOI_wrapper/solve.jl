@@ -95,7 +95,7 @@ function MOI.optimize!(
       if model.objvar
          objvar_name = "objvar"
       else
-         objvar_name = "x$(model.objective.value)"
+         objvar_name = variable_name(model, model.objective)
       end
       if haskey(model.sol.var, objvar_name)
          model.obj = model.sol.var[objvar_name].level[1]

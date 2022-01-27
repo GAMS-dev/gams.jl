@@ -51,6 +51,45 @@ function dbl2str(
    @sprintf("%.16g", value)
 end
 
+function variable_name(
+   model::Optimizer,
+   idx::MOI.VariableIndex
+)
+   idx = idx.value
+   if !isempty(model.variable_info[idx].name)
+      return replace(model.variable_info[idx].name, r"[^a-zA-Z0-9_]" => s"_")
+   elseif model.variable_info[idx].type == VARTYPE_FREE
+      return "x$idx"
+   elseif model.variable_info[idx].type == VARTYPE_BINARY
+      return "b$idx"
+   elseif model.variable_info[idx].type == VARTYPE_INTEGER
+      return "i$idx"
+   elseif model.variable_info[idx].type == VARTYPE_SEMICONT
+      return "sc$idx"
+   elseif model.variable_info[idx].type == VARTYPE_SEMIINT
+      return "si$idx"
+   end
+end
+
+function equation_name(
+   model::Optimizer,
+   idx::MOI.ConstraintIndex{F, S}
+) where {
+   F <: Union{
+      MOI.ScalarAffineFunction{Float64},
+      MOI.ScalarQuadraticFunction{Float64},
+   },
+   S,
+}
+   idx = idx.value
+   if !isempty(_constraints(model, F, S)[idx].name)
+      return replace(_constraints(model, F, S)[idx].name, r"[^a-zA-Z0-9_]" => s"_")
+   else
+      idx += _offset(model, F, S)
+      return "eq$idx"
+   end
+end
+
 function translate_header(
    io::GAMSTranslateStream
 )
@@ -97,9 +136,9 @@ function translate_defsets(
    end
 
    if typeof(set) == MOI.SOS1{Float64}
-      write(io, "s1s$idx / ")
+      write(io, "sos1_s$idx / ")
    elseif typeof(set) == MOI.SOS2{Float64}
-      write(io, "s2s$idx / ")
+      write(io, "sos2_s$idx / ")
    end
 
    first_elem = true
@@ -189,7 +228,7 @@ function translate_defvars(
       if ! first
          write(io, ", ")
       end
-      translate_variable(io, model, i)
+      write(io, variable_name(model, MOI.VariableIndex(i)))
       first = false
    end
 
@@ -199,7 +238,7 @@ function translate_defvars(
          if ! first
             write(io, ", ")
          end
-         write(io, "s1x$i(s1s$(i))")
+         write(io, "sos1_x$i(sos1_s$(i))")
          first = false
       end
    end
@@ -210,7 +249,7 @@ function translate_defvars(
          if ! first
             write(io, ", ")
          end
-         write(io, "s2x$i(s2s$(i))")
+         write(io, "sos2_x$i(sos2_s$(i))")
          first = false
       end
    end
@@ -246,11 +285,39 @@ function translate_defequs(
       first = false
    end
 
-   for i in 1:model.m
-      if ! first
-         write(io, ", ")
-      end
-      write(io, "eq$i")
+   for i in 1:length(model.linear_le_constraints)
+      name = equation_name(model, MOI.ConstraintIndex{MOI.ScalarAffineFunction{Float64}, MOI.LessThan{Float64}}(i))
+      write(io, first ? name : ", " * name)
+      first = false
+   end
+   for i in 1:length(model.linear_ge_constraints)
+      name = equation_name(model, MOI.ConstraintIndex{MOI.ScalarAffineFunction{Float64}, MOI.GreaterThan{Float64}}(i))
+      write(io, first ? name : ", " * name)
+      first = false
+   end
+   for i in 1:length(model.linear_eq_constraints)
+      name = equation_name(model, MOI.ConstraintIndex{MOI.ScalarAffineFunction{Float64}, MOI.EqualTo{Float64}}(i))
+      write(io, first ? name : ", " * name)
+      first = false
+   end
+   for i in 1:length(model.quadratic_le_constraints)
+      name = equation_name(model, MOI.ConstraintIndex{MOI.ScalarQuadraticFunction{Float64}, MOI.LessThan{Float64}}(i))
+      write(io, first ? name : ", " * name)
+      first = false
+   end
+   for i in 1:length(model.quadratic_ge_constraints)
+      name = equation_name(model, MOI.ConstraintIndex{MOI.ScalarQuadraticFunction{Float64}, MOI.GreaterThan{Float64}}(i))
+      write(io, first ? name : ", " * name)
+      first = false
+   end
+   for i in 1:length(model.quadratic_eq_constraints)
+      name = equation_name(model, MOI.ConstraintIndex{MOI.ScalarQuadraticFunction{Float64}, MOI.EqualTo{Float64}}(i))
+      write(io, first ? name : ", " * name)
+      first = false
+   end
+   for i in 1:model.m_nonlin
+      idx = i + offset_nonlin(model)
+      write(io, first ? "eq$idx" : ", eq$idx")
       first = false
    end
 
@@ -259,7 +326,7 @@ function translate_defequs(
       if ! first
          write(io, ", ")
       end
-      write(io, "s1eq$(i)(s1s$(i))")
+      write(io, "sos1_eq$(i)(sos1_s$(i))")
       first = false
    end
 
@@ -268,7 +335,7 @@ function translate_defequs(
       if ! first
          write(io, ", ")
       end
-      write(io, "s2eq$(i)(s2s$(i))")
+      write(io, "sos2_eq$(i)(sos2_s$(i))")
       first = false
    end
 
@@ -314,37 +381,12 @@ function translate_coefficient(
    return
 end
 
-function translate_variable(
-   model::Optimizer,
-   idx::Int
-)
-   if model.variable_info[idx].type == VARTYPE_FREE
-      return "x$idx"
-   elseif model.variable_info[idx].type == VARTYPE_BINARY
-      return "b$idx"
-   elseif model.variable_info[idx].type == VARTYPE_INTEGER
-      return "i$idx"
-   elseif model.variable_info[idx].type == VARTYPE_SEMICONT
-      return "sc$idx"
-   elseif model.variable_info[idx].type == VARTYPE_SEMIINT
-      return "si$idx"
-   end
-end
-
-function translate_variable(
-   io::GAMSTranslateStream,
-   model::Optimizer,
-   idx::Int
-)
-   write(io, translate_variable(model, idx))
-end
-
 function translate_function(
    io::GAMSTranslateStream,
    model::Optimizer,
-   func::MOI.VariableIndex
+   idx::MOI.VariableIndex
 )
-   translate_variable(io, model, func.value)
+   write(io, variable_name(model, idx))
 end
 
 function translate_function(
@@ -358,7 +400,7 @@ function translate_function(
          continue
       end
       translate_coefficient(io, term.coefficient, first=first)
-      translate_variable(io, model, term.variable.value)
+      write(io, variable_name(model, term.variable))
       first = false
    end
 
@@ -418,9 +460,7 @@ function translate_function(
       else
          translate_coefficient(io, term.coefficient, first=first)
       end
-      translate_variable(io, model, idx1.value)
-      write(io, " * ")
-      translate_variable(io, model, idx2.value)
+      write(io, variable_name(model, idx1) * " * " * variable_name(model, idx2))
       first = false
    end
 
@@ -533,7 +573,7 @@ function translate_function(
       write(io, ")")
 
    elseif typeof(op) == Symbol && func.args[2] isa MOI.VariableIndex
-      translate_variable(io, model, func.args[2].value)
+      write(io, variable_name(model, func.args[2]))
    else
       error("Unrecognized operation ($op)")
    end
@@ -609,29 +649,29 @@ function translate_equations(
    io::GAMSTranslateStream,
    model::Optimizer
 )
-   for (i, con) in enumerate(model.linear_le_constraints)
-      translate_equations(io, model, i + offset_linear_le(model), con.func, con.set)
+   for i in 1:length(model.linear_le_constraints)
+      translate_equations(io, model, MOI.ConstraintIndex{MOI.ScalarAffineFunction{Float64}, MOI.LessThan{Float64}}(i))
    end
-   for (i, con) in enumerate(model.linear_ge_constraints)
-      translate_equations(io, model, i + offset_linear_ge(model), con.func, con.set)
+   for i in 1:length(model.linear_ge_constraints)
+      translate_equations(io, model, MOI.ConstraintIndex{MOI.ScalarAffineFunction{Float64}, MOI.GreaterThan{Float64}}(i))
    end
-   for (i, con) in enumerate(model.linear_eq_constraints)
-      translate_equations(io, model, i + offset_linear_eq(model), con.func, con.set)
+   for i in 1:length(model.linear_eq_constraints)
+      translate_equations(io, model, MOI.ConstraintIndex{MOI.ScalarAffineFunction{Float64}, MOI.EqualTo{Float64}}(i))
    end
-   for (i, con) in enumerate(model.quadratic_le_constraints)
-      translate_equations(io, model, i + offset_quadratic_le(model), con.func, con.set)
+   for i in 1:length(model.quadratic_le_constraints)
+      translate_equations(io, model, MOI.ConstraintIndex{MOI.ScalarQuadraticFunction{Float64}, MOI.LessThan{Float64}}(i))
    end
-   for (i, con) in enumerate(model.quadratic_ge_constraints)
-      translate_equations(io, model, i + offset_quadratic_ge(model), con.func, con.set)
+   for i in 1:length(model.quadratic_ge_constraints)
+      translate_equations(io, model, MOI.ConstraintIndex{MOI.ScalarQuadraticFunction{Float64}, MOI.GreaterThan{Float64}}(i))
    end
-   for (i, con) in enumerate(model.quadratic_eq_constraints)
-      translate_equations(io, model, i + offset_quadratic_eq(model), con.func, con.set)
+   for i in 1:length(model.quadratic_eq_constraints)
+      translate_equations(io, model, MOI.ConstraintIndex{MOI.ScalarQuadraticFunction{Float64}, MOI.EqualTo{Float64}}(i))
    end
    for (i, con) in enumerate(model.complementarity_constraints)
-      translate_equations(io, model, i + offset_complementarity(model), con.func, con.set)
+      translate_equations(io, model, i, con.func, con.set)
    end
    for i in 1:model.m_nonlin
-      translate_equations(io, model, i + offset_nonlin(model), MOI.constraint_expr(model.nlp_data.evaluator, i))
+      translate_equations(io, model, i, MOI.constraint_expr(model.nlp_data.evaluator, i))
    end
    writeln(io, "")
    for (i, con) in enumerate(model.sos1_constraints)
@@ -647,39 +687,48 @@ end
 function translate_equations(
    io::GAMSTranslateStream,
    model::Optimizer,
-   idx::Int,
-   func::Union{MOI.ScalarAffineFunction{Float64}, MOI.ScalarQuadraticFunction{Float64}},
-   set::MOI.LessThan{Float64}
-)
-   write(io, "eq$idx.. ")
-   translate_function(io, model, func)
-   writeln(io, " =L= " * dbl2str(set.upper) * ";")
+   idx::MOI.ConstraintIndex{F, MOI.LessThan{Float64}}
+) where {
+   F <: Union{
+      MOI.ScalarAffineFunction{Float64},
+      MOI.ScalarQuadraticFunction{Float64},
+   }
+}
+   write(io, equation_name(model, idx) * ".. ")
+   translate_function(io, model, _constraints(model, F, MOI.LessThan{Float64})[idx.value].func)
+   writeln(io, " =L= " * dbl2str(_constraints(model, F, MOI.LessThan{Float64})[idx.value].set.upper) * ";")
    return
 end
 
 function translate_equations(
    io::GAMSTranslateStream,
    model::Optimizer,
-   idx::Int,
-   func::Union{MOI.ScalarAffineFunction{Float64}, MOI.ScalarQuadraticFunction{Float64}},
-   set::MOI.GreaterThan{Float64}
-)
-   write(io, "eq$idx.. ")
-   translate_function(io, model, func)
-   writeln(io, " =G= " * dbl2str(set.lower) * ";")
+   idx::MOI.ConstraintIndex{F, MOI.GreaterThan{Float64}}
+) where {
+   F <: Union{
+      MOI.ScalarAffineFunction{Float64},
+      MOI.ScalarQuadraticFunction{Float64},
+   }
+}
+   write(io, equation_name(model, idx) * ".. ")
+   translate_function(io, model, _constraints(model, F, MOI.GreaterThan{Float64})[idx.value].func)
+   writeln(io, " =G= " * dbl2str(_constraints(model, F, MOI.GreaterThan{Float64})[idx.value].set.lower) * ";")
    return
 end
 
 function translate_equations(
    io::GAMSTranslateStream,
    model::Optimizer,
-   idx::Int,
-   func::Union{MOI.ScalarAffineFunction{Float64}, MOI.ScalarQuadraticFunction{Float64}},
-   set::MOI.EqualTo{Float64}
-)
-   write(io, "eq$idx.. ")
-   translate_function(io, model, func)
-   writeln(io, " =E= " * dbl2str(set.value) * ";")
+   idx::MOI.ConstraintIndex{F, MOI.EqualTo{Float64}}
+) where {
+   F <: Union{
+      MOI.ScalarAffineFunction{Float64},
+      MOI.ScalarQuadraticFunction{Float64},
+   }
+}
+   write(io, equation_name(model, idx) * ".. ")
+   translate_function(io, model, _constraints(model, F, MOI.EqualTo{Float64})[idx.value].func)
+   writeln(io, " =E= " * dbl2str(_constraints(model, F, MOI.EqualTo{Float64})[idx.value].set.value) * ";")
    return
 end
 
@@ -693,6 +742,8 @@ function translate_equations(
       return
    end
    @assert(length(func.args) == 3)
+
+   idx += offset_nonlin(model)
 
    write(io, "eq$idx.. ")
    translate_function(io, model, func.args[2], is_parenthesis=true)
@@ -715,13 +766,12 @@ function translate_equations(
    func::MOI.VectorOfVariables,
    set::MOI.SOS1{Float64}
 )
-   write(io, "s1eq$idx(s1s$idx).. s1x$idx(s1s$idx) =e= ")
+   write(io, "sos1_eq$idx(sos1_s$idx).. sos1_x$idx(sos1_s$idx) =e= ")
    for (i, vi) in enumerate(func.variables)
       if i > 1
          write(io, " + ")
       end
-      translate_variable(io, model, vi.value)
-      write(io, "\$sameas('$(vi.value)',s1s$idx)")
+      write(io, variable_name(model, vi) * "\$sameas('$(vi.value)',sos1_s$idx)")
    end
    writeln(io, ";")
    return
@@ -734,13 +784,12 @@ function translate_equations(
    func::MOI.VectorOfVariables,
    set::MOI.SOS2{Float64}
 )
-   write(io, "s2eq$idx(s2s$idx).. s2x$idx(s2s$idx) =e= ")
+   write(io, "sos2_eq$idx(sos2_s$idx).. sos2_x$idx(sos2_s$idx) =e= ")
    for (i, vi) in enumerate(func.variables)
       if i > 1
          write(io, " + ")
       end
-      translate_variable(io, model, vi.value)
-      write(io, "\$sameas('$(vi.value)',s2s$idx)")
+      write(io, variable_name(model, vi) * "\$sameas('$(vi.value)',sos2_s$idx)")
    end
    writeln(io, ";")
    return
@@ -753,6 +802,8 @@ function translate_equations(
    func::MOI.VectorAffineFunction,
    set::MOI.Complements
 )
+   idx += offset_complementarity(model)
+
    for i in 1:set.dimension ÷ 2
       row = filter(term -> term.output_index == i, func.terms)
       write(io, "eq$(idx)_$(i).. ")
@@ -772,21 +823,17 @@ function translate_vardata(
 )
    for (i, var) in enumerate(model.variable_info)
       if is_fixed(var)
-         translate_variable(io, model, i)
-         writeln(io, ".fx = " * dbl2str(var.lower_bound) * ";")
+         writeln(io, variable_name(model, MOI.VariableIndex(i)) * ".fx = " * dbl2str(var.lower_bound) * ";")
          continue
       end
       if has_lower_bound(var)
-         translate_variable(io, model, i)
-         writeln(io, ".lo = " * dbl2str(var.lower_bound) * "; ")
+         writeln(io, variable_name(model, MOI.VariableIndex(i)) * ".lo = " * dbl2str(var.lower_bound) * "; ")
       end
       if has_start(var)
-         translate_variable(io, model, i)
-         writeln(io, ".l = " * dbl2str(var.start) * "; ")
+         writeln(io, variable_name(model, MOI.VariableIndex(i)) * ".l = " * dbl2str(var.start) * "; ")
       end
       if has_upper_bound(var)
-         translate_variable(io, model, i)
-         writeln(io, ".up = " * dbl2str(var.upper_bound) * ";")
+         writeln(io, variable_name(model, MOI.VariableIndex(i)) * ".up = " * dbl2str(var.upper_bound) * ";")
       end
    end
    write(io, "\n")
@@ -822,7 +869,7 @@ function translate_solve(
          if ! first
             write(io, ", ")
          end
-         write(io, "s1eq$(i)(s1s$(i))")
+         write(io, "sos1_eq$(i)(sos1_s$(i))")
          first = false
       end
 
@@ -831,7 +878,7 @@ function translate_solve(
          if ! first
             write(io, ", ")
          end
-         write(io, "s2eq$(i)(s2s$(i))")
+         write(io, "sos2_eq$(i)(sos2_s$(i))")
          first = false
       end
 
@@ -843,7 +890,7 @@ function translate_solve(
                write(io, ", ")
             end
             var = filter(term -> term.output_index == j + d, comp.func.terms)
-            var_str = translate_variable(model, var[1].scalar_term.variable.value)
+            var_str = variable_name(model, var[1].scalar_term.variable)
             write(io, "eq$(i)_$(j).$(var_str)")
             first = false
          end
@@ -865,7 +912,7 @@ function translate_solve(
       if model.objvar
          write(io, "objvar")
       elseif typeof(model.objective) == MOI.VariableIndex
-         translate_variable(io, model, model.objective.value)
+         write(io, variable_name(model, model.objective))
       else
          error("GAMS needs obj variable")
       end

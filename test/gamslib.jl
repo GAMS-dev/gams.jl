@@ -71,41 +71,39 @@ open("convert.opt", "w") do io
    println(io, "jump jump.jl")
 end
 
-@testset "gamslib        " begin
-   for model in TEST_GAMSLIB_MODELS
-      @testset "$model" begin
+for model in TEST_GAMSLIB_MODELS
+   @testset "$model" begin
 
-         # get model and convert to scalar GAMS and JuMP model
-         Base.run(`gamslib -q $model`)
-         Base.run(`gams $model.gms lo=2 solver=convert`)
-         Base.run(`gams $model.gms lo=2 solver=convert optfile=1`)
+      # get model and convert to scalar GAMS and JuMP model
+      Base.run(`gamslib -q $model`)
+      Base.run(`gams $model.gms lo=2 solver=convert`)
+      Base.run(`gams $model.gms lo=2 solver=convert optfile=1`)
 
-         # instruct GAMS model to export objective function
-         open("gams.gms", "a") do io
-            println(io, "File result_file / objval.txt /;")
-            println(io, "result_file.nd = 7;")
-            println(io, "put result_file;")
-            println(io, "put m.objval;")
-            println(io, "putclose;")
-         end
-
-         # solve GAMS model
-         objval_gams = NaN;
-         Base.run(`gams gams.gms lo=2`)
-         open("objval.txt", "r") do io
-            objval_gams = parse(Float64, read(io, String))
-         end
-
-         # solve JuMP model using GAMS
-         include(joinpath(tempdir, "jump.jl"))
-         set_optimizer(m, GAMS.Optimizer)
-         set_optimizer_attribute(m, GAMS.WorkDir(), tempdir)
-         set_optimizer_attribute(m, MOI.Silent(), true)
-         optimize!(m)
-         objval_jump = objective_value(m)
-
-         @test objval_gams ≈ objval_jump rtol=1e-4
+      # instruct GAMS model to export objective function
+      open("gams.gms", "a") do io
+         println(io, "File result_file / objval.txt /;")
+         println(io, "result_file.nd = 7;")
+         println(io, "put result_file;")
+         println(io, "put m.objval;")
+         println(io, "putclose;")
       end
+
+      # solve GAMS model
+      objval_gams = NaN;
+      Base.run(`gams gams.gms lo=2`)
+      open("objval.txt", "r") do io
+         objval_gams = parse(Float64, read(io, String))
+      end
+
+      # solve JuMP model using GAMS
+      include(joinpath(tempdir, "jump.jl"))
+      set_optimizer(m, GAMS.Optimizer)
+      set_optimizer_attribute(m, GAMS.WorkDir(), tempdir)
+      set_optimizer_attribute(m, MOI.Silent(), true)
+      optimize!(m)
+      objval_jump = objective_value(m)
+
+      @test objval_gams ≈ objval_jump rtol=1e-4
    end
 end
 

@@ -357,7 +357,7 @@ function MOI.get(
    MOI.check_result_index_bounds(model, attr)
    check_inbounds(model, vi)
    try
-      return model.sol.var[translate_variable(model, vi.value)].level[1]
+      return model.sol.var[variable_name(model, vi)].level[1]
    catch
       return 0
    end
@@ -375,7 +375,7 @@ function MOI.get(
       error("Variable $vi has no upper bound -- ConstraintPrimal not defined.")
    end
    try
-      return model.sol.var[translate_variable(model, vi.value)].level[1]
+      return model.sol.var[variable_name(model, vi)].level[1]
    catch
       return 0
    end
@@ -393,7 +393,7 @@ function MOI.get(
       error("Variable $vi has no lower bound -- ConstraintPrimal not defined.")
    end
    try
-      return model.sol.var[translate_variable(model, vi.value)].level[1]
+      return model.sol.var[variable_name(model, vi)].level[1]
    catch
       return 0
    end
@@ -411,7 +411,7 @@ function MOI.get(
       error("Variable $vi is not fixed -- ConstraintPrimal not defined.")
    end
    try
-      return model.sol.var[translate_variable(model, vi.value)].level[1]
+      return model.sol.var[variable_name(model, vi)].level[1]
    catch
       return 0
    end
@@ -430,7 +430,7 @@ function MOI.get(
    end
    s = _dual_multiplier(model)
    try
-      return s * model.sol.var[translate_variable(model, vi.value)].dual[1]
+      return s * model.sol.var[variable_name(model, vi)].dual[1]
    catch
       return 0
    end
@@ -452,7 +452,7 @@ function MOI.get(
    else
       s = _dual_multiplier(model)
       try
-         return s * model.sol.var[translate_variable(model, vi.value)].dual[1]
+         return s * model.sol.var[variable_name(model, vi)].dual[1]
       catch
          return 0
       end
@@ -472,7 +472,7 @@ function MOI.get(
    end
    try
       s = _dual_multiplier(model)
-      return s * model.sol.var[translate_variable(model, vi.value)].dual[1]
+      return s * model.sol.var[variable_name(model, vi)].dual[1]
    catch
       return 0
    end

@@ -30,7 +30,7 @@ end
         JuMP.optimize!(m)
 
         workdir = JuMP.get_optimizer_attribute(m, GAMS.WorkDir())
-        @test occursinfile(joinpath(workdir, "moi.gms"), r"x1.*=G=.*2257.812325")
+        @test occursinfile(joinpath(workdir, "moi.gms"), r"x.*=G=.*2257.812325")
         @test JuMP.value(x) == 2257.812325
     end
 
