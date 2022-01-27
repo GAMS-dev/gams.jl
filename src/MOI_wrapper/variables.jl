@@ -19,7 +19,7 @@ function MOI.get(
 )
    n = 0
    for var in model.variable_info
-      if has_upper_bound(var)
+      if _has_upper_bound(var)
          n += 1
       end
    end
@@ -32,7 +32,7 @@ function MOI.get(
 )
    n = 0
    for var in model.variable_info
-      if has_lower_bound(var)
+      if _has_lower_bound(var)
          n += 1
       end
    end
@@ -45,7 +45,7 @@ function MOI.get(
 )
    n = 0
    for var in model.variable_info
-      if is_fixed(var)
+      if _is_fixed(var)
          n += 1
       end
    end
@@ -317,7 +317,7 @@ function MOI.get(
 )
    vi = MOI.VariableIndex(ci.value)
    check_inbounds(model, vi)
-   if ! has_upper_bound(model, vi)
+   if ! _has_upper_bound(model, vi)
       error("Variable $vi has no upper bound -- ConstraintSet not defined.")
    end
    return MOI.LessThan(model.variable_info[vi.value].upper_bound)
@@ -330,7 +330,7 @@ function MOI.get(
 )
    vi = MOI.VariableIndex(ci.value)
    check_inbounds(model, vi)
-   if ! has_lower_bound(model, vi)
+   if ! _has_lower_bound(model, vi)
       error("Variable $vi has no lower bound -- ConstraintSet not defined.")
    end
    return MOI.GreaterThan(model.variable_info[vi.value].lower_bound)
@@ -343,7 +343,7 @@ function MOI.get(
 )
    vi = MOI.VariableIndex(ci.value)
    check_inbounds(model, vi)
-   if ! is_fixed(model, vi)
+   if ! _is_fixed(model, vi)
       error("Variable $vi is not fixed -- ConstraintSet not defined.")
    end
    return MOI.EqualTo(model.variable_info[vi.value].lower_bound)
@@ -371,7 +371,7 @@ function MOI.get(
    MOI.check_result_index_bounds(model, attr)
    vi = MOI.VariableIndex(ci.value)
    check_inbounds(model, vi)
-   if ! has_upper_bound(model, vi)
+   if ! _has_upper_bound(model, vi)
       error("Variable $vi has no upper bound -- ConstraintPrimal not defined.")
    end
    try
@@ -389,7 +389,7 @@ function MOI.get(
    MOI.check_result_index_bounds(model, attr)
    vi = MOI.VariableIndex(ci.value)
    check_inbounds(model, vi)
-   if ! has_lower_bound(model, vi)
+   if ! _has_lower_bound(model, vi)
       error("Variable $vi has no lower bound -- ConstraintPrimal not defined.")
    end
    try
@@ -407,7 +407,7 @@ function MOI.get(
    MOI.check_result_index_bounds(model, attr)
    vi = MOI.VariableIndex(ci.value)
    check_inbounds(model, vi)
-   if ! is_fixed(model, vi)
+   if ! _is_fixed(model, vi)
       error("Variable $vi is not fixed -- ConstraintPrimal not defined.")
    end
    try
@@ -425,7 +425,7 @@ function MOI.get(
    MOI.check_result_index_bounds(model, attr)
    vi = MOI.VariableIndex(ci.value)
    check_inbounds(model, vi)
-   if ! has_upper_bound(model, vi)
+   if ! _has_upper_bound(model, vi)
       error("Variable $vi has no upper bound -- ConstraintDual not defined.")
    end
    s = _dual_multiplier(model)
@@ -444,10 +444,10 @@ function MOI.get(
    MOI.check_result_index_bounds(model, attr)
    vi = MOI.VariableIndex(ci.value)
    check_inbounds(model, vi)
-   if ! has_lower_bound(model, vi)
+   if ! _has_lower_bound(model, vi)
       error("Variable $vi has no lower bound -- ConstraintDual not defined.")
    end
-   if is_fixed(model, vi)
+   if _is_fixed(model, vi)
       return 0.0
    else
       s = _dual_multiplier(model)
@@ -467,7 +467,7 @@ function MOI.get(
    MOI.check_result_index_bounds(model, attr)
    vi = MOI.VariableIndex(ci.value)
    check_inbounds(model, vi)
-   if ! is_fixed(model, vi)
+   if ! _is_fixed(model, vi)
       error("Variable $vi is not fixed -- ConstraintDual not defined.")
    end
    try

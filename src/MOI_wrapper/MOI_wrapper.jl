@@ -241,23 +241,14 @@ function MOI.is_empty(
       isempty(model.complementarity_constraints)
 end
 
-has_start(var::VariableInfo) = ! isnothing(var.start)
-has_upper_bound(var::VariableInfo) = ! isnothing(var.upper_bound)
-has_lower_bound(var::VariableInfo) = ! isnothing(var.lower_bound)
-is_fixed(var::VariableInfo) = has_lower_bound(var) && has_upper_bound(var) && var.lower_bound == var.upper_bound
+_has_start(var::VariableInfo) = ! isnothing(var.start)
+_has_upper_bound(var::VariableInfo) = ! isnothing(var.upper_bound)
+_has_lower_bound(var::VariableInfo) = ! isnothing(var.lower_bound)
+_is_fixed(var::VariableInfo) = _has_lower_bound(var) && _has_upper_bound(var) && var.lower_bound == var.upper_bound
 
-has_upper_bound(model::Optimizer, vi::MOI.VariableIndex) = has_upper_bound(model.variable_info[vi.value])
-has_lower_bound(model::Optimizer, vi::MOI.VariableIndex) = has_lower_bound(model.variable_info[vi.value])
-is_fixed(model::Optimizer, vi::MOI.VariableIndex) = is_fixed(model.variable_info[vi.value])
-
-offset_linear_le(model::Optimizer) = 0
-offset_linear_ge(model::Optimizer) = length(model.linear_le_constraints)
-offset_linear_eq(model::Optimizer) = offset_linear_ge(model) + length(model.linear_ge_constraints)
-offset_quadratic_le(model::Optimizer) = offset_linear_eq(model) + length(model.linear_eq_constraints)
-offset_quadratic_ge(model::Optimizer) = offset_quadratic_le(model) + length(model.quadratic_le_constraints)
-offset_quadratic_eq(model::Optimizer) = offset_quadratic_ge(model) + length(model.quadratic_ge_constraints)
-offset_nonlin(model::Optimizer) = offset_quadratic_eq(model) + length(model.quadratic_eq_constraints)
-offset_complementarity(model::Optimizer) = 0
+_has_upper_bound(model::Optimizer, vi::MOI.VariableIndex) = _has_upper_bound(model.variable_info[vi.value])
+_has_lower_bound(model::Optimizer, vi::MOI.VariableIndex) = _has_lower_bound(model.variable_info[vi.value])
+_is_fixed(model::Optimizer, vi::MOI.VariableIndex) = _is_fixed(model.variable_info[vi.value])
 
 function _constraints(
    model::Optimizer,
@@ -355,6 +346,10 @@ function _offset(
    return _offset(model, MOI.ScalarQuadraticFunction{Float64}, MOI.GreaterThan{Float64}) + length(model.quadratic_ge_constraints)
 end
 
+_offset_nonlin(model::Optimizer) = _offset(model, MOI.ScalarQuadraticFunction{Float64}, MOI.EqualTo{Float64}) + length(model.quadratic_eq_constraints)
+
+_dual_multiplier(model::Optimizer) = model.sense == MOI.MIN_SENSE ? 1.0 : -1.0
+
 function MOI.set(
    model::Optimizer,
    ::MOI.NLPBlock,
@@ -364,8 +359,6 @@ function MOI.set(
    MOI.initialize(model.nlp_data.evaluator, [:ExprGraph])
    return
 end
-
-_dual_multiplier(model::Optimizer) = model.sense == MOI.MIN_SENSE ? 1.0 : -1.0
 
 include("options.jl")
 include("variables.jl")

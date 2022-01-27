@@ -503,7 +503,7 @@ function MOI.get(
    MOI.check_result_index_bounds(model, attr)
    values = zeros(model.m_nonlin)
    s = _dual_multiplier(model)
-   for i = offset_nonlin(model)+1:offset_nonlin(model)+model.m_nonlin
+   for i = _offset_nonlin(model)+1:_offset_nonlin(model)+model.m_nonlin
       values[i] = s * model.sol.equ["eq$i"].dual[1]
    end
    return values

@@ -50,7 +50,7 @@ function MOI.optimize!(
    model.m_quad = length(model.quadratic_le_constraints) +
       length(model.quadratic_ge_constraints) + length(model.quadratic_eq_constraints)
    model.m_nonlin = !isnothing(model.nlp_data) ? length(model.nlp_data.constraint_bounds) : 0
-   model.m = offset_nonlin(model) + model.m_nonlin
+   model.m = _offset_nonlin(model) + model.m_nonlin
 
    # choose model type
    is_discrete = model.n_binary + model.n_integer + model.n_semicont + model.n_semiint > 0

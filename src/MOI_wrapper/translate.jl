@@ -316,7 +316,7 @@ function translate_defequs(
       first = false
    end
    for i in 1:model.m_nonlin
-      idx = i + offset_nonlin(model)
+      idx = i + _offset_nonlin(model)
       write(io, first ? "eq$idx" : ", eq$idx")
       first = false
    end
@@ -743,7 +743,7 @@ function translate_equations(
    end
    @assert(length(func.args) == 3)
 
-   idx += offset_nonlin(model)
+   idx += _offset_nonlin(model)
 
    write(io, "eq$idx.. ")
    translate_function(io, model, func.args[2], is_parenthesis=true)
@@ -802,8 +802,6 @@ function translate_equations(
    func::MOI.VectorAffineFunction,
    set::MOI.Complements
 )
-   idx += offset_complementarity(model)
-
    for i in 1:set.dimension ÷ 2
       row = filter(term -> term.output_index == i, func.terms)
       write(io, "eq$(idx)_$(i).. ")
@@ -822,17 +820,17 @@ function translate_vardata(
    model::Optimizer
 )
    for (i, var) in enumerate(model.variable_info)
-      if is_fixed(var)
+      if _is_fixed(var)
          writeln(io, variable_name(model, MOI.VariableIndex(i)) * ".fx = " * dbl2str(var.lower_bound) * ";")
          continue
       end
-      if has_lower_bound(var)
+      if _has_lower_bound(var)
          writeln(io, variable_name(model, MOI.VariableIndex(i)) * ".lo = " * dbl2str(var.lower_bound) * "; ")
       end
-      if has_start(var)
+      if _has_start(var)
          writeln(io, variable_name(model, MOI.VariableIndex(i)) * ".l = " * dbl2str(var.start) * "; ")
       end
-      if has_upper_bound(var)
+      if _has_upper_bound(var)
          writeln(io, variable_name(model, MOI.VariableIndex(i)) * ".up = " * dbl2str(var.upper_bound) * ";")
       end
    end
