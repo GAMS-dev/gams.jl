@@ -379,7 +379,18 @@ function MOI.get(
    try
       return model.sol.var[variable_name(model, vi)].level[1]
    catch
-      return 0
+      var = model.variable_info[vi.value]
+      if _is_fixed(var)
+         return var.lower_bound
+      elseif _has_lower_bound(var) && _has_upper_bound(var)
+         return max(min(0, var.upper_bound), var.lower_bound)
+      elseif _has_lower_bound(var)
+         return max(0, var.lower_bound)
+      elseif _has_upper_bound(var)
+         return min(0, var.upper_bound)
+      else
+         return 0
+      end
    end
 end
 

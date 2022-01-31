@@ -34,4 +34,16 @@ end
         @test JuMP.value(x) == 2257.812325
     end
 
+    @testset "fixed_var" begin
+        m = JuMP.Model(GAMS.Optimizer)
+        JuMP.@variable(m, x)
+        JuMP.@variable(m, y)
+        JuMP.fix(x, 1)
+        JuMP.@constraint(m, y == 1)
+        JuMP.set_optimizer_attribute(m, MOI.Silent(), true)
+        JuMP.optimize!(m)
+
+        @test JuMP.value(x) == JuMP.value(y)
+    end
+
 end
