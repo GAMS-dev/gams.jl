@@ -56,11 +56,6 @@ const TEST_GAMSLIB_MODELS = (
    # "nash"
 )
 
-# we need GAMS 32 for JuMP output in Convert
-if GAMS.get_version(ws)[1] < 32
-   return
-end
-
 # create temporary working directory
 curdir = pwd()
 tempdir = mktempdir(prefix = "gams_jl_")
