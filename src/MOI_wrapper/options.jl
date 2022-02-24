@@ -130,6 +130,22 @@ end
 
 function MOI.get(
    model::Optimizer,
+   ::MOI.Name
+)
+   return model.name
+end
+
+function MOI.set(
+   model::Optimizer,
+   ::MOI.Name,
+   name::String
+)
+   model.name = name
+   return
+end
+
+function MOI.get(
+   model::Optimizer,
    ::MOI.Silent
 )
    return get(model.gams_options, "logoption", nothing) == 0

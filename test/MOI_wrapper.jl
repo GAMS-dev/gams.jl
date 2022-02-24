@@ -26,9 +26,6 @@ MOI.Test.runtests(
             MOI.ConstraintBasisStatus,
         ],
     );
-    # include = String[
-    #     "test_infeasible_MAX_SENSE",
-    # ],
     exclude = String[
         # xpress returns different duals
         "test_conic_NormInfinityCone_3",
@@ -36,6 +33,7 @@ MOI.Test.runtests(
         "test_solve_VariableIndex_ConstraintDual_MIN_SENSE",
         "test_variable_solve_with_lowerbound",
         "test_variable_solve_with_upperbound",
+        "test_quadratic_nonhomogeneous",
 
         # xpress doesn't return dual bound
         "test_linear_Semicontinuous_integration",

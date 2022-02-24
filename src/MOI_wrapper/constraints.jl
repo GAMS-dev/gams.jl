@@ -1,4 +1,67 @@
 
+function MOI.get(
+   model::Optimizer,
+   ::MOI.ListOfConstraintTypesPresent
+)
+   constraints = Set{Tuple{Type,Type}}()
+
+   for info in values(model.variable_info)
+      if info.type == VARTYPE_BINARY
+         push!(constraints, (MOI.VariableIndex, MOI.ZeroOne))
+      elseif info.type == VARTYPE_INTEGER
+         push!(constraints, (MOI.VariableIndex, MOI.Integer))
+      elseif info.type == VARTYPE_SEMICONT
+         push!(constraints, (MOI.VariableIndex, MOI.Semicontinuous{Float64}))
+      elseif info.type == VARTYPE_SEMIINT
+         push!(constraints, (MOI.VariableIndex, MOI.Semiinteger{Float64}))
+      end
+
+      if _is_fixed(info)
+         push!(constraints, (MOI.VariableIndex, MOI.EqualTo{Float64}))
+      elseif _has_lower_bound(info) && _has_upper_bound(info)
+         push!(constraints, (MOI.VariableIndex, MOI.GreaterThan{Float64}))
+         push!(constraints, (MOI.VariableIndex, MOI.LessThan{Float64}))
+      elseif _has_upper_bound(info)
+         push!(constraints, (MOI.VariableIndex, MOI.LessThan{Float64}))
+      elseif _has_lower_bound(info)
+         push!(constraints, (MOI.VariableIndex, MOI.GreaterThan{Float64}))
+      end
+   end
+
+   if length(model.linear_eq_constraints) > 0
+      push!(constraints, (MOI.ScalarAffineFunction{Float64}, MOI.EqualTo{Float64}))
+   end
+   if length(model.linear_le_constraints) > 0
+      push!(constraints, (MOI.ScalarAffineFunction{Float64}, MOI.LessThan{Float64}))
+   end
+   if length(model.linear_ge_constraints) > 0
+      push!(constraints, (MOI.ScalarAffineFunction{Float64}, MOI.GreaterThan{Float64}))
+   end
+
+   if length(model.quadratic_eq_constraints) > 0
+      push!(constraints, (MOI.ScalarQuadraticFunction{Float64}, MOI.EqualTo{Float64}))
+   end
+   if length(model.quadratic_le_constraints) > 0
+      push!(constraints, (MOI.ScalarQuadraticFunction{Float64}, MOI.LessThan{Float64}))
+   end
+   if length(model.quadratic_ge_constraints) > 0
+      push!(constraints, (MOI.ScalarQuadraticFunction{Float64}, MOI.GreaterThan{Float64}))
+   end
+
+   if length(model.sos1_constraints) > 0
+      push!(constraints, (MOI.VectorOfVariables, MOI.SOS1{Float64}))
+   end
+   if length(model.sos2_constraints) > 0
+      push!(constraints, (MOI.VectorOfVariables, MOI.SOS2{Float64}))
+   end
+
+   if length(model.complementarity_constraints) > 0
+      push!(constraints, (MOI.VectorAffineFunction{Float64}, MOI.Complements))
+   end
+
+   return collect(constraints)
+end
+
 function MOI.add_constraint(
    model::Optimizer,
    func::MOI.ScalarAffineFunction{Float64},

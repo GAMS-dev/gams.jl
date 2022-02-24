@@ -83,11 +83,11 @@ function MOI.optimize!(
       translate_objective(io, model)
       translate_equations(io, model)
       translate_vardata(io, model)
-      translate_solve(io, model, "moi")
+      translate_solve(io, model, model.name)
    end
 
    # run GAMS
-   job = GAMSJob(model.gamswork, filename, "moi")
+   job = GAMSJob(model.gamswork, filename, model.name)
    model.sol, stats = run(job, options=model.gams_options, solver_options=model.solver_options)
 
    # process optimal objective

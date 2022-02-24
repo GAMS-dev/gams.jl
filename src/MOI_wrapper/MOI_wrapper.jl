@@ -73,6 +73,7 @@ mutable struct Optimizer <: MOI.AbstractOptimizer
    gamswork::Union{GAMSWorkspace, Nothing}
 
    # problem attributes
+   name::String
    model_type::GAMSModelType
    n_binary::Int
    n_integer::Int
@@ -116,7 +117,7 @@ end
 function Optimizer(workspace::Union{Nothing, GAMSWorkspace} = nothing)
    gams_options = Dict{String, Any}()
    gams_options["threads"] = 1
-   return Optimizer(workspace, MODEL_TYPE_UNDEFINED, 0, 0, 0, 0, 0, 0, 0, 0,
+   return Optimizer(workspace, "m", MODEL_TYPE_UNDEFINED, 0, 0, 0, 0, 0, 0, 0, 0,
                     MOI.FEASIBILITY_SENSE, nothing, true, [], [], [], [], [], [],
                     [], [], [], nothing, [], nothing, nothing, MODEL_TYPE_UNDEFINED,
                     gams_options, Dict{String, Any}(), NaN, SOLVE_STATUS_UNDEFINED,
@@ -134,6 +135,7 @@ end
 
 MOI.get(::Optimizer, ::MOI.SolverName) = "GAMS"
 
+MOI.supports(::Optimizer, ::MOI.Name) = true
 MOI.supports(::Optimizer, ::MOI.SolverVersion) = true
 MOI.supports(::Optimizer, ::MOI.Silent) = true
 MOI.supports(::Optimizer, ::MOI.ObjectiveSense) = true
