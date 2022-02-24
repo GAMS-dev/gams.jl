@@ -191,7 +191,7 @@ function MOI.get(
    ::MOI.SolverVersion
 )
    ver = get_version(model.gamswork);
-   return "$ver[1].$ver[2].$ver[3]"
+   return "$(ver[1]).$(ver[2]).$(ver[3])"
 end
 
 function MOI.copy_to(

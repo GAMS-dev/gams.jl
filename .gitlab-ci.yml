@@ -1,0 +1,17 @@
+
+stages:
+  - test
+
+test:
+    stage: test
+    tags:
+        - linux
+    image: 
+        name: julia:1.7
+    before_script:
+        - export PATH="/opt/gams/:$PATH"
+    script:
+        - julia --project=@. -e "import Pkg; Pkg.test()"
+    only:
+        - merge_requests
+        - master
