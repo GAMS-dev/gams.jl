@@ -9,7 +9,7 @@ test:
     image: 
         name: julia:1.7
     before_script:
-        - export PATH="/opt/gams/:$PATH"
+        - export PATH="/opt/gams29.1.0:$PATH"
     script:
         - julia --project=@. -e "import Pkg; Pkg.test()"
     only:
