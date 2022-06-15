@@ -394,7 +394,8 @@ function run(
    # create solver option file
    has_optfile = false
    if haskey(options, "solver") && length(solver_options) > 0
-      opt_filepath = joinpath(job.workspace.working_dir, "$(options["solver"]).opt")
+      opt_filename = lowercase("$(options["solver"]).opt")
+      opt_filepath = joinpath(job.workspace.working_dir, opt_filename)
       open(opt_filepath, "w") do io
          for (name, value) in solver_options
             Base.write(io, "$name $value\n")
