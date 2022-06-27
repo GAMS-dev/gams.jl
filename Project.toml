@@ -1,7 +1,7 @@
 name = "GAMS"
 uuid = "1ca51c6a-1b4d-4546-9ae1-53e0a243ab12"
 authors = ["GAMS Software GmbH <support@gams.com>"]
-version = "0.3.3"
+version = "0.3.4"
 
 [deps]
 Libdl = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
