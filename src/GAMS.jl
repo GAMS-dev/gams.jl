@@ -5,7 +5,7 @@ using Libdl
 export GAMSModelStatus, GAMSSolveStatus, GAMSModelType, GAMSVarType
 export label
 export GAMSWorkspace, GAMSJob
-export get_version, check_solver, get_solvers, set_system_dir
+export get_version, set_system_dir
 
 # GAMS model status
 @enum(GAMSModelStatus,
@@ -202,14 +202,13 @@ mutable struct GAMSWorkspace
    version::Tuple{Int, Int, Int}
    working_dir::String
    system_dir::String
-   supported_solver_type::Dict{String, Dict{GAMSModelType, Bool}}
 
    function GAMSWorkspace(
       working_dir::String,
       system_dir::String
    )
       check_system_dir(system_dir)
-      new((0, 0, 0), working_dir, system_dir, Dict{String, Dict{GAMSModelType, Bool}}())
+      new((0, 0, 0), working_dir, system_dir)
    end
 end
 
@@ -251,7 +250,6 @@ function set_system_dir(
    if check_system_dir(system_dir)
       workspace.system_dir = system_dir
       workspace.version = (0,0,0)
-      workspace.supported_solver_type = Dict{String, Dict{GAMSModelType, Bool}}()
    end
 end
 
@@ -276,89 +274,6 @@ function get_version(
       workspace.version = (version[1], version[2], version[3])
    end
    return workspace.version
-end
-
-function load_solver_info(
-   workspace::GAMSWorkspace
-)
-   cmd = joinpath(workspace.system_dir, "gams")
-   cmd_arg::Vector{String} = Vector{String}()
-   push!(cmd_arg, joinpath(@__DIR__, "solver_info.gms"))
-   push!(cmd_arg, "curDir=$(workspace.working_dir)")
-   push!(cmd_arg, "logoption=0")
-
-   try
-      Base.run(`$cmd $cmd_arg`)
-   catch e
-      lst_filepath = joinpath(workspace.working_dir, "solver_info.lst")
-      error("GAMS compilation failed:\n" * open(f->read(f, String), lst_filepath))
-   end
-
-   # create gdx object
-   gdx = GDXHandle()
-   gdx_create(gdx)
-   gdx_open_read(gdx, joinpath(workspace.working_dir, "solver_info.gdx"))
-
-   # read gdx file
-   n_rec = gdx_data_read_str_start(gdx, 1)
-   uels = Vector{String}(undef, 2)
-   vals = Vector{Float64}(undef, 2)
-   for i in 1:n_rec
-      gdx_data_read_str(gdx, uels, vals)
-      name = lowercase(uels[1])
-      if ! haskey(workspace.supported_solver_type, name)
-         workspace.supported_solver_type[name] = Dict{String, Bool}()
-      end
-      mtype = model_type_from_label(uppercase(uels[2]))
-      if ! haskey(workspace.supported_solver_type[name], mtype)
-         workspace.supported_solver_type[name][mtype] = true
-      end
-   end
-   gdx_data_read_done(gdx)
-   gdx_close(gdx)
-   gdx_free(gdx)
-
-   return
-end
-
-function check_solver(
-   workspace::GAMSWorkspace,
-   solver::String
-)
-   solver = lowercase(solver)
-   if isempty(workspace.supported_solver_type)
-      load_solver_info(workspace)
-   end
-   return haskey(workspace.supported_solver_type, solver)
-end
-
-function check_solver(
-   workspace::GAMSWorkspace,
-   solver::String,
-   modeltype::GAMSModelType
-)
-   solver = lowercase(solver)
-   if check_solver(workspace, solver)
-      return haskey(workspace.supported_solver_type[solver], modeltype)
-   end
-   return false
-end
-
-function check_solver(
-   workspace::GAMSWorkspace,
-   solver::String,
-   modeltype::String
-)
-   return check_solver(workspace, solver, model_type_from_label(uppercase(modeltype)))
-end
-
-function get_solvers(
-   workspace::GAMSWorkspace
-)
-   if isempty(workspace.supported_solver_type)
-      load_solver_info(workspace)
-   end
-   return sort(collect(keys(workspace.supported_solver_type)))
 end
 
 mutable struct GAMSJob

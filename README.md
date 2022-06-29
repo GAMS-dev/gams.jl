@@ -147,17 +147,6 @@ set_optimizer_attribute(model, "<solver_option_name>", <option_value>)
 Note that passing a solver option is only valid when exlicitly choosing a GAMS
 solver and not using the default.
 
-### Checking Solver Support
-
-In order to check, if a GAMS solver is licensed (and supports a given [GAMS
-model
-type](https://www.gams.com/latest/docs/UG_ModelSolve.html#UG_ModelSolve_ModelClassificationOfModels)),
-do
-```julia
-GAMS.check_solver(GAMS.GAMSWorkspace(), "<solver_name>")
-GAMS.check_solver(GAMS.GAMSWorkspace(), "<solver_name>", "<model_type>")
-```
-
 ### GAMS Names vs. JuMP Names
 
 GAMS uses generated variable and constraint names although it is possible to
