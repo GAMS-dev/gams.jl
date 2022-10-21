@@ -1,0 +1,63 @@
+GAMS.jl v0.4.0
+==================
+- Update to MathOptInterface 1.8.2
+
+GAMS.jl v0.3.3
+==================
+- Fixed missing attributes: 'Name', 'ListOfConstraintTypesPresent'
+
+GAMS.jl v0.3.2
+==================
+- Added attributes to query generated and original symbol names
+
+GAMS.jl v0.3.1
+==================
+- Fixed primal solution of a fixed unused variable
+
+GAMS.jl v0.3.0
+==================
+- Update to MathOptInterface 0.10.7
+- Added support of variable and constraint names in generated GAMS model
+- Fixed repeated update of bounds
+- Fixed empty row
+
+GAMS.jl v0.2.5
+==================
+- Fixed setting license option
+- Fixed incorrect reset of model type, system directory and working directory
+
+GAMS.jl v0.2.4
+==================
+- Added GAMS command line option 'license'
+
+GAMS.jl v0.2.3
+==================
+- Added support of optimizer initialization with a GAMSWorkspace
+
+GAMS.jl v0.2.2
+==================
+- Added support of acos, asin, atan, mod and sign function
+
+GAMS.jl v0.2.1
+==================
+- Fixed query of optimizer attributes 'sysdir', 'workdir' and 'modeltype'
+- Fixed init of GAMSWorkspace when GAMS cannot be found in PATH
+
+GAMS.jl v0.2.0
+==================
+- Added support of complementarity constraints (model types MPEC and MCP)
+- Fixed handling of objective function for model type CNS
+- Fixed return of non-existing variables from NaN to 0
+
+GAMS.jl v0.1.6
+==================
+- Fixed solution GDX report for incomplete list of variables
+
+GAMS.jl v0.1.5
+==================
+- Fixed precision for writing doubles
+- Fixed a bug when only sos2 constraints are present
+
+GAMS.jl v0.1.4
+==================
+- Added support of MOI.NLPBlockDual
