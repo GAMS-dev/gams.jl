@@ -77,6 +77,10 @@ version_depend_excludes = Dict(
         # xpress returns different duals
         "test_conic_NormInfinityCone_3",
         "test_quadratic_nonhomogeneous",
+    ],
+    "40.4.0" => String[
+        # xpress returns different duals
+        "test_quadratic_nonhomogeneous",
     ]
 )
 
