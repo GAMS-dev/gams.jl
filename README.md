@@ -127,7 +127,9 @@ where `<option>` is either
 [MCP](https://www.gams.com/latest/docs/UG_GamsCall.html#GAMSAOmcp) or
 [MPEC](https://www.gams.com/latest/docs/UG_GamsCall.html#GAMSAOmpec).
 Note that `GAMS.ResLim()` is equivalent to `MOI.TimeLimitSec()` and
-`GAMS.Threads()` to `MOI.NumberOfThreads()`.
+`GAMS.Threads()` to `MOI.NumberOfThreads()`. Options `SolPrint`, `LimRow`,
+`LimCol` and `SolveLink` cannot be changed and are set to `0`, `0`, `0` and `5`,
+respectively.
 
 #### Model Type
 
