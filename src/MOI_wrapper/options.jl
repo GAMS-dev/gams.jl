@@ -207,6 +207,38 @@ end
 
 function MOI.get(
    model::Optimizer,
+   ::MOI.AbsoluteGapTolerance
+)
+   return get(model.gams_options, "optca", nothing)
+end
+
+function MOI.set(
+   model::Optimizer,
+   ::MOI.AbsoluteGapTolerance,
+   value::Int
+)
+   MOI.set(model, MOI.RawOptimizerAttribute("optca"), value)
+   return
+end
+
+function MOI.get(
+   model::Optimizer,
+   ::MOI.RelativeGapTolerance
+)
+   return get(model.gams_options, "optcr", nothing)
+end
+
+function MOI.set(
+   model::Optimizer,
+   ::MOI.RelativeGapTolerance,
+   value::Int
+)
+   MOI.set(model, MOI.RawOptimizerAttribute("optcr"), value)
+   return
+end
+
+function MOI.get(
+   model::Optimizer,
    option::MOI.RawOptimizerAttribute
 )
    name = lowercase(option.name)

@@ -1,3 +1,8 @@
+GAMS.jl v0.5.0
+==================
+- Add support of attributes NodeCount, RelativeGapTolerance,
+  AbsoluteGapTolerance and RelativeGap.
+
 GAMS.jl v0.4.1
 ==================
 - Fix MathOptInterface dependency to be [1.8.x, 2)

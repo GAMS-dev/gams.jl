@@ -112,6 +112,7 @@ mutable struct Optimizer <: MOI.AbstractOptimizer
    sol::Union{GAMSSolution, Nothing}
    obj::Float64
    obj_est::Float64
+   node_count::Int
 end
 
 function Optimizer(workspace::Union{Nothing, GAMSWorkspace} = nothing)
@@ -121,7 +122,7 @@ function Optimizer(workspace::Union{Nothing, GAMSWorkspace} = nothing)
                     MOI.FEASIBILITY_SENSE, nothing, true, [], [], [], [], [], [],
                     [], [], [], nothing, [], nothing, nothing, MODEL_TYPE_UNDEFINED,
                     gams_options, Dict{String, Any}(), NaN, SOLVE_STATUS_UNDEFINED,
-                    MODEL_STATUS_UNDEFINED, nothing, NaN, NaN)
+                    MODEL_STATUS_UNDEFINED, nothing, NaN, NaN, 0)
 end
 
 struct GeneratedVariableName <: MOI.AbstractVariableAttribute end
@@ -161,8 +162,14 @@ MOI.supports(::Optimizer, ::GeneratedConstraintName, ::Type{MOI.ConstraintIndex{
 MOI.supports(::Optimizer, ::GeneratedConstraintName, ::Type{MOI.ConstraintIndex{MOI.ScalarQuadraticFunction{Float64}, MOI.EqualTo{Float64}}}) = true
 MOI.supports(::Optimizer, ::MOI.TimeLimitSec) = true
 MOI.supports(::Optimizer, ::MOI.NumberOfThreads) = true
+MOI.supports(::Optimizer, ::MOI.RelativeGapTolerance) = true
+MOI.supports(::Optimizer, ::MOI.AbsoluteGapTolerance) = true
 MOI.supports(::Optimizer, ::MOI.NLPBlock) = true
 MOI.supports(::Optimizer, ::MOI.NLPBlockDual) = true
+MOI.supports(::Optimizer, ::MOI.NodeCount) = true
+MOI.supports(::Optimizer, ::MOI.ObjectiveValue) = true
+MOI.supports(::Optimizer, ::MOI.ObjectiveBound) = true
+MOI.supports(::Optimizer, ::MOI.RelativeGap) = true
 MOI.supports_constraint(::Optimizer, ::Type{MOI.VariableIndex}, ::Type{MOI.LessThan{Float64}}) = true
 MOI.supports_constraint(::Optimizer, ::Type{MOI.VariableIndex}, ::Type{MOI.GreaterThan{Float64}}) = true
 MOI.supports_constraint(::Optimizer, ::Type{MOI.VariableIndex}, ::Type{MOI.EqualTo{Float64}}) = true

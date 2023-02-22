@@ -114,6 +114,11 @@ function MOI.optimize!(
    else
       model.solve_time = 0.0
    end
+
+   if haskey(stats, "nodUsd") && !isnan(stats["nodUsd"])
+      model.node_count = stats["nodUsd"]
+   end
+
    return
 end
 
@@ -122,6 +127,13 @@ function MOI.get(
    ::MOI.SolveTimeSec
 )
    return model.solve_time
+end
+
+function MOI.get(
+   model::Optimizer,
+   ::MOI.NodeCount
+)
+   return model.node_count
 end
 
 function MOI.get(

@@ -119,7 +119,7 @@ const GAMS_MODEL_STATUS_NO_SOLUTION = (
 const GAMS_MODEL_ATTRIBUTES_INT = (
    "domUsd", "iterUsd", "marginals", "modelStat", "numDepnd", "numDVar", "numEqu",
    "numInfes", "numNLIns", "numNLNZ", "numNOpt", "numNZ", "numRedef", "numVar",
-   "numVarProj", "solveStat"
+   "numVarProj", "solveStat", "nodUsd"
 )
 
 # GAMS model attributes (after solve) with real value

@@ -39,3 +39,10 @@ function MOI.get(
 )
    return model.obj_est
 end
+
+function MOI.get(
+   model::Optimizer,
+   ::MOI.RelativeGap
+)
+   return abs(model.obj - model.obj_est) / max(abs(model.obj), abs(model.obj_est))
+end
