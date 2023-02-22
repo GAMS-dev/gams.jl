@@ -1,6 +1,6 @@
-GAMS.jl v0.5.0
+GAMS.jl v0.4.2
 ==================
-- Add support of attributes NodeCount, RelativeGapTolerance,
+- Fixed missing attributes: NodeCount, RelativeGapTolerance,
   AbsoluteGapTolerance and RelativeGap.
 
 GAMS.jl v0.4.1
