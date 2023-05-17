@@ -1,4 +1,3 @@
-
 # GAMS.jl
 
 GAMS.jl provides a
@@ -48,15 +47,15 @@ GAMS.jl supports the following JuMP features:
 ## Installation
 
 1. [Download GAMS](https://www.gams.com/download/) and obtain a
-GAMS license. Please note that GAMS also offers a [free community
-license](https://www.gams.com/latest/docs/UG_License.html#GAMS_Community_Licenses).
+   GAMS license. Please note that GAMS also offers a [free community
+   license](https://www.gams.com/latest/docs/UG_License.html#GAMS_Community_Licenses).
 2. (optional) Add the GAMS system directory to the `PATH` variable in order to
-find GAMS automatically.
+   find GAMS automatically.
 3. Install GAMS.jl using the Julia package manager:
-```julia
-using Pkg
-Pkg.add("GAMS")
-```
+   ```julia
+   using Pkg
+   Pkg.add("GAMS")
+   ```
 
 ## Usage
 
@@ -149,7 +148,7 @@ Specifying GAMS solver options:
 ```julia
 set_optimizer_attribute(model, "<solver_option_name>", <option_value>)
 ```
-Note that passing a solver option is only valid when exlicitly choosing a GAMS
+Note that passing a solver option is only valid when explicitly choosing a GAMS
 solver and not using the default.
 
 ### GAMS Names vs. JuMP Names
@@ -159,7 +158,7 @@ pass the JuMP names to the GAMS optimizer, because GAMS is more restrictive
 when it comes to variable and constraint naming. Use the attributes
 `GeneratedVariableName`, `GeneratedConstraintName`, `OriginalVariableName`,
 `OriginalConstraintName` to query a GAMS symbol name from a JuMP symbol and vice
-versa. This can help for debugging, e.g., in case of GAMS compilation errors.
+versa. This can help for debugging, for example, in case of GAMS compilation errors.
 For example:
 ```julia
 using GAMS
