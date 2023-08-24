@@ -47,10 +47,10 @@ GAMS.jl supports the following JuMP features:
 2. (optional) Add the GAMS system directory to the `PATH` variable in order to
    find GAMS automatically.
 3. Install GAMS.jl using the Julia package manager:
-```julia
-using Pkg
-Pkg.add("GAMS")
-```
+   ```julia
+   using Pkg
+   Pkg.add("GAMS")
+   ```
 
 ## Usage
 
