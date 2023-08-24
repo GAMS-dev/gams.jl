@@ -10,22 +10,17 @@ GAMS comes with dozens of supported solvers. Among them are:
 [ALPHAECP](https://www.gams.com/latest/docs/S_ALPHAECP.html),
 [ANTIGONE](https://www.gams.com/latest/docs/S_ANTIGONE.html),
 [BARON](https://www.gams.com/latest/docs/S_BARON.html),
-[BONMIN](https://www.gams.com/latest/docs/S_BONMIN.html),
 [CBC](https://www.gams.com/latest/docs/S_CBC.html),
 [CONOPT](https://www.gams.com/latest/docs/S_CONOPT.html),
 [CPLEX](https://www.gams.com/latest/docs/S_CPLEX.html),
 [DICOPT](https://www.gams.com/latest/docs/S_DICOPT.html),
-[GLOMIQO](https://www.gams.com/latest/docs/S_GLOMIQO.html),
 [GUROBI](https://www.gams.com/latest/docs/S_GUROBI.html),
 [IPOPT](https://www.gams.com/latest/docs/S_IPOPT.html),
 [KNITRO](https://www.gams.com/latest/docs/S_KNITRO.html),
-[LGO](https://www.gams.com/latest/docs/S_LGO.html),
 [LINDO](https://www.gams.com/latest/docs/S_LINDO.html),
 [LINDOGLOBAL](https://www.gams.com/latest/docs/S_LINDO.html),
-[LOCALSOLVER](https://www.gams.com/latest/docs/S_LOCALSOLVER.html),
 [MINOS](https://www.gams.com/latest/docs/S_MINOS.html),
 [MOSEK](https://www.gams.com/latest/docs/S_MOSEK.html),
-[MSNLP](https://www.gams.com/latest/docs/S_MSNLP.html),
 [NLPEC](https://www.gams.com/latest/docs/S_NLPEC.html),
 [PATH](https://www.gams.com/latest/docs/S_PATH.html),
 [QUADMINOS](https://www.gams.com/latest/docs/S_MINOS.html),
@@ -34,7 +29,6 @@ GAMS comes with dozens of supported solvers. Among them are:
 [SCIP](https://www.gams.com/latest/docs/S_SCIP.html),
 [SNOPT](https://www.gams.com/latest/docs/S_SNOPT.html),
 [SOPLEX](https://www.gams.com/latest/docs/S_SOPLEX.html),
-[XA](https://www.gams.com/latest/docs/S_XA.html),
 [XPRESS](https://www.gams.com/latest/docs/S_XPRESS.html).
 Find a complete list [here](https://www.gams.com/latest/docs/S_MAIN.html).
 
@@ -48,10 +42,10 @@ GAMS.jl supports the following JuMP features:
 ## Installation
 
 1. [Download GAMS](https://www.gams.com/download/) and obtain a
-GAMS license. Please note that GAMS also offers a [free community
-license](https://www.gams.com/latest/docs/UG_License.html#GAMS_Community_Licenses).
+   GAMS license. Please note that GAMS also offers a [free community
+   license](https://www.gams.com/latest/docs/UG_License.html#GAMS_Community_Licenses).
 2. (optional) Add the GAMS system directory to the `PATH` variable in order to
-find GAMS automatically.
+   find GAMS automatically.
 3. Install GAMS.jl using the Julia package manager:
 ```julia
 using Pkg
@@ -149,7 +143,7 @@ Specifying GAMS solver options:
 ```julia
 set_optimizer_attribute(model, "<solver_option_name>", <option_value>)
 ```
-Note that passing a solver option is only valid when exlicitly choosing a GAMS
+Note that passing a solver option is only valid when explicitly choosing a GAMS
 solver and not using the default.
 
 ### GAMS Names vs. JuMP Names
@@ -159,7 +153,7 @@ pass the JuMP names to the GAMS optimizer, because GAMS is more restrictive
 when it comes to variable and constraint naming. Use the attributes
 `GeneratedVariableName`, `GeneratedConstraintName`, `OriginalVariableName`,
 `OriginalConstraintName` to query a GAMS symbol name from a JuMP symbol and vice
-versa. This can help for debugging, e.g., in case of GAMS compilation errors.
+versa. This can help for debugging, for example in case of GAMS compilation errors.
 For example:
 ```julia
 using GAMS
