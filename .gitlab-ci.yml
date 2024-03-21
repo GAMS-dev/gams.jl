@@ -23,7 +23,9 @@ test:
     before_script:
         - export PATH="/opt/gams29.1.0:$PATH"
     script:
-        - julia --project=@. -e "using Pkg; Pkg.test()"
+        - julia --project=@. -e "using Pkg; Pkg.test(; coverage = true)"
+        - julia -e "using Pkg; Pkg.add(\"Coverage\"); using Coverage, Printf; cov = get_summary(process_folder()); @printf \"coverage %.2f%%\n\" (cov[1] / cov[2])"
+    coverage: /^coverage \d+.\d+\%/
     only:
         - merge_requests
         - master
