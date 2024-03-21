@@ -1,0 +1,8 @@
+indent = 4
+margin = 100
+always_for_in = true
+whitespace_typedefs = true
+remove_extra_newlines = true
+long_to_short_function_def = true
+always_use_return = true
+conditional_to_if = true

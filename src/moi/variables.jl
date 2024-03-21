@@ -3,65 +3,41 @@
 ##  Adding Variables and Variable Index                            ##
 #####################################################################
 
-function MOI.add_variable(
-    model::Optimizer
-)
+function MOI.add_variable(model::Optimizer)
     push!(model.variables, VariableInfo())
     return MOI.VariableIndex(length(model.variables))
 end
 
-function MOI.add_variables(
-    model::Optimizer,
-    n::Int
-)
-    return [MOI.add_variable(model) for i in 1:n]
-end
+MOI.add_variables(model::Optimizer, n::Int) = [MOI.add_variable(model) for i in 1:n]
 
-function MOI.get(
-    model::Optimizer,
-    ::Type{MathOptInterface.VariableIndex},
-    name::String
-)
+function MOI.get(model::Optimizer, ::Type{MathOptInterface.VariableIndex}, name::String)
     for (i, var) in enumerate(model.variables)
         if name == var.name
             return MOI.VariableIndex(i)
         end
     end
-    error("Unrecognized variable name $name.")
+    return error("Unrecognized variable name $name.")
 end
 
-function check_inbounds(
-    model::Optimizer,
-    vi::MOI.VariableIndex
-)
+function check_inbounds(model::Optimizer, vi::MOI.VariableIndex)
     nvar = length(model.variables)
     if !(1 <= vi.value <= nvar)
         error("Invalid variable index: $vi ∉ [1,$nvar].")
     end
 end
 
-function check_inbounds(
-    model::Optimizer,
-    var::MOI.VectorOfVariables
-)
+check_inbounds(model::Optimizer, var::MOI.VectorOfVariables) =
     for vi in var.variables
         check_inbounds(model, vi)
     end
-end
 
-function check_inbounds(
-    model::Optimizer,
-    aff::MOI.ScalarAffineFunction
-)
+function check_inbounds(model::Optimizer, aff::MOI.ScalarAffineFunction)
     for term in aff.terms
         check_inbounds(model, term.variable)
     end
 end
 
-function check_inbounds(
-    model::Optimizer,
-    quad::MOI.ScalarQuadraticFunction
-)
+function check_inbounds(model::Optimizer, quad::MOI.ScalarQuadraticFunction)
     for term in quad.affine_terms
         check_inbounds(model, term.variable)
     end
@@ -71,43 +47,23 @@ function check_inbounds(
     end
 end
 
-function check_inbounds(
-    model::Optimizer,
-    vaf::MOI.VectorAffineFunction
-)
+function check_inbounds(model::Optimizer, vaf::MOI.VectorAffineFunction)
     for vi in vaf.terms
         check_inbounds(model, vi.scalar_term)
     end
 end
 
-function check_inbounds(
-    model::Optimizer,
-    aft::MOI.ScalarAffineTerm
-)
-    return check_inbounds(model, aft.variable)
-end
+check_inbounds(model::Optimizer, aft::MOI.ScalarAffineTerm) = check_inbounds(model, aft.variable)
 
-function gms_name(
-    vi::MOI.VariableIndex
-)
-    return "x$(vi.value)"
-end
+gms_name(vi::MOI.VariableIndex) = "x$(vi.value)"
 
 #####################################################################
 ##  Variable Statistics                                            ##
 #####################################################################
 
-function MOI.get(
-    model::Optimizer,
-    ::MOI.NumberOfVariables
-)
-    return length(model.variables)
-end
+MOI.get(model::Optimizer, ::MOI.NumberOfVariables) = length(model.variables)
 
-function MOI.get(
-    model::Optimizer,
-    ::MOI.ListOfVariableIndices
-)
+function MOI.get(model::Optimizer, ::MOI.ListOfVariableIndices)
     return [MOI.VariableIndex(i) for i in 1:length(model.variables)]
 end
 
@@ -121,7 +77,7 @@ function MOI.set(
     model::Optimizer,
     ::MOI.VariablePrimalStart,
     vi::MOI.VariableIndex,
-    value::Union{Real, Nothing}
+    value::Union{Real, Nothing},
 )
     check_inbounds(model, vi)
     model.variables[vi.value].start = value
@@ -130,21 +86,12 @@ end
 
 MOI.supports(::Optimizer, ::MOI.VariableName, ::Type{MOI.VariableIndex}) = true
 
-function MOI.set(
-    model::Optimizer,
-    attr::MOI.VariableName,
-    vi::MOI.VariableIndex,
-    value
-)
+function MOI.set(model::Optimizer, attr::MOI.VariableName, vi::MOI.VariableIndex, value)
     check_inbounds(model, vi)
-    model.variables[vi.value].name = value
+    return model.variables[vi.value].name = value
 end
 
-function MOI.get(
-    model::Optimizer,
-    ::MOI.VariableName,
-    vi::MOI.VariableIndex
-)
+function MOI.get(model::Optimizer, ::MOI.VariableName, vi::MOI.VariableIndex)
     return model.variables[vi.value].name
 end
 
@@ -152,13 +99,7 @@ struct GeneratedVariableName <: MOI.AbstractVariableAttribute end
 
 MOI.supports(::Optimizer, ::GeneratedVariableName, ::Type{MOI.VariableIndex}) = true
 
-function MOI.get(
-    model::Optimizer,
-    ::GeneratedVariableName,
-    vi::MOI.VariableIndex
-)
-    return gms_name(vi)
-end
+MOI.get(model::Optimizer, ::GeneratedVariableName, vi::MOI.VariableIndex) = gms_name(vi)
 
 struct OriginalVariableName <: MOI.AbstractModelAttribute
     name::String
@@ -166,10 +107,7 @@ end
 
 MOI.supports(::Optimizer, ::OriginalVariableName) = true
 
-function MOI.get(
-    model::Optimizer,
-    attr::OriginalVariableName
-)
+function MOI.get(model::Optimizer, attr::OriginalVariableName)
     for (i, v) in enumerate(model.variables)
         if gms_name(MOI.VariableIndex(i)) == attr.name
             return v.name
@@ -178,16 +116,15 @@ function MOI.get(
     return nothing
 end
 
-function MOI.get(
-    model::Optimizer,
-    attr::MOI.VariablePrimal,
-    vi::MOI.VariableIndex
-)
+function MOI.get(model::Optimizer, attr::MOI.VariablePrimal, vi::MOI.VariableIndex)
     MOI.check_result_index_bounds(model, attr)
     check_inbounds(model, vi)
     try
         return model.solution.var[gms_name(vi)].level[1]
     catch
-        return max(min(0, model.variables[vi.value].upper_bound), model.variables[vi.value].lower_bound)
+        return max(
+            min(0, model.variables[vi.value].upper_bound),
+            model.variables[vi.value].lower_bound,
+        )
     end
 end

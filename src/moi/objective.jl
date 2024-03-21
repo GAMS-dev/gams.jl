@@ -6,7 +6,7 @@ MOI.supports(::Optimizer, ::MOI.ObjectiveFunction{MOI.ScalarQuadraticFunction{Fl
 function MOI.set(
     model::Optimizer,
     ::MOI.ObjectiveFunction,
-    func::Union{MOI.VariableIndex, MOI.ScalarAffineFunction, MOI.ScalarQuadraticFunction}
+    func::Union{MOI.VariableIndex, MOI.ScalarAffineFunction, MOI.ScalarQuadraticFunction},
 )
     check_inbounds(model, func)
     model.objective = func
@@ -15,18 +15,9 @@ end
 
 MOI.supports(::Optimizer, ::MOI.ObjectiveSense) = true
 
-function MOI.get(
-    model::Optimizer,
-    ::MOI.ObjectiveSense
-)
-    return model.sense
-end
+MOI.get(model::Optimizer, ::MOI.ObjectiveSense) = model.sense
 
-function MOI.set(
-    model::Optimizer,
-    ::MOI.ObjectiveSense,
-    sense::MOI.OptimizationSense
-)
+function MOI.set(model::Optimizer, ::MOI.ObjectiveSense, sense::MOI.OptimizationSense)
     model.sense = sense
     if sense == MOI.FEASIBILITY_SENSE
         model.objective = nothing
@@ -36,28 +27,18 @@ end
 
 MOI.supports(::Optimizer, ::MOI.ObjectiveValue) = true
 
-function MOI.get(
-    model::Optimizer,
-    attr::MOI.ObjectiveValue
-)
+function MOI.get(model::Optimizer, attr::MOI.ObjectiveValue)
     MOI.check_result_index_bounds(model, attr)
     return model.objective_value
 end
 
 MOI.supports(::Optimizer, ::MOI.ObjectiveBound) = true
 
-function MOI.get(
-    model::Optimizer,
-    ::MOI.ObjectiveBound
-)
-    return model.objective_bound
-end
+MOI.get(model::Optimizer, ::MOI.ObjectiveBound) = model.objective_bound
 
 MOI.supports(::Optimizer, ::MOI.RelativeGap) = true
 
-function MOI.get(
-    model::Optimizer,
-    ::MOI.RelativeGap
-)
-    return abs(model.objective_value - model.objective_bound) / max(abs(model.objective_value), abs(model.objective_bound))
+function MOI.get(model::Optimizer, ::MOI.RelativeGap)
+    return abs(model.objective_value - model.objective_bound) /
+           max(abs(model.objective_value), abs(model.objective_bound))
 end

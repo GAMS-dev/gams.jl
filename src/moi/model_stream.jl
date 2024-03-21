@@ -2,22 +2,15 @@
 const LINE_BREAK = 120
 
 mutable struct ModelStream
-   io::IOStream
-   n_line::Int
+    io::IOStream
+    n_line::Int
 end
 
 ModelStream(io::IOStream) = ModelStream(io, 0)
 
-function num2str(
-    value::Number
- )
-    @sprintf("%.16g", value)
- end
+num2str(value::Number) = @sprintf("%.16g", value)
 
-function coeff2str(
-    coeff::Float64,
-    first::Bool=false
-)
+coeff2str(coeff::Float64, first::Bool = false) =
     if first && coeff == -1.0
         return "-"
     elseif first && coeff == 1.0
@@ -37,67 +30,47 @@ function coeff2str(
     else
         return ""
     end
- end
 
-function write(
-    io::ModelStream,
-    num::Number
-)
-    write(io, num2str(num))
-end
+write(io::ModelStream, num::Number) = write(io, num2str(num))
 
- function write(
-    io::ModelStream,
-    str::String
- )
+function write(io::ModelStream, str::String)
     n = length(str)
     if io.n_line + n > LINE_BREAK
-       idx = n+1
-       while true
-          idx = findprev(isequal(' '), str, idx-1)
-          if idx == nothing || io.n_line + idx <= LINE_BREAK
-             break
-          end
-       end
-       if idx == nothing
-          Base.write(io.io, "\n  ")
-          io.n_line = Base.write(io.io, str)
-       else
-          Base.write(io.io, str[1:idx-1])
-          Base.write(io.io, "\n ")
-          Base.write(io.io, str[idx+1:end])
-          io.n_line = n-idx
-       end
+        idx = n + 1
+        while true
+            idx = findprev(isequal(' '), str, idx - 1)
+            if idx == nothing || io.n_line + idx <= LINE_BREAK
+                break
+            end
+        end
+        if idx == nothing
+            Base.write(io.io, "\n  ")
+            io.n_line = Base.write(io.io, str)
+        else
+            Base.write(io.io, str[1:idx-1])
+            Base.write(io.io, "\n ")
+            Base.write(io.io, str[idx+1:end])
+            io.n_line = n - idx
+        end
     else
-       Base.write(io.io, str)
-       io.n_line += n
+        Base.write(io.io, str)
+        io.n_line += n
     end
- end
+end
 
- function writeln(
-    io::ModelStream,
-    str::String
- )
+function writeln(io::ModelStream, str::String)
     write(io, str)
     Base.write(io.io, "\n")
-    io.n_line = 0
- end
+    return io.n_line = 0
+end
 
 #####################################################################
 ##  Terms                                                          ##
 #####################################################################
 
-function write(
-    io::ModelStream,
-    term::MOI.VariableIndex
-)
-    write(io, gms_name(term))
-end
+write(io::ModelStream, term::MOI.VariableIndex) = write(io, gms_name(term))
 
-function write(
-    io::ModelStream,
-    terms::Vector{MOI.ScalarAffineTerm{Float64}}
-)
+function write(io::ModelStream, terms::Vector{MOI.ScalarAffineTerm{Float64}})
     first = true
     for (j, term) in enumerate(terms)
         if term.coefficient != 0.0
@@ -109,28 +82,22 @@ function write(
     if first
         write(io, "0.0")
     end
- end
+end
 
 #####################################################################
 ##  Functions                                                      ##
 #####################################################################
 
-function write(
-    io::ModelStream,
-    func::MOI.ScalarAffineFunction{Float64}
-)
+function write(io::ModelStream, func::MOI.ScalarAffineFunction{Float64})
     write(io, func.terms)
     if func.constant < 0.0
-       write(io, " - " * num2str(-func.constant))
+        write(io, " - " * num2str(-func.constant))
     elseif func.constant > 0.0
-       write(io, " + " * num2str(func.constant))
+        write(io, " + " * num2str(func.constant))
     end
 end
 
-function write(
-    io::ModelStream,
-    func::MOI.ScalarQuadraticFunction{Float64}
-)
+function write(io::ModelStream, func::MOI.ScalarQuadraticFunction{Float64})
     if length(func.affine_terms) + length(func.quadratic_terms) == 0
         write(io, num2str(func.constant))
         return
@@ -152,7 +119,10 @@ function write(
         if term.variable_1 == term.variable_2
             coeff /= 2.0
         end
-        write(io, coeff2str(coeff, first) * gms_name(term.variable_1) * " * " * gms_name(term.variable_2))
+        write(
+            io,
+            coeff2str(coeff, first) * gms_name(term.variable_1) * " * " * gms_name(term.variable_2),
+        )
         first = false
     end
 
@@ -162,42 +132,23 @@ function write(
     elseif func.constant > 0.0
         write(io, " + " * num2str(func.constant))
     end
- end
+end
 
 #####################################################################
 ##  Sets                                                           ##
 #####################################################################
 
-function write(
-    io::ModelStream,
-    set::MOI.GreaterThan{Float64}
-)
-    write(io, " =G= " * num2str(set.lower))
-end
+write(io::ModelStream, set::MOI.GreaterThan{Float64}) = write(io, " =G= " * num2str(set.lower))
 
-function write(
-    io::ModelStream,
-    set::MOI.LessThan{Float64}
-)
-    write(io, " =L= " * num2str(set.upper))
-end
+write(io::ModelStream, set::MOI.LessThan{Float64}) = write(io, " =L= " * num2str(set.upper))
 
-function write(
-    io::ModelStream,
-    set::MOI.EqualTo{Float64}
-)
-    write(io, " =E= " * num2str(set.value))
-end
+write(io::ModelStream, set::MOI.EqualTo{Float64}) = write(io, " =E= " * num2str(set.value))
 
 #####################################################################
 ##  Expressions                                                    ##
 #####################################################################
 
-function write(
-    io::ModelStream,
-    num::Number;
-    is_parenthesis = false
-)
+function write(io::ModelStream, num::Number; is_parenthesis = false)
     if is_parenthesis || num > 0
         write(io, num2str(num))
     else
@@ -205,11 +156,7 @@ function write(
     end
 end
 
-function write(
-    io::ModelStream,
-    expr::Expr;
-    is_parenthesis = false
-)
+function write(io::ModelStream, expr::Expr; is_parenthesis = false)
     if length(expr.args) == 0
         write(io, "0.0")
         return
@@ -219,18 +166,18 @@ function write(
 
     if op in (:+, :-)
         @assert length(expr.args) >= 2
-        if ! is_parenthesis
+        if !is_parenthesis
             write(io, "(")
         end
         if length(expr.args) == 2
             write(io, "(" * string(op))
-            write(io, expr.args[2], is_parenthesis=false)
+            write(io, expr.args[2], is_parenthesis = false)
             write(io, ")")
         else
-            write(io, expr.args[2], is_parenthesis=true)
+            write(io, expr.args[2], is_parenthesis = true)
             for i in 3:length(expr.args)
                 write(io, " " * string(op) * " ")
-                write(io, expr.args[i], is_parenthesis=(op==:+))
+                write(io, expr.args[i], is_parenthesis = (op == :+))
             end
         end
         if !is_parenthesis
@@ -242,10 +189,10 @@ function write(
         if !is_parenthesis
             write(io, "(")
         end
-        write(io, expr.args[2], is_parenthesis=false)
+        write(io, expr.args[2], is_parenthesis = false)
         for i in 3:length(expr.args)
             write(io, " " * string(op) * " ")
-            write(io, expr.args[i], is_parenthesis=false)
+            write(io, expr.args[i], is_parenthesis = false)
         end
         if !is_parenthesis
             write(io, ")")
@@ -257,51 +204,52 @@ function write(
             write(io, expr.args[2])
         elseif expr.args[3] == 2.0
             write(io, "sqr(")
-            write(io, expr.args[2], is_parenthesis=true)
+            write(io, expr.args[2], is_parenthesis = true)
             write(io, ")")
         elseif expr.args[3] isa Real && expr.args[3] == round(expr.args[3])
             write(io, "power(")
-            write(io, expr.args[2], is_parenthesis=true)
+            write(io, expr.args[2], is_parenthesis = true)
             write(io, ", ")
-            write(io, expr.args[3], is_parenthesis=true)
+            write(io, expr.args[3], is_parenthesis = true)
             write(io, ")")
         else
-            write(io, expr.args[2], is_parenthesis=false)
+            write(io, expr.args[2], is_parenthesis = false)
             write(io, "**")
-            write(io, expr.args[3], is_parenthesis=false)
+            write(io, expr.args[3], is_parenthesis = false)
         end
 
-    elseif op in (:sqrt, :log, :log10, :log2, :exp, :sin, :sinh, :cos, :cosh, :tan, :tanh, :abs, :sign)
+    elseif op in
+           (:sqrt, :log, :log10, :log2, :exp, :sin, :sinh, :cos, :cosh, :tan, :tanh, :abs, :sign)
         @assert length(expr.args) == 2
         write(io, string(op) * "(")
-        write(io, expr.args[2], is_parenthesis=true)
+        write(io, expr.args[2], is_parenthesis = true)
         write(io, ")")
 
     elseif op in (:acos,)
         @assert length(expr.args) == 2
         write(io, "arccos(")
-        write(io, expr.args[2], is_parenthesis=true)
+        write(io, expr.args[2], is_parenthesis = true)
         write(io, ")")
 
     elseif op in (:asin,)
         @assert length(expr.args) == 2
         write(io, "arcsin(")
-        write(io, expr.args[2], is_parenthesis=true)
+        write(io, expr.args[2], is_parenthesis = true)
         write(io, ")")
 
     elseif op in (:atan,)
         @assert length(expr.args) == 2
         write(io, "arctan(")
-        write(io, expr.args[2], is_parenthesis=true)
+        write(io, expr.args[2], is_parenthesis = true)
         write(io, ")")
 
     elseif op in (:max, :min, :mod)
         @assert length(expr.args) >= 2
         write(io, string(op) * "(")
-        write(io, expr.args[2], is_parenthesis=true)
+        write(io, expr.args[2], is_parenthesis = true)
         for i in 3:length(expr.args)
             write(io, ", ")
-            write(io, expr.args[i], is_parenthesis=true)
+            write(io, expr.args[i], is_parenthesis = true)
         end
         write(io, ")")
 
@@ -311,17 +259,13 @@ function write(
     else
         error("Unrecognized operation ($op)")
     end
-
 end
 
 #####################################################################
 ##  Model                                                          ##
 #####################################################################
 
-function write(
-    io::ModelStream,
-    model::Optimizer
-)
+function write(io::ModelStream, model::Optimizer)
     writeln(io, "*\n* GAMS Model generated by GAMS.jl\n*\n")
     writeln(io, "\$offlisting\n")
 
@@ -344,7 +288,9 @@ function write(
             end
         end
     end
-    is_nonlinear = !isnothing(model.nlp_data) && (length(model.nlp_data.constraint_bounds) > 0 || model.nlp_data.has_objective)
+    is_nonlinear =
+        !isnothing(model.nlp_data) &&
+        (length(model.nlp_data.constraint_bounds) > 0 || model.nlp_data.has_objective)
     is_compl = length(model.compl_constraints) > 0
 
     # detect model type
@@ -492,7 +438,8 @@ function write(
     end
 
     # objective variable definition
-    has_objective = !isnothing(model.objective) || (!isnothing(model.nlp_data) && model.nlp_data.has_objective)
+    has_objective =
+        !isnothing(model.objective) || (!isnothing(model.nlp_data) && model.nlp_data.has_objective)
     has_var_objective = has_objective && typeof(model.objective) == MOI.VariableIndex
     has_dummy_objective = !has_objective && model_type != :MCP && model_type != :CNS
     if has_objective || has_dummy_objective
@@ -519,7 +466,7 @@ function write(
         writeln(io, "Equations")
         write(io, "  ")
         first = true
-        for i = 1:n_nonlin
+        for i in 1:n_nonlin
             write(io, first ? "nlp_eq$i" : ", nlp_eq$i")
             first = false
         end
@@ -532,7 +479,7 @@ function write(
         write(io, "  ")
         first = true
         for (i, c) in enumerate(model.compl_constraints)
-            for j in 1:(c.set.dimension ÷ 2)
+            for j in 1:(c.set.dimension÷2)
                 write(io, first ? "compl_eq$(i)_$(j)" : ", compl_eq$(i)_$(j)")
             end
             first = false
@@ -557,12 +504,12 @@ function write(
         elseif model.sense == MOI.MAX_SENSE
             write(io, "obj.. objvar =L= ")
         else
-            write(io, "obj.. objvar =E= ");
+            write(io, "obj.. objvar =E= ")
         end
         if has_dummy_objective
             write(io, "0.0")
         elseif !isnothing(model.nlp_data) && model.nlp_data.has_objective
-            write(io, MOI.objective_expr(model.nlp_data.evaluator), is_parenthesis=true)
+            write(io, MOI.objective_expr(model.nlp_data.evaluator), is_parenthesis = true)
         elseif has_objective
             write(io, model.objective)
         else
@@ -605,13 +552,13 @@ function write(
 
     # nonlinear constraints
     if n_nonlin > 0
-        for i = 1:n_nonlin
+        for i in 1:n_nonlin
             name = "nlp_eq$i"
             push!(equation_names, name)
             write(io, name * ".. ")
             expr = MOI.constraint_expr(model.nlp_data.evaluator, i)
             @assert(length(expr.args) == 3)
-            write(io, expr.args[2], is_parenthesis=true)
+            write(io, expr.args[2], is_parenthesis = true)
             if expr.args[1] == :(==)
                 write(io, " =E= ")
             elseif expr.args[1] == :(<=)
@@ -619,7 +566,7 @@ function write(
             else
                 write(io, " =G= ")
             end
-            write(io, expr.args[3], is_parenthesis=true)
+            write(io, expr.args[3], is_parenthesis = true)
             writeln(io, ";")
         end
         writeln(io, "")
@@ -628,12 +575,13 @@ function write(
     # complementarity constraints
     if length(model.compl_constraints) > 0
         list_equation_names = true
-        for (i, c) in enumerate(model.compl_constraints), j in 1:c.set.dimension ÷ 2
+        for (i, c) in enumerate(model.compl_constraints), j in 1:c.set.dimension÷2
             name = "compl_eq$(i)_$(j)"
             write(io, name * ".. ")
             terms = filter(term -> term.output_index == j, c.func.terms)
             write(io, [term.scalar_term for term in terms])
-            writeln(io, (c.func.constants[j] < 0 ? " - " : " + ") * num2str(abs(c.func.constants[j])) * " =N= 0;")
+            constant_sign = c.func.constants[j] < 0 ? " - " : " + "
+            writeln(io, constant_sign * num2str(abs(c.func.constants[j])) * " =N= 0;")
             terms = filter(term -> term.output_index == j + c.set.dimension ÷ 2, c.func.terms)
             @assert length(terms) == 1
             push!(equation_names, name * "." * gms_name(terms[1].scalar_term.variable))
@@ -685,14 +633,10 @@ function write(
             write(io, "objvar")
         end
     end
-    writeln(io, ";\n")
+    return writeln(io, ";\n")
 end
 
-function write(
-    filename::String,
-    model::Optimizer
-)
+write(filename::String, model::Optimizer) =
     open(filename, "w") do fio
-        write(ModelStream(fio), model)
+        return write(ModelStream(fio), model)
     end
-end

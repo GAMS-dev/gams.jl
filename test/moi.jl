@@ -70,18 +70,16 @@ common_excludes = [
 
 version_depend_excludes = Dict(
     "29.1.0" => String[
-        # xpress finds incorrect solution
-        "test_linear_integer_solve_twice",
-    ],
+    # xpress finds incorrect solution
+        "test_linear_integer_solve_twice",],
     "38.2.1" => String[
         # xpress returns different duals
         "test_conic_NormInfinityCone_3",
         "test_quadratic_nonhomogeneous",
     ],
     "40.4.0" => String[
-        # xpress returns different duals
-        "test_quadratic_nonhomogeneous",
-    ]
+    # xpress returns different duals
+        "test_quadratic_nonhomogeneous",],
 )
 
 MOI.optimize!(model)
@@ -97,11 +95,7 @@ MOI.Test.runtests(
         atol = 1e-5,
         rtol = 1e-5,
         optimal_status = MOI.OPTIMAL,
-        exclude = Any[
-            MOI.DualObjectiveValue,
-            MOI.VariableBasisStatus,
-            MOI.ConstraintBasisStatus,
-        ],
+        exclude = Any[MOI.DualObjectiveValue, MOI.VariableBasisStatus, MOI.ConstraintBasisStatus],
     );
     exclude = excludes,
 )

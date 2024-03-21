@@ -1,18 +1,9 @@
 
 MOI.supports(::Optimizer, ::MOI.Silent) = true
 
-function MOI.get(
-    model::Optimizer,
-    ::MOI.Silent
-)
-    return get(model.gams_options, "logoption", nothing) == 0
-end
+MOI.get(model::Optimizer, ::MOI.Silent) = get(model.gams_options, "logoption", nothing) == 0
 
-function MOI.set(
-    model::Optimizer,
-    ::MOI.Silent,
-    silent::Bool
-)
+function MOI.set(model::Optimizer, ::MOI.Silent, silent::Bool)
     if silent
         MOI.set(model, MOI.RawOptimizerAttribute("logoption"), 0)
     else
@@ -23,109 +14,57 @@ end
 
 MOI.supports(::Optimizer, ::MOI.TimeLimitSec) = true
 
-function MOI.get(
-    model::Optimizer,
-    ::MOI.TimeLimitSec
-)
-    return get(model.gams_options, "reslim", nothing)
-end
+MOI.get(model::Optimizer, ::MOI.TimeLimitSec) = get(model.gams_options, "reslim", nothing)
 
-function MOI.set(
-    model::Optimizer,
-    ::MOI.TimeLimitSec,
-    value::Real
-)
+function MOI.set(model::Optimizer, ::MOI.TimeLimitSec, value::Real)
     MOI.set(model, MOI.RawOptimizerAttribute("reslim"), Float64(value))
     return
 end
 
-function MOI.set(
-    model::Optimizer,
-    ::MOI.TimeLimitSec,
-    ::Nothing
-)
+function MOI.set(model::Optimizer, ::MOI.TimeLimitSec, ::Nothing)
     delete!(model.gams_options, "reslim")
     return
 end
 
 MOI.supports(::Optimizer, ::MOI.NumberOfThreads) = true
 
-function MOI.get(
-    model::Optimizer,
-    ::MOI.NumberOfThreads
-)
-    return get(model.gams_options, "threads", nothing)
-end
+MOI.get(model::Optimizer, ::MOI.NumberOfThreads) = get(model.gams_options, "threads", nothing)
 
-function MOI.set(
-    model::Optimizer,
-    ::MOI.NumberOfThreads,
-    value::Int
-)
+function MOI.set(model::Optimizer, ::MOI.NumberOfThreads, value::Int)
     MOI.set(model, MOI.RawOptimizerAttribute("threads"), value)
     return
 end
 
 MOI.supports(::Optimizer, ::MOI.RelativeGapTolerance) = true
 
-function MOI.get(
-    model::Optimizer,
-    ::MOI.RelativeGapTolerance
-)
-    return get(model.gams_options, "optcr", nothing)
-end
+MOI.get(model::Optimizer, ::MOI.RelativeGapTolerance) = get(model.gams_options, "optcr", nothing)
 
-function MOI.set(
-    model::Optimizer,
-    ::MOI.RelativeGapTolerance,
-    value::Int
-)
+function MOI.set(model::Optimizer, ::MOI.RelativeGapTolerance, value::Int)
     MOI.set(model, MOI.RawOptimizerAttribute("optcr"), value)
     return
 end
 
 MOI.supports(::Optimizer, ::MOI.AbsoluteGapTolerance) = true
 
-function MOI.get(
-    model::Optimizer,
-    ::MOI.AbsoluteGapTolerance
-)
-    return get(model.gams_options, "optca", nothing)
-end
+MOI.get(model::Optimizer, ::MOI.AbsoluteGapTolerance) = get(model.gams_options, "optca", nothing)
 
-function MOI.set(
-    model::Optimizer,
-    ::MOI.AbsoluteGapTolerance,
-    value::Int
-)
+function MOI.set(model::Optimizer, ::MOI.AbsoluteGapTolerance, value::Int)
     MOI.set(model, MOI.RawOptimizerAttribute("optca"), value)
     return
 end
 
 MOI.supports(::Optimizer, ::MOI.Name) = true
 
-function MOI.get(
-    model::Optimizer,
-    ::MOI.Name
-)
-    return model.name
-end
+MOI.get(model::Optimizer, ::MOI.Name) = model.name
 
-function MOI.set(
-    model::Optimizer,
-    ::MOI.Name,
-    name::String
-)
+function MOI.set(model::Optimizer, ::MOI.Name, name::String)
     model.name = name
     return
 end
 
 MOI.supports(::Optimizer, ::MOI.RawOptimizerAttribute) = true
 
-function MOI.get(
-    model::Optimizer,
-    option::MOI.RawOptimizerAttribute
-)
+function MOI.get(model::Optimizer, option::MOI.RawOptimizerAttribute)
     name = lowercase(option.name)
 
     if name == "modeltype"
@@ -149,11 +88,7 @@ function MOI.get(
     end
 end
 
-function MOI.set(
-    model::Optimizer,
-    option::MOI.RawOptimizerAttribute,
-    value::String
-)
+function MOI.set(model::Optimizer, option::MOI.RawOptimizerAttribute, value::String)
     name = lowercase(option.name)
 
     if name == "modeltype"
@@ -175,11 +110,7 @@ function MOI.set(
     return
 end
 
-function MOI.set(
-    model::Optimizer,
-    option::MOI.RawOptimizerAttribute,
-    value::Number
-)
+function MOI.set(model::Optimizer, option::MOI.RawOptimizerAttribute, value::Number)
     name = lowercase(option.name)
     if name in GAMS.MOI_SUPPORTED_CLOPTIONS
         model.gams_options[name] = value
@@ -246,25 +177,18 @@ const MOI_SUPPORTED_CLOPTIONS = (
     "rminlp",
     "qcp",
     "miqcp",
-    "rmiqcp"
+    "rmiqcp",
 )
 
-function MOI.get(
-    model::Optimizer,
-    opt::AbstractGAMSCmdAttribute
-)
+function MOI.get(model::Optimizer, opt::AbstractGAMSCmdAttribute)
     name = lowercase(replace(string(typeof(opt)), r"(GAMS.)" => ""))
     if haskey(model.gams_options, name)
         return model.gams_options[name]
     end
-    error("GAMS option '$(name)' is not set.")
+    return error("GAMS option '$(name)' is not set.")
 end
 
-function MOI.set(
-    model::Optimizer,
-    opt::AbstractGAMSCmdAttribute,
-    value
-)
+function MOI.set(model::Optimizer, opt::AbstractGAMSCmdAttribute, value)
     name = lowercase(replace(string(typeof(opt)), r"(GAMS.)" => ""))
     model.gams_options[name] = value
     return
@@ -272,18 +196,9 @@ end
 
 struct ModelType <: MOI.AbstractOptimizerAttribute end
 
-function MOI.get(
-    model::Optimizer,
-    ::ModelType
-)
-    return label(model.user_model_type)
-end
+MOI.get(model::Optimizer, ::ModelType) = label(model.user_model_type)
 
-function MOI.set(
-    model::Optimizer,
-    ::ModelType,
-    value::String
-)
+function MOI.set(model::Optimizer, ::ModelType, value::String)
     value = uppercase(value)
     model.user_model_type = model_type_from_label(value)
     if model.user_model_type == MODEL_TYPE_UNDEFINED
@@ -294,10 +209,7 @@ end
 
 struct SysDir <: MOI.AbstractOptimizerAttribute end
 
-function MOI.get(
-    model::Optimizer,
-    ::SysDir
-)
+MOI.get(model::Optimizer, ::SysDir) =
     if isnothing(model.gamswork)
         if isnothing(model.sysdir)
             error("GAMS system directory has not been set.")
@@ -306,13 +218,8 @@ function MOI.get(
     else
         return model.gamswork.system_dir
     end
-end
 
-function MOI.set(
-    model::Optimizer,
-    ::SysDir,
-    value::String
-)
+function MOI.set(model::Optimizer, ::SysDir, value::String)
     if isnothing(model.gamswork)
         check_system_dir(value)
         model.sysdir = value
@@ -324,10 +231,7 @@ end
 
 struct WorkDir <: MOI.AbstractOptimizerAttribute end
 
-function MOI.get(
-    model::Optimizer,
-    ::WorkDir
-)
+MOI.get(model::Optimizer, ::WorkDir) =
     if isnothing(model.gamswork)
         if isnothing(model.workdir)
             error("GAMS working directory has not been set.")
@@ -336,13 +240,8 @@ function MOI.get(
     else
         return model.gamswork.working_dir
     end
-end
 
-function MOI.set(
-    model::Optimizer,
-    ::WorkDir,
-    value::String
-)
+function MOI.set(model::Optimizer, ::WorkDir, value::String)
     if isnothing(model.gamswork)
         model.workdir = value
     else

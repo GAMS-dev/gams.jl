@@ -1,17 +1,29 @@
 
 stages:
-  - test
+    - format
+    - test
+
+format:
+    stage: format
+    tags:
+        - linux
+    image:
+        name: julia:latest
+    script:
+        - julia -e "using Pkg; Pkg.add(\"JuliaFormatter\"); using JuliaFormatter; exit(format(\".\", verbose=true) == false)"
+    only:
+        - merge_requests
 
 test:
     stage: test
     tags:
         - linux
-    image: 
-        name: julia:1.7
+    image:
+        name: julia:latest
     before_script:
         - export PATH="/opt/gams29.1.0:$PATH"
     script:
-        - julia --project=@. -e "import Pkg; Pkg.test()"
+        - julia --project=@. -e "using Pkg; Pkg.test()"
     only:
         - merge_requests
         - master
