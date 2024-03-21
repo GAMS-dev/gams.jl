@@ -146,13 +146,12 @@ write(io::ModelStream, set::MOI.EqualTo{Float64}) = write(io, " =E= " * num2str(
 ##  Expressions                                                    ##
 #####################################################################
 
-function write(io::ModelStream, num::Number; is_parenthesis = true)
+write(io::ModelStream, num::Number; is_parenthesis = true) =
     if is_parenthesis || num > 0
         write(io, num2str(num))
     else
         write(io, "(" * num2str(num) * ")")
     end
-end
 
 function write(io::ModelStream, expr::Expr; is_parenthesis = true)
     if length(expr.args) == 0
