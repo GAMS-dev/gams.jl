@@ -31,8 +31,6 @@ coeff2str(coeff::Float64, first::Bool = false) =
         return ""
     end
 
-write(io::ModelStream, num::Number) = write(io, num2str(num))
-
 function write(io::ModelStream, str::String)
     n = length(str)
     if io.n_line + n > LINE_BREAK
@@ -148,7 +146,7 @@ write(io::ModelStream, set::MOI.EqualTo{Float64}) = write(io, " =E= " * num2str(
 ##  Expressions                                                    ##
 #####################################################################
 
-function write(io::ModelStream, num::Number; is_parenthesis = false)
+function write(io::ModelStream, num::Number; is_parenthesis = true)
     if is_parenthesis || num > 0
         write(io, num2str(num))
     else
@@ -156,7 +154,7 @@ function write(io::ModelStream, num::Number; is_parenthesis = false)
     end
 end
 
-function write(io::ModelStream, expr::Expr; is_parenthesis = false)
+function write(io::ModelStream, expr::Expr; is_parenthesis = true)
     if length(expr.args) == 0
         write(io, "0.0")
         return

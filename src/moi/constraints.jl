@@ -415,13 +415,14 @@ end
 #####################################################################
 
 MOI.supports(::Optimizer, ::MOI.NLPBlock) = true
-MOI.supports(::Optimizer, ::MOI.NLPBlockDual) = true
 
 function MOI.set(model::Optimizer, ::MOI.NLPBlock, nlp_data::MOI.NLPBlockData)
     model.nlp_data = nlp_data
     MOI.initialize(model.nlp_data.evaluator, [:ExprGraph])
     return
 end
+
+MOI.supports(::Optimizer, ::MOI.NLPBlockDual) = true
 
 function MOI.get(model::Optimizer, attr::MOI.NLPBlockDual)
     MOI.check_result_index_bounds(model, attr)
