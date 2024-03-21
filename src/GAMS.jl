@@ -3,7 +3,6 @@ module GAMS
 using Libdl
 
 export GAMSModelStatus, GAMSSolveStatus, GAMSModelType, GAMSVarType
-export label
 export GAMSWorkspace, GAMSJob
 export get_version, set_system_dir
 
@@ -68,6 +67,8 @@ export get_version, set_system_dir
    MODEL_TYPE_EMP,
    MODEL_TYPE_UNDEFINED,
 )
+const ModelTypes = [:LP, :MIP, :RMIP, :NLP, :MCP, :MPEC, :RMPEC, :CNS, :DNLP, :MINLP, :RMINLP, :QCP,
+   :MIQCP, :RMIQCP, :EMP]
 
 # GAMS variable type
 @enum(GAMSVarType,
@@ -82,6 +83,7 @@ export get_version, set_system_dir
    VARTYPE_SEMICONT,
    VARTYPE_SEMIINT
 )
+const VariableTypes = [:Binary, :Integer, :Positive, :Negative, :Free, :SOS1, :SOS2, :SemiCont, :SemiInt]
 
 # GAMS value position in GDX data
 const GAMS_VALUE_LEVEL = 1
@@ -138,12 +140,6 @@ const GAMS_MODEL_ATTRIBUTES = union(
 const GAMS_MODEL_ATTRIBUTES_REQUIRED = (
    "modelStat", "numEqu", "numVar", "solveStat"
 )
-
-function label(
-   mtype::GAMSModelType
-)
-   return replace(string(mtype), r"(MODEL_TYPE_)" => "")
-end
 
 function model_type_from_label(
    mtype::String
@@ -420,77 +416,6 @@ function run(
    return sol, stats
 end
 
-function auto_model_type(
-   mtype::GAMSModelType,
-   is_quadratic::Bool,
-   is_nonlinear::Bool,
-   is_discrete::Bool,
-   is_complementarity::Bool
-)
-   if mtype == GAMS.MODEL_TYPE_UNDEFINED
-      if is_complementarity
-         mtype = GAMS.MODEL_TYPE_MPEC
-      elseif is_nonlinear && is_discrete
-         mtype = GAMS.MODEL_TYPE_MINLP
-      elseif is_nonlinear
-         mtype = GAMS.MODEL_TYPE_NLP
-      elseif is_quadratic && is_discrete
-         mtype = GAMS.MODEL_TYPE_MIQCP
-      elseif is_quadratic
-         mtype = GAMS.MODEL_TYPE_QCP
-      elseif is_discrete
-         mtype = GAMS.MODEL_TYPE_MIP
-      else
-         mtype = GAMS.MODEL_TYPE_LP
-      end
-   else
-      if mtype == GAMS.MODEL_TYPE_LP
-         if is_complementarity
-            mtype = GAMS.MODEL_TYPE_MPEC
-         elseif is_quadratic
-            mtype = GAMS.MODEL_TYPE_QCP
-         elseif is_nonlinear
-            mtype = GAMS.MODEL_TYPE_NLP
-         elseif is_discrete
-            mtype = GAMS.MODEL_TYPE_MIP
-         end
-      end
-      if mtype == GAMS.MODEL_TYPE_MIP
-         if is_complementarity
-            mtype = GAMS.MODEL_TYPE_MPEC
-         elseif is_quadratic
-            mtype = GAMS.MODEL_TYPE_MIQCP
-         elseif is_nonlinear
-            mtype = GAMS.MODEL_TYPE_MINLP
-         end
-      end
-      if mtype == GAMS.MODEL_TYPE_QCP
-         if is_complementarity
-            mtype = GAMS.MODEL_TYPE_MPEC
-         elseif is_nonlinear
-            mtype = GAMS.MODEL_TYPE_NLP
-         elseif is_discrete
-            mtype = GAMS.MODEL_TYPE_MIQCP
-         end
-      end
-      if mtype == GAMS.MODEL_TYPE_MIQCP
-         if is_complementarity
-            mtype = GAMS.MODEL_TYPE_MPEC
-         elseif is_nonlinear
-            mtype = GAMS.MODEL_TYPE_MINLP
-         end
-      end
-      if mtype == GAMS.MODEL_TYPE_NLP
-         if is_complementarity
-            mtype = GAMS.MODEL_TYPE_MPEC
-         elseif is_discrete
-            mtype = GAMS.MODEL_TYPE_MINLP
-         end
-      end
-   end
-   return mtype
-end
-
 function parse_gdx_value(
    val::Float64
 )
@@ -510,6 +435,6 @@ function parse_gdx_value(
 end
 
 include("gdx.jl")
-include("MOI_wrapper/MOI_wrapper.jl")
+include("MOI_wrapper.jl")
 
 end
