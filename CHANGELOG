@@ -1,3 +1,7 @@
+GAMS.jl v0.5.0
+==================
+- Small refactor (small changes to layout of intermediate written GAMS file)
+
 GAMS.jl v0.4.2
 ==================
 - Fixed missing attributes: NodeCount, RelativeGapTolerance,

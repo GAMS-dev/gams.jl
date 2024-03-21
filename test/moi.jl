@@ -15,7 +15,7 @@ model = MOI.Utilities.CachingOptimizer(
 MOI.set(model, MOI.Silent(), true)
 MOI.set(model, GAMS.Solver(), solver)
 
-common_excludes = String[
+common_excludes = [
     # ZeroBridge does not support ConstraintDual
     "test_conic_linear_VectorOfVariables_2",
 
@@ -33,23 +33,23 @@ common_excludes = String[
     "test_model_default_PrimalStatus",
 
     # no solution returned
-    "test_infeasible_MAX_SENSE",
-    "test_infeasible_MIN_SENSE",
-    "test_infeasible_affine_MAX_SENSE",
-    "test_infeasible_affine_MIN_SENSE",
-    "test_linear_INFEASIBLE",
+    r"test_infeasible_MAX_SENSE.*",
+    r"test_infeasible_MIN_SENSE.*",
+    r"test_infeasible_affine_MAX_SENSE.*",
+    r"test_infeasible_affine_MIN_SENSE.*",
+    r"test_linear_INFEASIBLE.*",
     "test_solve_DualStatus_INFEASIBILITY_CERTIFICATE_EqualTo_lower",
     "test_solve_DualStatus_INFEASIBILITY_CERTIFICATE_EqualTo_upper",
     "test_solve_DualStatus_INFEASIBILITY_CERTIFICATE_GreaterThan",
     "test_solve_DualStatus_INFEASIBILITY_CERTIFICATE_Interval_lower",
     "test_solve_DualStatus_INFEASIBILITY_CERTIFICATE_Interval_upper",
     "test_solve_DualStatus_INFEASIBILITY_CERTIFICATE_LessThan",
-    "test_solve_DualStatus_INFEASIBILITY_CERTIFICATE_VariableIndex_LessThan",
+    r"test_solve_DualStatus_INFEASIBILITY_CERTIFICATE_VariableIndex_LessThan.*",
 
     # local optimal instead of optimal
-    "test_nonlinear_hs071",
+    r"test_nonlinear_hs071.*",
     "test_nonlinear_mixed_complementarity",
-    "test_nonlinear_objective",
+    r"test_nonlinear_objective.*",
     "test_nonlinear_qp_complementarity_constraint",
     "test_nonlinear_without_objective",
     "test_quadratic_nonconvex_constraint_basic",
@@ -70,18 +70,16 @@ common_excludes = String[
 
 version_depend_excludes = Dict(
     "29.1.0" => String[
-        # xpress finds incorrect solution
-        "test_linear_integer_solve_twice",
-    ],
+    # xpress finds incorrect solution
+        "test_linear_integer_solve_twice",],
     "38.2.1" => String[
         # xpress returns different duals
         "test_conic_NormInfinityCone_3",
         "test_quadratic_nonhomogeneous",
     ],
     "40.4.0" => String[
-        # xpress returns different duals
-        "test_quadratic_nonhomogeneous",
-    ]
+    # xpress returns different duals
+        "test_quadratic_nonhomogeneous",],
 )
 
 MOI.optimize!(model)
@@ -97,11 +95,7 @@ MOI.Test.runtests(
         atol = 1e-5,
         rtol = 1e-5,
         optimal_status = MOI.OPTIMAL,
-        exclude = Any[
-            MOI.DualObjectiveValue,
-            MOI.VariableBasisStatus,
-            MOI.ConstraintBasisStatus,
-        ],
+        exclude = Any[MOI.DualObjectiveValue, MOI.VariableBasisStatus, MOI.ConstraintBasisStatus],
     );
     exclude = excludes,
 )

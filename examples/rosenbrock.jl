@@ -8,29 +8,29 @@ using JuMP
 using Test
 
 function example_rosenbrock(; verbose = true)
-   model = Model(GAMS.Optimizer)
-   set_optimizer_attribute(model, MOI.Silent(), !verbose)
+    model = Model(GAMS.Optimizer)
+    set_optimizer_attribute(model, MOI.Silent(), !verbose)
 
-   @variable(model, -10 <= x1 <= 5, start = -1.2)
-   @variable(model, -10 <= x2 <= 10, start = 1.0)
+    @variable(model, -10 <= x1 <= 5, start = -1.2)
+    @variable(model, -10 <= x2 <= 10, start = 1.0)
 
-   @NLobjective(model, Min, 100 * (x2 - x1^2)^2 + -(1 - x1)^2)
+    @NLobjective(model, Min, 100 * (x2 - x1^2)^2 + -(1 - x1)^2)
 
-   if verbose
-      print(model)
-   end
+    if verbose
+        print(model)
+    end
 
-   JuMP.optimize!(model)
+    JuMP.optimize!(model)
 
-   obj_opt = JuMP.objective_value(model)
-   x1_opt = JuMP.value(x1)
-   x2_opt = JuMP.value(x2)
+    obj_opt = JuMP.objective_value(model)
+    x1_opt = JuMP.value(x1)
+    x2_opt = JuMP.value(x2)
 
-   if verbose
-      println("Objective value: ", obj_opt)
-      println("x1 = ", x1_opt)
-      println("x2 = ", x2_opt)
-   end
+    if verbose
+        println("Objective value: ", obj_opt)
+        println("x1 = ", x1_opt)
+        println("x2 = ", x2_opt)
+    end
 end
 
 example_rosenbrock(verbose = false)

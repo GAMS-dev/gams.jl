@@ -13,7 +13,7 @@ println("-"^30)
 println("MathOptInterface Tests")
 println("-"^30)
 println("")
-include("MOI_wrapper.jl")
+include("moi.jl")
 
 # we need GAMS 34.3 for JuMP output in Convert
 ver = GAMS.get_version(GAMS.GAMSWorkspace())

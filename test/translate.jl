@@ -5,10 +5,7 @@ using Test
 
 const MOI = MathOptInterface
 
-function occursinfile(
-    filename::String,
-    regex::Regex
-)
+occursinfile(filename::String, regex::Regex) =
     open(filename) do f
         for line in eachline(f)
             if occursin(regex, line)
@@ -17,10 +14,8 @@ function occursinfile(
         end
         return false
     end
-end
 
 @testset "translate      " begin
-
     @testset "precision" begin
         m = JuMP.Model(GAMS.Optimizer)
         JuMP.@variable(m, x >= 0)
@@ -45,5 +40,4 @@ end
 
         @test JuMP.value(x) == JuMP.value(y)
     end
-
 end
