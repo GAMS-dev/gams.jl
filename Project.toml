@@ -1,7 +1,7 @@
 name = "GAMS"
 uuid = "1ca51c6a-1b4d-4546-9ae1-53e0a243ab12"
 authors = ["GAMS Software GmbH <support@gams.com>"]
-version = "0.4.2"
+version = "0.5.0"
 
 [deps]
 JuMP = "4076af6c-e467-56ae-b986-b466b2749572"
@@ -10,5 +10,5 @@ MathOptInterface = "b8f27783-ece8-5eb3-8dc8-9495eed66fee"
 Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 
 [compat]
-MathOptInterface = "1.8"
+MathOptInterface = "1.17"
 julia = "^1.6"
