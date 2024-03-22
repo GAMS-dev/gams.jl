@@ -37,6 +37,7 @@ mutable struct Optimizer <: MOI.AbstractOptimizer
         MOI.VariableIndex,
         MOI.ScalarAffineFunction{Float64},
         MOI.ScalarQuadraticFunction{Float64},
+        MOI.ScalarNonlinearFunction,
     }
     constraints::Vector{
         Union{
@@ -46,6 +47,9 @@ mutable struct Optimizer <: MOI.AbstractOptimizer
             ConstraintInfo{MOI.ScalarQuadraticFunction{Float64}, MOI.LessThan{Float64}},
             ConstraintInfo{MOI.ScalarQuadraticFunction{Float64}, MOI.GreaterThan{Float64}},
             ConstraintInfo{MOI.ScalarQuadraticFunction{Float64}, MOI.EqualTo{Float64}},
+            ConstraintInfo{MOI.ScalarNonlinearFunction, MOI.LessThan{Float64}},
+            ConstraintInfo{MOI.ScalarNonlinearFunction, MOI.GreaterThan{Float64}},
+            ConstraintInfo{MOI.ScalarNonlinearFunction, MOI.EqualTo{Float64}},
         },
     }
     sos_constraints::Vector{

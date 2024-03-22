@@ -54,6 +54,10 @@ common_excludes = [
     "test_nonlinear_without_objective",
     "test_quadratic_nonconvex_constraint_basic",
     "test_quadratic_nonconvex_constraint_integration",
+    r"test_nonlinear_expression_hs071.*",
+    "test_nonlinear_expression_hs109",
+    "test_nonlinear_expression_hs110",
+    "test_nonlinear_expression_quartic",
 
     # xpress doesn't return dual bound
     "test_linear_Semicontinuous_integration",
@@ -66,6 +70,7 @@ common_excludes = [
     "test_solve_VariableIndex_ConstraintDual_MIN_SENSE",
     "test_variable_solve_with_lowerbound",
     "test_variable_solve_with_upperbound",
+    "test_nonlinear_duals",
 ]
 
 version_depend_excludes = Dict(

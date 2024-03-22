@@ -2,11 +2,17 @@
 MOI.supports(::Optimizer, ::MOI.ObjectiveFunction{MOI.VariableIndex}) = true
 MOI.supports(::Optimizer, ::MOI.ObjectiveFunction{MOI.ScalarAffineFunction{Float64}}) = true
 MOI.supports(::Optimizer, ::MOI.ObjectiveFunction{MOI.ScalarQuadraticFunction{Float64}}) = true
+MOI.supports(::Optimizer, ::MOI.ObjectiveFunction{MOI.ScalarNonlinearFunction}) = true
 
 function MOI.set(
     model::Optimizer,
     ::MOI.ObjectiveFunction,
-    func::Union{MOI.VariableIndex, MOI.ScalarAffineFunction, MOI.ScalarQuadraticFunction},
+    func::Union{
+        MOI.VariableIndex,
+        MOI.ScalarAffineFunction,
+        MOI.ScalarQuadraticFunction,
+        MOI.ScalarNonlinearFunction,
+    },
 )
     check_inbounds(model, func)
     model.objective = func

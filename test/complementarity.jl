@@ -24,7 +24,7 @@ using Test
         @variable(gnash1m, l[1:4])
         @variable(gnash1m, Q >= 0)
 
-        @NLobjective(
+        @objective(
             gnash1m,
             Min,
             c[1] * x + b[1] / (b[1] + 1) * K[1]^(-1 / b[1]) * x^((1 + b[1]) / b[1]) -
@@ -32,7 +32,7 @@ using Test
         )
 
         @constraint(gnash1m, Q == x + y[1] + y[2] + y[3] + y[4])
-        @NLconstraint(
+        @constraint(
             gnash1m,
             [i = 1:4],
             0 ==
