@@ -146,115 +146,114 @@ write(io::ModelStream, set::MOI.EqualTo{Float64}) = write(io, " =E= " * num2str(
 ##  Expressions                                                    ##
 #####################################################################
 
-write(io::ModelStream, num::Number; is_parenthesis = true) =
-    if is_parenthesis || num > 0
-        write(io, num2str(num))
+write(io::ModelStream, num::Number) = write(io, num2str(num))
+
+function write(io::ModelStream, expr::Union{Expr, MOI.ScalarNonlinearFunction})
+    if expr isa MOI.ScalarNonlinearFunction
+        head = expr.head
+        args = expr.args
     else
-        write(io, "(" * num2str(num) * ")")
-    end
-
-function write(io::ModelStream, expr::Expr; is_parenthesis = true)
-    if length(expr.args) == 0
-        write(io, "0.0")
-        return
-    end
-
-    op = expr.args[1]
-
-    if op in (:+, :-)
-        @assert length(expr.args) >= 2
-        if !is_parenthesis
-            write(io, "(")
+        if length(expr.args) == 0
+            write(io, "0.0")
+            return
         end
-        if length(expr.args) == 2
-            write(io, "(" * string(op))
-            write(io, expr.args[2], is_parenthesis = false)
-            write(io, ")")
+        head = expr.args[1]
+        args = expr.args[2:end]
+    end
+
+    if head in (:+, :-)
+        @assert length(args) >= 1
+        if length(args) == 1
+            write(io, "(" * string(head) * "(")
+            write(io, args[1])
+            write(io, "))")
         else
-            write(io, expr.args[2], is_parenthesis = true)
-            for i in 3:length(expr.args)
-                write(io, " " * string(op) * " ")
-                write(io, expr.args[i], is_parenthesis = (op == :+))
+            write(io, args[1])
+            for i in 2:length(args)
+                write(io, " " * string(head) * " ")
+                if head == :-
+                    write(io, "(")
+                end
+                write(io, args[i])
+                if head == :-
+                    write(io, ")")
+                end
             end
         end
-        if !is_parenthesis
+
+    elseif head in (:*, :/)
+        @assert length(args) >= 2
+        write(io, "(")
+        write(io, args[1])
+        write(io, ")")
+        for i in 2:length(args)
+            write(io, " " * string(head) * " (")
+            write(io, args[i])
             write(io, ")")
         end
 
-    elseif op in (:*, :/)
-        @assert length(expr.args) >= 3
-        if !is_parenthesis
-            write(io, "(")
-        end
-        write(io, expr.args[2], is_parenthesis = false)
-        for i in 3:length(expr.args)
-            write(io, " " * string(op) * " ")
-            write(io, expr.args[i], is_parenthesis = false)
-        end
-        if !is_parenthesis
-            write(io, ")")
-        end
-
-    elseif op == :^
-        @assert length(expr.args) == 3
-        if expr.args[3] == 1.0
-            write(io, expr.args[2])
-        elseif expr.args[3] == 2.0
+    elseif head == :^
+        @assert length(args) == 2
+        if args[2] == 1.0
+            write(io, args[2])
+        elseif args[2] == 2.0
             write(io, "sqr(")
-            write(io, expr.args[2], is_parenthesis = true)
+            write(io, args[1])
             write(io, ")")
-        elseif expr.args[3] isa Real && expr.args[3] == round(expr.args[3])
+        elseif args[2] isa Real && args[2] == round(args[2])
             write(io, "power(")
-            write(io, expr.args[2], is_parenthesis = true)
+            write(io, args[1])
             write(io, ", ")
-            write(io, expr.args[3], is_parenthesis = true)
+            write(io, args[2])
             write(io, ")")
         else
-            write(io, expr.args[2], is_parenthesis = false)
-            write(io, "**")
-            write(io, expr.args[3], is_parenthesis = false)
+            write(io, "(")
+            write(io, args[1])
+            write(io, ")**(")
+            write(io, args[2])
+            write(io, ")")
         end
 
-    elseif op in
+    elseif head in
            (:sqrt, :log, :log10, :log2, :exp, :sin, :sinh, :cos, :cosh, :tan, :tanh, :abs, :sign)
-        @assert length(expr.args) == 2
-        write(io, string(op) * "(")
-        write(io, expr.args[2], is_parenthesis = true)
+        @assert length(args) == 1
+        write(io, string(head) * "(")
+        write(io, args[1])
         write(io, ")")
 
-    elseif op in (:acos,)
-        @assert length(expr.args) == 2
+    elseif head in (:acos,)
+        @assert length(args) == 1
         write(io, "arccos(")
-        write(io, expr.args[2], is_parenthesis = true)
+        write(io, args[1])
         write(io, ")")
 
-    elseif op in (:asin,)
-        @assert length(expr.args) == 2
+    elseif head in (:asin,)
+        @assert length(args) == 1
         write(io, "arcsin(")
-        write(io, expr.args[2], is_parenthesis = true)
+        write(io, args[1])
         write(io, ")")
 
-    elseif op in (:atan,)
-        @assert length(expr.args) == 2
+    elseif head in (:atan,)
+        @assert length(args) == 1
         write(io, "arctan(")
-        write(io, expr.args[2], is_parenthesis = true)
+        write(io, args[1])
         write(io, ")")
 
-    elseif op in (:max, :min, :mod)
-        @assert length(expr.args) >= 2
-        write(io, string(op) * "(")
-        write(io, expr.args[2], is_parenthesis = true)
-        for i in 3:length(expr.args)
+    elseif head in (:max, :min, :mod)
+        @assert length(args) >= 1
+        write(io, string(head) * "(")
+        write(io, args[1])
+        for i in 2:length(args)
             write(io, ", ")
-            write(io, expr.args[i], is_parenthesis = true)
+            write(io, args[i])
         end
         write(io, ")")
 
-    elseif typeof(op) == Symbol && expr.args[2] isa MOI.VariableIndex
-        write(io, expr.args[2])
+    elseif typeof(head) == Symbol && args[1] isa MOI.VariableIndex
+        write(io, args[1])
 
     else
-        error("Unrecognized operation ($op)")
+        throw(MOI.UnsupportedNonlinearOperator(head))
     end
 end
 
@@ -286,8 +285,17 @@ function write(io::ModelStream, model::Optimizer)
         end
     end
     is_nonlinear =
+        typeof(model.objective) == MOI.ScalarNonlinearFunction ||
         !isnothing(model.nlp_data) &&
         (length(model.nlp_data.constraint_bounds) > 0 || model.nlp_data.has_objective)
+    if !is_nonlinear
+        for c in model.constraints
+            if typeof(c.func) == MOI.ScalarNonlinearFunction
+                is_nonlinear = true
+                break
+            end
+        end
+    end
     is_compl = length(model.compl_constraints) > 0
 
     # detect model type
@@ -458,12 +466,12 @@ function write(io::ModelStream, model::Optimizer)
     end
 
     # nonlinear constraint definition
-    n_nonlin = isnothing(model.nlp_data) ? 0 : length(model.nlp_data.constraint_bounds)
-    if n_nonlin > 0
+    n_nonlin_block = isnothing(model.nlp_data) ? 0 : length(model.nlp_data.constraint_bounds)
+    if n_nonlin_block > 0
         writeln(io, "Equations")
         write(io, "  ")
         first = true
-        for i in 1:n_nonlin
+        for i in 1:n_nonlin_block
             write(io, first ? "nlp_eq$i" : ", nlp_eq$i")
             first = false
         end
@@ -506,7 +514,7 @@ function write(io::ModelStream, model::Optimizer)
         if has_dummy_objective
             write(io, "0.0")
         elseif !isnothing(model.nlp_data) && model.nlp_data.has_objective
-            write(io, MOI.objective_expr(model.nlp_data.evaluator), is_parenthesis = true)
+            write(io, MOI.objective_expr(model.nlp_data.evaluator))
         elseif has_objective
             write(io, model.objective)
         else
@@ -548,14 +556,14 @@ function write(io::ModelStream, model::Optimizer)
     end
 
     # nonlinear constraints
-    if n_nonlin > 0
-        for i in 1:n_nonlin
+    if n_nonlin_block > 0
+        for i in 1:n_nonlin_block
             name = "nlp_eq$i"
             push!(equation_names, name)
             write(io, name * ".. ")
             expr = MOI.constraint_expr(model.nlp_data.evaluator, i)
             @assert(length(expr.args) == 3)
-            write(io, expr.args[2], is_parenthesis = true)
+            write(io, expr.args[2])
             if expr.args[1] == :(==)
                 write(io, " =E= ")
             elseif expr.args[1] == :(<=)
@@ -563,7 +571,7 @@ function write(io::ModelStream, model::Optimizer)
             else
                 write(io, " =G= ")
             end
-            write(io, expr.args[3], is_parenthesis = true)
+            write(io, expr.args[3])
             writeln(io, ";")
         end
         writeln(io, "")

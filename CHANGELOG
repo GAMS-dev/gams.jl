@@ -1,6 +1,8 @@
 GAMS.jl v0.5.0
 ==================
-- Small refactor (small changes to layout of intermediate written GAMS file)
+- Add support of MOI.ScalarNonlinearFunction as objective and as constraints with sets EqualTo,
+  LessThan and GreaterThan.
+- Small refactor (small changes to layout of intermediate written GAMS file).
 
 GAMS.jl v0.4.2
 ==================

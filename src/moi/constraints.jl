@@ -151,7 +151,7 @@ end
 #####################################################################
 
 const SupportedScalarConstraintFunctions{T} =
-    Union{MOI.ScalarAffineFunction{T}, MOI.ScalarQuadraticFunction{T}}
+    Union{MOI.ScalarAffineFunction{T}, MOI.ScalarQuadraticFunction{T}, MOI.ScalarNonlinearFunction}
 
 const SupportedScalarConstraintSets{T} = Union{MOI.LessThan{T}, MOI.GreaterThan{T}, MOI.EqualTo{T}}
 

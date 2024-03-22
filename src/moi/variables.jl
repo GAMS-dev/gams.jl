@@ -47,6 +47,14 @@ function check_inbounds(model::Optimizer, quad::MOI.ScalarQuadraticFunction)
     end
 end
 
+check_inbounds(model::Optimizer, func::MOI.ScalarNonlinearFunction) =
+    for arg in func.args
+        if arg isa Real
+            continue
+        end
+        check_inbounds(model, arg)
+    end
+
 function check_inbounds(model::Optimizer, vaf::MOI.VectorAffineFunction)
     for vi in vaf.terms
         check_inbounds(model, vi.scalar_term)
