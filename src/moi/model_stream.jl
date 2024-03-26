@@ -146,7 +146,12 @@ write(io::ModelStream, set::MOI.EqualTo{Float64}) = write(io, " =E= " * num2str(
 ##  Expressions                                                    ##
 #####################################################################
 
-write(io::ModelStream, num::Number) = write(io, num2str(num))
+write(io::ModelStream, num::Number) =
+    if num < 0
+        write(io, "(" * num2str(num) * ")")
+    else
+        write(io, num2str(num))
+    end
 
 function write(io::ModelStream, expr::Union{Expr, MOI.ScalarNonlinearFunction})
     if expr isa MOI.ScalarNonlinearFunction

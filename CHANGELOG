@@ -1,3 +1,7 @@
+GAMS.jl v0.5.1
+==================
+- Fixed missing parenthesis in translated nonlinear constraints.
+
 GAMS.jl v0.5.0
 ==================
 - Add support of MOI.ScalarNonlinearFunction as objective and as constraints with sets EqualTo,
