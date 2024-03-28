@@ -29,7 +29,6 @@ mutable struct Optimizer <: MOI.AbstractOptimizer
 
     # problem attributes
     name::String
-    type::Union{Nothing, Symbol}
     sense::MOI.OptimizationSense
     variables::Vector{VariableInfo}
     objective::Union{
@@ -64,9 +63,9 @@ mutable struct Optimizer <: MOI.AbstractOptimizer
     # parameters
     sysdir::Union{String, Nothing}
     workdir::Union{String, Nothing}
-    user_model_type::GAMSModelType
     gams_options::Dict{String, Any}
     solver_options::Dict{String, Any}
+    type::Union{Nothing, Symbol}
 
     # solution attributes
     solve_time::Float64
@@ -82,7 +81,6 @@ function Optimizer(workspace::Union{Nothing, GAMSWorkspace} = nothing)
     return Optimizer(
         workspace,
         "m",
-        nothing,
         MOI.FEASIBILITY_SENSE,
         [],
         nothing,
@@ -92,9 +90,9 @@ function Optimizer(workspace::Union{Nothing, GAMSWorkspace} = nothing)
         nothing,
         nothing,
         nothing,
-        MODEL_TYPE_UNDEFINED,
         Dict{String, Any}(),
         Dict{String, Any}(),
+        nothing,
         NaN,
         SOLVE_STATUS_UNDEFINED,
         MODEL_STATUS_UNDEFINED,
@@ -119,7 +117,6 @@ MOI.supports_incremental_interface(::Optimizer) = true
 MOI.copy_to(model::Optimizer, src::MOI.ModelLike) = MOIU.default_copy_to(model, src)
 
 function MOI.empty!(model::Optimizer)
-    model.type = nothing
     model.sense = MOI.FEASIBILITY_SENSE
     model.objective = nothing
     empty!(model.variables)
@@ -136,8 +133,7 @@ function MOI.empty!(model::Optimizer)
 end
 
 function MOI.is_empty(model::Optimizer)
-    return isnothing(model.type) &&
-           model.sense == MOI.FEASIBILITY_SENSE &&
+    return model.sense == MOI.FEASIBILITY_SENSE &&
            isnothing(model.objective) &&
            isempty(model.variables) &&
            isempty(model.constraints) &&

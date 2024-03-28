@@ -1,3 +1,8 @@
+GAMS.jl v0.5.2
+==================
+- Fixed ignored attribute ModelType.
+- Fixed missing parenthesis in translated nonlinear constraints.
+
 GAMS.jl v0.5.1
 ==================
 - Fixed missing parenthesis in translated nonlinear constraints.

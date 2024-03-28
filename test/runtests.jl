@@ -6,7 +6,7 @@ println("-"^30)
 println("Translate Tests")
 println("-"^30)
 println("")
-include("translate.jl")
+include("general.jl")
 
 println("")
 println("-"^30)

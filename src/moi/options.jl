@@ -196,12 +196,12 @@ end
 
 struct ModelType <: MOI.AbstractOptimizerAttribute end
 
-MOI.get(model::Optimizer, ::ModelType) = label(model.user_model_type)
+MOI.get(model::Optimizer, ::ModelType) = label(model.type)
 
 function MOI.set(model::Optimizer, ::ModelType, value::String)
     value = uppercase(value)
-    model.user_model_type = model_type_from_label(value)
-    if model.user_model_type == MODEL_TYPE_UNDEFINED
+    model.type = Symbol(value)
+    if !(model.type in ModelTypes)
         error("Unsupported model type '$value'.")
     end
     return
