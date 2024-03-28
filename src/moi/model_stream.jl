@@ -176,13 +176,9 @@ function write(io::ModelStream, expr::Union{Expr, MOI.ScalarNonlinearFunction})
             write(io, args[1])
             for i in 2:length(args)
                 write(io, " " * string(head) * " ")
-                if head == :-
-                    write(io, "(")
-                end
+                write(io, "(")
                 write(io, args[i])
-                if head == :-
-                    write(io, ")")
-                end
+                write(io, ")")
             end
         end
 

@@ -40,4 +40,12 @@ occursinfile(filename::String, regex::Regex) =
 
         @test JuMP.value(x) == JuMP.value(y)
     end
+
+    @testset "parenthesis_1" begin
+        m = JuMP.Model(GAMS.Optimizer)
+        @variable(m, -1.0 <= x <= 1.0)
+        @variable(m, must_have_eq, Bin, start = 0)
+        @constraint(m, con, 0 <= x^3 +  (1.0 - must_have_eq) * 100.0)
+        optimize!(m)
+    end
 end
