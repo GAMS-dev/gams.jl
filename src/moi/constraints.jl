@@ -360,8 +360,8 @@ gms_name(ci::MOI.ConstraintIndex{MOI.VectorOfVariables, MOI.SOS2{Float64}}) = "s
 
 function check_inbounds(
     model::Optimizer,
-    ci::MOI.ConstraintIndex{MOI.VectorAffineFunction{Float64}, MOI.Complements},
-)
+    ci::MOI.ConstraintIndex{F, MOI.Complements},
+) where {F <: Union{MOI.VectorAffineFunction{Float64}, MOI.VectorNonlinearFunction}}
     if !(1 <= ci.value <= length(model.compl_constraints))
         error("Invalid constraint index ", ci.value)
     end
@@ -369,33 +369,38 @@ end
 
 MOI.supports_constraint(
     ::Optimizer,
-    ::Type{MOI.VectorAffineFunction{Float64}},
+    ::Type{<:Union{MOI.VectorAffineFunction{Float64}, MOI.VectorNonlinearFunction}},
     ::Type{MOI.Complements},
 ) = true
 
 function MOI.add_constraint(
     model::Optimizer,
-    func::MOI.VectorAffineFunction{Float64},
+    func::F,
     set::MOI.Complements,
-)
-    check_inbounds(model, func)
+) where {F <: Union{MOI.VectorAffineFunction{Float64}, MOI.VectorNonlinearFunction}}
     push!(model.compl_constraints, ConstraintInfo(func, set))
     n = length(model.compl_constraints)
-    return MathOptInterface.ConstraintIndex{MOI.VectorAffineFunction{Float64}, MOI.Complements}(n)
+    return MathOptInterface.ConstraintIndex{F, MOI.Complements}(n)
 end
 
 function MOI.get(
     model::Optimizer,
-    ::MOI.NumberOfConstraints{MOI.VectorAffineFunction{Float64}, MOI.Complements},
-)
-    return length(model.compl_constraints)
+    ::MOI.NumberOfConstraints{F, MOI.Complements},
+) where {F <: Union{MOI.VectorAffineFunction{Float64}, MOI.VectorNonlinearFunction}}
+    n = 0
+    for c in values(model.compl_constraints)
+        if c.func isa F
+            n += 1
+        end
+    end
+    return n
 end
 
 function MOI.get(
     model::Optimizer,
     ::MOI.ConstraintName,
-    ci::MOI.ConstraintIndex{MOI.VectorAffineFunction{Float64}, MOI.Complements},
-)
+    ci::MOI.ConstraintIndex{F, MOI.Complements},
+) where {F <: Union{MOI.VectorAffineFunction{Float64}, MOI.VectorNonlinearFunction}}
     check_inbounds(model, ci)
     return model.compl_constraints[ci.value].name
 end
@@ -403,9 +408,9 @@ end
 function MOI.set(
     model::Optimizer,
     attr::MOI.ConstraintName,
-    ci::MOI.ConstraintIndex{MOI.VectorAffineFunction{Float64}, MOI.Complements},
+    ci::MOI.ConstraintIndex{F, MOI.Complements},
     value,
-)
+) where {F <: Union{MOI.VectorAffineFunction{Float64}, MOI.VectorNonlinearFunction}}
     check_inbounds(model, ci)
     return model.compl_constraints[ci.value].name = value
 end
