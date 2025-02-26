@@ -1,4 +1,4 @@
-GAMS.jl v0.6
+GAMS.jl v0.5.3
 ==================
 - Added support of VectorNonlinearFunction in Complements constraints.
 
