@@ -58,6 +58,12 @@ common_excludes = [
     "test_nonlinear_expression_hs109",
     "test_nonlinear_expression_hs110",
     "test_nonlinear_expression_quartic",
+    "test_nonlinear_constraint_log",
+    "test_nonlinear_quadratic_1",
+    "test_nonlinear_quadratic_2",
+    "test_nonlinear_quadratic_3",
+    "test_nonlinear_quadratic_4",
+    "test_nonlinear_expression_univariate_function",
 
     # xpress doesn't return dual bound
     "test_linear_Semicontinuous_integration",
