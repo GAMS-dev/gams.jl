@@ -57,7 +57,12 @@ mutable struct Optimizer <: MOI.AbstractOptimizer
             ConstraintInfo{MOI.VectorOfVariables, MOI.SOS2{Float64}},
         },
     }
-    compl_constraints::Vector{ConstraintInfo{MOI.VectorAffineFunction{Float64}, MOI.Complements}}
+    compl_constraints::Vector{
+        Union{
+            ConstraintInfo{MOI.VectorAffineFunction{Float64}, MOI.Complements},
+            ConstraintInfo{MOI.VectorNonlinearFunction, MOI.Complements},
+        },
+    }
     nlp_data::Union{MOI.NLPBlockData, Nothing}
 
     # parameters

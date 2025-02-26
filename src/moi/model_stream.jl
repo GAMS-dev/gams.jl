@@ -582,15 +582,27 @@ function write(io::ModelStream, model::Optimizer)
     if length(model.compl_constraints) > 0
         list_equation_names = true
         for (i, c) in enumerate(model.compl_constraints), j in 1:c.set.dimension÷2
-            name = "compl_eq$(i)_$(j)"
-            write(io, name * ".. ")
-            terms = filter(term -> term.output_index == j, c.func.terms)
-            write(io, [term.scalar_term for term in terms])
-            constant_sign = c.func.constants[j] < 0 ? " - " : " + "
-            writeln(io, constant_sign * num2str(abs(c.func.constants[j])) * " =N= 0;")
-            terms = filter(term -> term.output_index == j + c.set.dimension ÷ 2, c.func.terms)
-            @assert length(terms) == 1
-            push!(equation_names, name * "." * gms_name(terms[1].scalar_term.variable))
+            eqname = "compl_eq$(i)_$(j)"
+            varname = ""
+            write(io, eqname * ".. ")
+            if isa(c.func, MOI.VectorNonlinearFunction)
+                write(io, c.func.rows[j])
+                writeln(io, " =N= 0;")
+                varexpr = c.func.rows[j+c.set.dimension÷2]
+                @assert varexpr.head == :+
+                @assert length(varexpr.args) == 1
+                @assert isa(varexpr.args[1], MOI.VariableIndex)
+                varname = gms_name(varexpr.args[1])
+            else
+                terms = filter(term -> term.output_index == j, c.func.terms)
+                write(io, [term.scalar_term for term in terms])
+                constant_sign = c.func.constants[j] < 0 ? " - " : " + "
+                writeln(io, constant_sign * num2str(abs(c.func.constants[j])) * " =N= 0;")
+                terms = filter(term -> term.output_index == j + c.set.dimension ÷ 2, c.func.terms)
+                @assert length(terms) == 1
+                varname = gms_name(terms[1].scalar_term.variable)
+            end
+            push!(equation_names, eqname * "." * varname)
         end
         writeln(io, "")
     end

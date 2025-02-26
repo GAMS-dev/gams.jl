@@ -1,3 +1,7 @@
+GAMS.jl v0.6
+==================
+- Added support of VectorNonlinearFunction in Complements constraints.
+
 GAMS.jl v0.5.2
 ==================
 - Fixed ignored attribute ModelType.

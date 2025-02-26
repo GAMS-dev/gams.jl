@@ -55,6 +55,48 @@ using Test
         @test isapprox(JuMP.value.(l)' * (L .- JuMP.value.(y)), 0, atol = 1e-5)
     end
 
+    # as above but as nonlinear complementarity constraint
+    @testset "gnash1mnl" begin
+        gnash1m = Model(GAMS.Optimizer)
+        set_optimizer_attribute(gnash1m, MOI.Silent(), true)
+
+        c = [10, 8, 6, 4, 2]
+        K = [5, 5, 5, 5, 5]
+        b = [1.2, 1.1, 1.0, 0.9, 0.8]
+        L = 20
+        g = 1.7
+
+        gg = 5000^(1 / g)
+
+        @variable(gnash1m, 0 <= x <= L)
+        @variable(gnash1m, 0 <= y[1:4] <= L)
+        @variable(gnash1m, Q >= 0)
+
+        @objective(
+            gnash1m,
+            Min,
+            c[1] * x + b[1] / (b[1] + 1) * K[1]^(-1 / b[1]) * x^((1 + b[1]) / b[1]) -
+            x * (gg * Q^(-1 / g))
+        )
+
+        @constraint(gnash1m, Q == x + y[1] + y[2] + y[3] + y[4])
+        @constraint(
+            gnash1m,
+            [i = 1:4],
+            (c[i+1] + K[i+1]^(-1 / b[i+1]) * y[i]) - (gg * Q^(-1 / g)) -
+            y[i] * (-1 / g * gg * Q^(-1 - 1 / g)) ⟂ y[i]
+        )
+
+        # Initial solutions to help reaching the optimality
+        set_start_value.(y, [11, 19, 20, 20])
+        set_start_value(x, 5)
+        set_start_value(Q, 70)
+
+        JuMP.optimize!(gnash1m)
+
+        @test isapprox(JuMP.objective_value(gnash1m), -6.11671, atol = 1e-4)
+    end
+
     # An MPEC from J.F. Bard, Convex two-level optimization,
     # Mathematical Programming 40(1), 15-27, 1988.
     @testset "bard1" begin
