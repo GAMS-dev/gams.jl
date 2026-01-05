@@ -1,3 +1,7 @@
+GAMS.jl v0.5.4
+==================
+- Fixed value type for options `MOI.RelativeGapTolerance` and `MOI.AbsoluteGapTolerance`.
+
 GAMS.jl v0.5.3
 ==================
 - Added support of VectorNonlinearFunction in Complements constraints.

@@ -15,6 +15,13 @@ model = MOI.Utilities.CachingOptimizer(
 MOI.set(model, MOI.Silent(), true)
 MOI.set(model, GAMS.Solver(), solver)
 
+# GAMS currently doesn't know default values of options. However, some tests require to get the
+# default value before setting some options, e.g. MOI.AbsoluteGapTolerance. This leads to issues in
+# the tests as some intermediate value is kept then. Therefore, set the default explicitly for those:
+MOI.set(model, MOI.AbsoluteGapTolerance(), 0)
+MOI.set(model, MOI.RelativeGapTolerance(), 1e-4)
+MOI.set(model, MOI.NumberOfThreads(), 1)
+
 common_excludes = [
     # ZeroBridge does not support ConstraintDual
     "test_conic_linear_VectorOfVariables_2",

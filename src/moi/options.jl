@@ -16,7 +16,7 @@ MOI.supports(::Optimizer, ::MOI.TimeLimitSec) = true
 
 MOI.get(model::Optimizer, ::MOI.TimeLimitSec) = get(model.gams_options, "reslim", nothing)
 
-function MOI.set(model::Optimizer, ::MOI.TimeLimitSec, value::Real)
+function MOI.set(model::Optimizer, ::MOI.TimeLimitSec, value::Number)
     MOI.set(model, MOI.RawOptimizerAttribute("reslim"), Float64(value))
     return
 end
@@ -39,8 +39,8 @@ MOI.supports(::Optimizer, ::MOI.RelativeGapTolerance) = true
 
 MOI.get(model::Optimizer, ::MOI.RelativeGapTolerance) = get(model.gams_options, "optcr", nothing)
 
-function MOI.set(model::Optimizer, ::MOI.RelativeGapTolerance, value::Int)
-    MOI.set(model, MOI.RawOptimizerAttribute("optcr"), value)
+function MOI.set(model::Optimizer, ::MOI.RelativeGapTolerance, value::Number)
+    MOI.set(model, MOI.RawOptimizerAttribute("optcr"), Float64(value))
     return
 end
 
@@ -48,8 +48,8 @@ MOI.supports(::Optimizer, ::MOI.AbsoluteGapTolerance) = true
 
 MOI.get(model::Optimizer, ::MOI.AbsoluteGapTolerance) = get(model.gams_options, "optca", nothing)
 
-function MOI.set(model::Optimizer, ::MOI.AbsoluteGapTolerance, value::Int)
-    MOI.set(model, MOI.RawOptimizerAttribute("optca"), value)
+function MOI.set(model::Optimizer, ::MOI.AbsoluteGapTolerance, value::Number)
+    MOI.set(model, MOI.RawOptimizerAttribute("optca"), Float64(value))
     return
 end
 
