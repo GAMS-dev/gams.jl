@@ -4,10 +4,12 @@ authors = ["GAMS Software GmbH <support@gams.com>"]
 version = "0.5.4"
 
 [deps]
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 Libdl = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
 MathOptInterface = "b8f27783-ece8-5eb3-8dc8-9495eed66fee"
 Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 
 [compat]
+DataFrames = "1"
 MathOptInterface = "1.19"
 julia = "^1.6"

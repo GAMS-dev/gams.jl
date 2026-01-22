@@ -1,5 +1,13 @@
 
 using GAMS
+using Test
+
+println("")
+println("-"^30)
+println("GDXFile Tests")
+println("-"^30)
+println("")
+include("gdxfile.jl")
 
 println("")
 println("-"^30)

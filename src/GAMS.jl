@@ -1,10 +1,16 @@
 module GAMS
 
 using Libdl
+using DataFrames
 
 export GAMSModelStatus, GAMSSolveStatus, GAMSModelType, GAMSVarType
 export GAMSWorkspace, GAMSJob
 export get_version, set_system_dir
+
+# GDX file access exports
+export GDXFile, GDXSymbol, GDXSet, GDXParameter, GDXVariable, GDXEquation
+export read_gdx, write_gdx
+export list_sets, list_parameters, list_variables, list_equations, list_symbols
 
 # GAMS model status
 @enum(
@@ -454,6 +460,7 @@ function parse_gdx_value(val::Float64)
 end
 
 include("gdx.jl")
+include("GDXFile.jl")
 include("MOI_wrapper.jl")
 
 end
